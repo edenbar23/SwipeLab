@@ -1,4 +1,4 @@
-# 🪲 SwipeLab  
+# <h1>SwipeLab <img src="https://github.com/edenbar23/SwipeLab/blob/main/icon.png" width="30" /></h1> 
 ### *A Gamified Human-in-the-Loop Image Labeling Platform*
 
 SwipeLab is a cross-platform image labeling system designed to help researchers quickly collect **high-quality human labels** for image datasets. The platform includes a **mobile app** for users to classify images using a simple “Yes / No / I Don’t Know” interface, a **secure backend** for data storage and API communication, and a **research dashboard** for monitoring label quality and exporting results.
