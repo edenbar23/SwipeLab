@@ -1,0 +1,1 @@
+// admin screen for managing gold images
