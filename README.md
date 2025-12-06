@@ -157,4 +157,3 @@ Ben-Gurion University
 
 ### 📄 License
 TBD — will be added before public release.
-cd SwipeLab
