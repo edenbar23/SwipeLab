@@ -2,6 +2,7 @@
 
 import { NavigationContainer } from "@react-navigation/native";
 import React from "react";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 // stores
 import { useAuthStore } from "../stores/authStore";
@@ -31,8 +32,10 @@ export default function RootNavigator() {
   const effectiveMode = role === "ADMIN" ? mode : "user";
 
   return (
-    <NavigationContainer>
-      {effectiveMode === "admin" ? <AdminNavigator /> : <UserNavigator />}
-    </NavigationContainer>
+    <SafeAreaView style={{ flex: 1}}>
+      <NavigationContainer>
+        {effectiveMode === "admin" ? <AdminNavigator /> : <UserNavigator />}
+      </NavigationContainer>
+    </SafeAreaView>
   );
 }

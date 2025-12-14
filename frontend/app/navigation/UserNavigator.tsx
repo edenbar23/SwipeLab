@@ -24,10 +24,10 @@ export default function UserNavigator() {
       {/* Bottom Bar */}
       <BottomBar
         items={[
-          { label: "My Tasks", route: "Tasks" },
-          { label: "Leaderboard", route: "Leaderboard" },
-          { label: "Stats", route: "Stats" },
-          { label: "Settings", route: "UserSettings" },
+          { label: "My Tasks", route: "Tasks", icon: require("../../assets/images/tasks.png") },
+          { label: "Leaderboard", route: "Leaderboard", icon: require("../../assets/images/leaderboard.png") },
+          { label: "Stats", route: "Stats", icon: require("../../assets/images/stats.png") },
+          { label: "Settings", route: "UserSettings", icon: require("../../assets/images/settings.png") },
         ]}
       />
     </View>
