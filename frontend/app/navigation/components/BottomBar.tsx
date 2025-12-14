@@ -1,10 +1,11 @@
 import { useNavigation } from "@react-navigation/native";
 import React from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Image, ImageSourcePropType, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 interface NavItem {
   label: string;
   route: string;
+  icon: ImageSourcePropType;
 }
 
 interface Props {
@@ -15,6 +16,7 @@ export default function BottomBar({ items }: Props) {
   const navigation = useNavigation<any>();
 
   return (
+    
     <View style={styles.container}>
       {items.map((item) => (
         <TouchableOpacity
@@ -22,6 +24,11 @@ export default function BottomBar({ items }: Props) {
           style={styles.button}
           onPress={() => navigation.navigate(item.route)}
         >
+          <Image
+            source={item.icon}
+            style={styles.icon}
+            resizeMode="contain"
+          />
           <Text style={styles.label}>{item.label}</Text>
         </TouchableOpacity>
       ))}
@@ -38,6 +45,11 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     justifyContent: "space-around",
   },
-  button: { padding: 6 },
+  button: {alignItems: "center", padding: 6 },
+  icon: {
+    width: 22,
+    height: 22,
+    marginBottom: 2,
+  },
   label: { fontSize: 14, fontWeight: "600" },
 });
