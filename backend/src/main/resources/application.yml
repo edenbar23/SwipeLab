@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: swipelab-backend
+  
+  # Use 'dev' profile by default
+  profiles:
+    active: ${SPRING_PROFILE:dev}
+
+server:
+  port: 8080
+
+logging:
+  level:
+    com.swipelab: INFO
