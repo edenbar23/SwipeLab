@@ -1,4 +1,4 @@
-package com.swipelab.model;
+package com.swipelab.model.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
