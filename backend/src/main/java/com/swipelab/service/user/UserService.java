@@ -1,6 +1,6 @@
 package com.swipelab.service.user;
 
-import com.swipelab.repository.UserService;
+import com.swipelab.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 @Service
