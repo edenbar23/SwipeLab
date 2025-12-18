@@ -14,21 +14,32 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "users", uniqueConstraints = {
-        @UniqueConstraint(columnNames = "email")
-})
+@Table(
+        name = "users",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = "username"),
+                @UniqueConstraint(columnNames = "email")
+        }
+)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {
 
+    /**
+     * Primary identifier (used in JWT subject)
+     */
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @NotBlank
+    @Column(nullable = false, updatable = false)
+    private String username;
 
+    /**
+     * Email is unique but NOT the primary key
+     */
     @NotBlank
     @Email
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String email;
 
     // For local authentication (null for OAuth users)
@@ -42,7 +53,7 @@ public class User {
     @Column(nullable = false)
     private AuthProvider provider = AuthProvider.LOCAL;
 
-    // External provider's user ID (for OAuth)
+    // External provider's user ID (Google sub)
     @Column(name = "provider_id")
     private String providerId;
 
@@ -50,33 +61,33 @@ public class User {
     @Column(nullable = false)
     private UserRole role = UserRole.USER;
 
-    // For refresh token rotation
+    // Refresh token rotation (hashed)
     @Column(name = "refresh_token_hash")
     private String refreshTokenHash;
 
-    // Password reset functionality
+    // Password reset
     @Column(name = "reset_password_token")
     private String resetPasswordToken;
 
     @Column(name = "reset_token_expiry")
     private LocalDateTime resetTokenExpiry;
 
-    // Email verification token
+    // Email verification
     @Column(name = "email_verification_token")
     private String emailVerificationToken;
 
     @Column(name = "verification_token_expiry")
     private LocalDateTime verificationTokenExpiry;
 
-    // User profile fields
+    // Profile
     @Column(name = "display_name")
     private String displayName;
 
     @Column(name = "profile_image_url")
     private String profileImageUrl;
 
-    // Credibility tracking
-    @Column(name = "credibility_score")
+    // Credibility
+    @Column(name = "credibility_score", nullable = false)
     private Double credibilityScore = 0.0;
 
     @CreationTimestamp
@@ -94,6 +105,6 @@ public class User {
     @Column(nullable = false)
     private Boolean active = true;
 
-    @Column(name = "account_locked")
+    @Column(name = "account_locked", nullable = false)
     private Boolean accountLocked = false;
 }
