@@ -1,82 +1,88 @@
 package com.swipelab.security;
 
-import io.jsonwebtoken.*;
-import io.jsonwebtoken.security.Keys;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.Authentication;
+import com.swipelab.config.JwtConfig;
+import com.swipelab.security.enums.TokenType;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import javax.crypto.SecretKey;
-import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Date;
 
 @Component
+@RequiredArgsConstructor
 public class JwtTokenProvider {
 
-    @Value("${jwt.secret}")
-    private String jwtSecret;
+    private final JwtConfig jwtConfig;
 
-    @Value("${jwt.expiration}")
-    private long jwtExpiration;
-
-    private SecretKey getSigningKey() {
-        byte[] keyBytes = jwtSecret.getBytes(StandardCharsets.UTF_8);
-        return Keys.hmacShaKeyFor(keyBytes);
-    }
-
-    public String generateToken(Authentication authentication) {
-        String userEmail = authentication.getName();
-        Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + jwtExpiration);
+    /**
+     * Generates a signed JWT token.
+     */
+    public String generateToken(
+            String username,
+            String role,
+            TokenType tokenType,
+            Duration expiration
+    ) {
+        Instant now = Instant.now();
 
         return Jwts.builder()
-                .subject(userEmail)
-                .issuedAt(now)
-                .expiration(expiryDate)
-                .signWith(getSigningKey())
+                .subject(username)
+                .claim("role", role)
+                .claim("type", tokenType.name())
+                .issuer(jwtConfig.getIssuer())
+                .issuedAt(Date.from(now))
+                .expiration(Date.from(now.plus(expiration)))
+                .signWith(jwtConfig.getSigningKey())
                 .compact();
     }
 
-    public String generateTokenFromEmail(String email) {
-        Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + jwtExpiration);
-
-        return Jwts.builder()
-                .subject(email)
-                .issuedAt(now)
-                .expiration(expiryDate)
-                .signWith(getSigningKey())
-                .compact();
-    }
-
-    public String getEmailFromToken(String token) {
-        Claims claims = Jwts.parser()
-                .verifyWith(getSigningKey())
+    /**
+     * Parses and validates JWT claims.
+     * Throws JwtException if invalid or expired.
+     */
+    public Claims parseClaims(String token) {
+        return Jwts.parser()
+                .verifyWith(jwtConfig.getSigningKey())
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
-
-        return claims.getSubject();
     }
 
-    public boolean validateToken(String authToken) {
+    /**
+     * Validates token signature and expiration.
+     */
+    public boolean isTokenValid(String token) {
         try {
-            Jwts.parser()
-                    .verifyWith(getSigningKey())
-                    .build()
-                    .parseSignedClaims(authToken);
+            parseClaims(token);
             return true;
-        } catch (SecurityException ex) {
-            System.err.println("Invalid JWT signature");
-        } catch (MalformedJwtException ex) {
-            System.err.println("Invalid JWT token");
-        } catch (ExpiredJwtException ex) {
-            System.err.println("Expired JWT token");
-        } catch (UnsupportedJwtException ex) {
-            System.err.println("Unsupported JWT token");
-        } catch (IllegalArgumentException ex) {
-            System.err.println("JWT claims string is empty");
+        } catch (JwtException | IllegalArgumentException ex) {
+            return false;
         }
-        return false;
+    }
+
+    /**
+     * Extracts username (JWT subject).
+     */
+    public String extractUsername(String token) {
+        return parseClaims(token).getSubject();
+    }
+
+    /**
+     * Extracts user role.
+     */
+    public String extractRole(String token) {
+        return parseClaims(token).get("role", String.class);
+    }
+
+    /**
+     * Extracts token type (ACCESS / REFRESH).
+     */
+    public TokenType extractTokenType(String token) {
+        String type = parseClaims(token).get("type", String.class);
+        return TokenType.valueOf(type);
     }
 }
