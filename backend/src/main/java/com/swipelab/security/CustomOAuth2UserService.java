@@ -1,6 +1,6 @@
 package com.swipelab.security;
 
-import com.swipelab.model.User;
+import com.swipelab.model.entity.User;
 import com.swipelab.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
