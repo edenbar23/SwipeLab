@@ -1,5 +1,7 @@
 package com.swipelab.model.enums;
 
-public class UserRole {
-    
+public enum UserRole {
+    USER,
+    ADMIN,
+    RESEARCHER
 }
