@@ -81,5 +81,10 @@ public class JwtService {
         user.setRefreshTokenHash(null);
         userRepository.save(user);
     }
+
+    public long getAccessTokenExpirySeconds() {
+        return jwtConfig.getAccessTokenExpirationMinutes() * 60;
+    }
+
 }
 

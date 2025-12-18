@@ -1,6 +1,7 @@
 package com.swipelab.controller;
 
 import com.swipelab.dto.request.EmailVerificationRequest;
+import com.swipelab.dto.request.LoginRequest;
 import com.swipelab.dto.request.RegisterRequest;
 import com.swipelab.dto.response.AuthResponse;
 import com.swipelab.exception.EmailVerificationException;
@@ -113,4 +114,11 @@ public class AuthController {
                 "message", "Security configuration is working!",
                 "timestamp", System.currentTimeMillis()));
     }
+
+    @PostMapping("/login")
+    public ResponseEntity<AuthResponse> login(
+            @Valid @RequestBody LoginRequest request) {
+        return ResponseEntity.ok(authenticationService.login(request));
+    }
+
 }
