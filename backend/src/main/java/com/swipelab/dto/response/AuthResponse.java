@@ -1,16 +1,12 @@
 package com.swipelab.dto.response;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
 
-@Data
-@Builder
-@NoArgsConstructor
+@Getter
 @AllArgsConstructor
 public class AuthResponse {
-    private String message;
-    private String email;
-    private boolean emailVerified;
+
+    private final String accessToken;
+    private final String refreshToken;
 }
