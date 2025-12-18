@@ -1,0 +1,12 @@
+# IDE
+.idea/
+*.iml
+*.swp
+
+# Java/Maven
+target/
+*.class
+*.log
+
+# OS
+.DS_Store
