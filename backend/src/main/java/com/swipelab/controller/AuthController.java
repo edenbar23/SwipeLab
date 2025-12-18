@@ -1,7 +1,9 @@
 package com.swipelab.controller;
 
+import com.swipelab.dto.request.EmailVerificationRequest;
 import com.swipelab.dto.request.RegisterRequest;
 import com.swipelab.dto.response.AuthResponse;
+import com.swipelab.exception.EmailVerificationException;
 import com.swipelab.service.auth.AuthenticationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +23,9 @@ public class AuthController {
 
     private final AuthenticationService authenticationService;
 
-    // NEW: Registration endpoint
+    /**
+     * Register a new user
+     */
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
         try {
@@ -35,7 +39,57 @@ public class AuthController {
         }
     }
 
-    // EXISTING: Keep your current endpoints
+    /**
+     * Verify user email with token
+     * Endpoint: POST /api/v1/auth/email/verify
+     */
+    @PostMapping("/email/verify")
+    public ResponseEntity<Map<String, String>> verifyEmail(
+            @Valid @RequestBody EmailVerificationRequest request) {
+        try {
+            authenticationService.verifyEmail(request.getToken());
+
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Email verified successfully");
+            response.put("status", "success");
+
+            return ResponseEntity.ok(response);
+        } catch (EmailVerificationException e) {
+            Map<String, String> response = new HashMap<>();
+            response.put("message", e.getMessage());
+            response.put("status", "error");
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+    }
+
+    /**
+     * Resend verification email
+     * Endpoint: POST /api/v1/auth/email/resend
+     */
+    @PostMapping("/email/resend")
+    public ResponseEntity<Map<String, String>> resendVerificationEmail(
+            @RequestParam String email) {
+        try {
+            authenticationService.resendVerificationEmail(email);
+
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Verification email sent successfully");
+            response.put("status", "success");
+
+            return ResponseEntity.ok(response);
+        } catch (EmailVerificationException e) {
+            Map<String, String> response = new HashMap<>();
+            response.put("message", e.getMessage());
+            response.put("status", "error");
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+    }
+
+    /**
+     * Get current authenticated user
+     */
     @GetMapping("/user")
     public ResponseEntity<?> getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
         if (userDetails == null) {
@@ -50,6 +104,9 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * Test endpoint to verify security configuration
+     */
     @GetMapping("/test")
     public ResponseEntity<?> testEndpoint() {
         return ResponseEntity.ok(Map.of(

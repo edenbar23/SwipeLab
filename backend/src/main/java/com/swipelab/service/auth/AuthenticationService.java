@@ -2,6 +2,7 @@ package com.swipelab.service.auth;
 
 import com.swipelab.dto.request.RegisterRequest;
 import com.swipelab.dto.response.AuthResponse;
+import com.swipelab.exception.EmailVerificationException;
 import com.swipelab.model.entity.User;
 import com.swipelab.model.enums.AuthProvider;
 import com.swipelab.model.enums.UserRole;
@@ -65,8 +66,68 @@ public class AuthenticationService {
         return AuthResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
-                .expiresIn(2592000) // 30 days in seconds (example)
+                .expiresIn(2592000) // 30 days in seconds
                 .message("Registration successful. Please check your email to verify your account.")
                 .build();
+    }
+
+    /**
+     * Verifies user's email using the verification token
+     *
+     * @param token The verification token sent via email
+     * @throws EmailVerificationException if token is invalid or expired
+     */
+    @Transactional
+    public void verifyEmail(String token) {
+        // Find user by verification token
+        User user = userRepository.findByEmailVerificationToken(token)
+                .orElseThrow(() -> new EmailVerificationException("Invalid verification token"));
+
+        // Check if token has expired
+        if (user.getVerificationTokenExpiry() == null ||
+                LocalDateTime.now().isAfter(user.getVerificationTokenExpiry())) {
+            throw new EmailVerificationException("Verification token has expired");
+        }
+
+        // Check if email is already verified
+        if (user.getEmailVerified()) {
+            throw new EmailVerificationException("Email is already verified");
+        }
+
+        // Mark email as verified
+        user.setEmailVerified(true);
+
+        // Invalidate the token
+        user.setEmailVerificationToken(null);
+        user.setVerificationTokenExpiry(null);
+
+        // Save updated user
+        userRepository.save(user);
+    }
+
+    /**
+     * Resends verification email if the previous token expired
+     *
+     * @param email User's email address
+     * @throws EmailVerificationException if email is already verified or not found
+     */
+    @Transactional
+    public void resendVerificationEmail(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new EmailVerificationException("User not found with email: " + email));
+
+        if (user.getEmailVerified()) {
+            throw new EmailVerificationException("Email is already verified");
+        }
+
+        // Generate new verification token
+        String verificationToken = UUID.randomUUID().toString();
+        user.setEmailVerificationToken(verificationToken);
+        user.setVerificationTokenExpiry(LocalDateTime.now().plusHours(24));
+
+        userRepository.save(user);
+
+        // Send new verification email
+        emailService.sendVerificationEmail(user.getEmail(), verificationToken);
     }
 }
