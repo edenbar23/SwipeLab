@@ -21,6 +21,7 @@ public class AuthenticationService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
+    private final JwtService jwtService;
 
     @Transactional
     public AuthResponse register(RegisterRequest request) {
@@ -29,11 +30,17 @@ public class AuthenticationService {
             throw new RuntimeException("Email already registered");
         }
 
+        // Check if username already exists
+        if (userRepository.findByUsername(request.getUsername()).isPresent()) {
+            throw new RuntimeException("Username already taken");
+        }
+
         // Generate email verification token
         String verificationToken = UUID.randomUUID().toString();
 
         // Create new user
         User user = new User();
+        user.setUsername(request.getUsername());
         user.setEmail(request.getEmail());
         user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         user.setDisplayName(request.getDisplayName());
@@ -51,10 +58,15 @@ public class AuthenticationService {
         // Send verification email asynchronously
         emailService.sendVerificationEmail(savedUser.getEmail(), verificationToken);
 
+        // Generate tokens
+        String accessToken = jwtService.generateAccessToken(savedUser);
+        String refreshToken = jwtService.generateRefreshToken(savedUser);
+
         return AuthResponse.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .expiresIn(2592000) // 30 days in seconds (example)
                 .message("Registration successful. Please check your email to verify your account.")
-                .email(savedUser.getEmail())
-                .emailVerified(false)
                 .build();
     }
 }

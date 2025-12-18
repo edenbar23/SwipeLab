@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 public class AuthController {
 
@@ -54,7 +54,6 @@ public class AuthController {
     public ResponseEntity<?> testEndpoint() {
         return ResponseEntity.ok(Map.of(
                 "message", "Security configuration is working!",
-                "timestamp", System.currentTimeMillis()
-        ));
+                "timestamp", System.currentTimeMillis()));
     }
 }

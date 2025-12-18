@@ -25,7 +25,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
                 return new org.springframework.security.core.userdetails.User(
                                 user.getEmail(),
-                                "", // No password for OAuth2 users
+                                user.getPasswordHash() != null ? user.getPasswordHash() : "",
                                 Collections.singletonList(
                                                 new SimpleGrantedAuthority("ROLE_" + user.getRole().name())));
         }
