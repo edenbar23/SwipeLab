@@ -70,8 +70,12 @@ public class JwtService {
         String newAccessToken = generateAccessToken(user);
         String newRefreshToken = generateRefreshToken(user); // rotation
 
-        return new AuthResponse(newAccessToken, newRefreshToken);
-    }
+        return AuthResponse.builder()
+                .accessToken(newAccessToken)
+                .refreshToken(newRefreshToken)
+                .expiresIn(jwtConfig.getAccessTokenExpirationMinutes() * 60) // Convert to seconds
+                .message("Tokens refreshed successfully")
+                .build();    }
 
     public void revokeRefreshToken(User user) {
         user.setRefreshTokenHash(null);
