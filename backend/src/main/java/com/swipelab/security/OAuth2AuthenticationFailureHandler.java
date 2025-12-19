@@ -14,20 +14,15 @@ import java.io.IOException;
 @Component
 public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationFailureHandler {
 
-    @Value("${cors.allowed-origins}")
-    private String allowedOrigins;
+    @Value("${app.oauth2.redirect-uri:http://localhost:3000/login}")
+    private String redirectUri;
 
     @Override
-    public void onAuthenticationFailure(HttpServletRequest request,
-                                        HttpServletResponse response,
-                                        AuthenticationException exception) throws IOException, ServletException {
-
-        String redirectUri = allowedOrigins.split(",")[0].trim();
-
-        String targetUrl = UriComponentsBuilder.fromUriString(redirectUri + "/oauth2/redirect")
+    public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
+            AuthenticationException exception) throws IOException, ServletException {
+        String targetUrl = UriComponentsBuilder.fromUriString(redirectUri)
                 .queryParam("error", exception.getLocalizedMessage())
-                .build()
-                .toUriString();
+                .build().toUriString();
 
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
     }
