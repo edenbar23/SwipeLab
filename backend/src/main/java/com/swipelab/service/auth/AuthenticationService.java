@@ -1,8 +1,10 @@
 package com.swipelab.service.auth;
 
 import com.swipelab.dto.request.RegisterRequest;
+import com.swipelab.dto.request.ResetPasswordRequest;
 import com.swipelab.dto.response.AuthResponse;
 import com.swipelab.exception.EmailVerificationException;
+import com.swipelab.exception.PasswordResetException;
 import com.swipelab.model.entity.User;
 import com.swipelab.model.enums.AuthProvider;
 import com.swipelab.model.enums.UserRole;
@@ -193,5 +195,73 @@ public class AuthenticationService {
         userRepository.save(user);
     }
 
+    /**
+     * Handles forgot password request
+     * Generates reset token and sends email for existing users
+     * Returns success for non-existing emails (security best practice)
+     *
+     * @param email User's email address
+     */
+    @Transactional
+    public void forgotPassword(String email) {
+        // Look up user by email
+        User user = userRepository.findByEmail(email).orElse(null);
+
+        // If user exists, generate token and send email
+        if (user != null) {
+            // Generate password reset token
+            String resetToken = UUID.randomUUID().toString();
+
+            // Set token and expiry (1 hour)
+            user.setResetPasswordToken(resetToken);
+            user.setResetTokenExpiry(LocalDateTime.now().plusHours(1));
+
+            // Save user with reset token
+            userRepository.save(user);
+
+            // Send password reset email asynchronously
+            emailService.sendPasswordResetEmail(user.getEmail(), resetToken);
+        }
+
+        // Always return success, regardless of whether email exists
+        // This prevents email enumeration attacks
+    }
+
+    /**
+     * Resets user password using a valid reset token
+     *
+     * @param request Contains reset token and new password
+     * @throws PasswordResetException if token is invalid, expired, or already used
+     */
+    @Transactional
+    public void resetPassword(ResetPasswordRequest request) {
+        // Find user by reset token
+        User user = userRepository.findByResetPasswordToken(request.getToken())
+                .orElseThrow(() -> new PasswordResetException("Invalid or expired reset token"));
+
+        // Validate token expiry
+        if (user.getResetTokenExpiry() == null ||
+                LocalDateTime.now().isAfter(user.getResetTokenExpiry())) {
+            // Invalidate expired token
+            user.setResetPasswordToken(null);
+            user.setResetTokenExpiry(null);
+            userRepository.save(user);
+            throw new PasswordResetException("Reset token has expired");
+        }
+
+        // Hash the new password
+        String hashedPassword = passwordEncoder.encode(request.getNewPassword());
+        user.setPasswordHash(hashedPassword);
+
+        // Invalidate the reset token (one-time use)
+        user.setResetPasswordToken(null);
+        user.setResetTokenExpiry(null);
+
+        // Optionally: Invalidate all refresh tokens for security
+        user.setRefreshTokenHash(null);
+
+        // Save updated user
+        userRepository.save(user);
+    }
 
 }

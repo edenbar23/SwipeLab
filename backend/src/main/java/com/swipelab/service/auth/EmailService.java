@@ -27,4 +27,25 @@ public class EmailService {
             Thread.currentThread().interrupt();
         }
     }
+
+    @Async
+    public void sendPasswordResetEmail(String email, String token) {
+        // TODO: Implement actual email sending (e.g., using SendGrid, AWS SES, JavaMailSender)
+        // For now, just log the password reset link
+        String resetLink = "http://localhost:8080/auth/password/reset?token=" + token;
+
+        log.info("==============================================");
+        log.info("PASSWORD RESET EMAIL");
+        log.info("To: {}", email);
+        log.info("Reset Link: {}", resetLink);
+        log.info("Token expires in 1 hour");
+        log.info("==============================================");
+
+        // Simulate email sending delay
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
 }
