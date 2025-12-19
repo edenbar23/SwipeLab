@@ -171,4 +171,9 @@ public class AuthenticationService {
                 .build();
     }
 
+    @Transactional
+    public AuthResponse refresh(String refreshToken) {
+        return jwtService.refreshTokens(refreshToken);
+    }
+
 }

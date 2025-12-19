@@ -10,6 +10,7 @@ import com.swipelab.security.enums.TokenType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.util.UUID;
@@ -85,6 +86,39 @@ public class JwtService {
     public long getAccessTokenExpirySeconds() {
         return jwtConfig.getAccessTokenExpirationMinutes() * 60;
     }
+
+    @Transactional
+    public AuthResponse refreshTokens(String refreshToken) {
+
+        // Validate token structure & signature
+        if (!tokenProvider.isTokenValid(refreshToken) ||
+                tokenProvider.extractTokenType(refreshToken) != TokenType.REFRESH) {
+            throw new UnauthorizedException("Invalid refresh token");
+        }
+
+        String username = tokenProvider.extractUsername(refreshToken);
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UnauthorizedException("User not found"));
+
+        // Verify refresh token hash (rotation protection)
+        if (user.getRefreshTokenHash() == null ||
+                !passwordEncoder.matches(refreshToken, user.getRefreshTokenHash())) {
+            throw new UnauthorizedException("Refresh token revoked or reused");
+        }
+
+        // Rotate tokens
+        String newAccessToken = generateAccessToken(user);
+        String newRefreshToken = generateRefreshToken(user); // overwrites old hash
+
+        return AuthResponse.builder()
+                .accessToken(newAccessToken)
+                .refreshToken(newRefreshToken)
+                .expiresIn(getAccessTokenExpirySeconds())
+                .message("Token refreshed")
+                .build();
+    }
+
 
 }
 
