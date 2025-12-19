@@ -134,5 +134,20 @@ public class AuthController {
         return ResponseEntity.ok(authenticationService.refresh(refreshToken));
     }
 
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(
+            @RequestHeader("Authorization") String authorizationHeader) {
+
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+            throw new UnauthorizedException("Missing refresh token");
+        }
+
+        String refreshToken = authorizationHeader.substring(7);
+        authenticationService.logout(refreshToken);
+
+        return ResponseEntity.noContent().build();
+    }
+
+
 
 }

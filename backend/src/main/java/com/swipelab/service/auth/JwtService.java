@@ -119,6 +119,14 @@ public class JwtService {
                 .build();
     }
 
+    public boolean isRefreshToken(String token) {
+        return tokenProvider.isTokenValid(token) &&
+                tokenProvider.extractTokenType(token) == TokenType.REFRESH;
+    }
 
+
+    public String extractUsername(String refreshToken) {
+        return tokenProvider.extractUsername(refreshToken);
+    }
 }
 
