@@ -1,6 +1,7 @@
 package com.swipelab.controller;
 
 import com.swipelab.dto.request.EmailVerificationRequest;
+import com.swipelab.dto.request.ForgotPasswordRequest;
 import com.swipelab.dto.request.LoginRequest;
 import com.swipelab.dto.request.RegisterRequest;
 import com.swipelab.dto.response.AuthResponse;
@@ -162,6 +163,28 @@ public class AuthController {
         return ResponseEntity.ok(
                 userService.getUserProfile(principal.getName())
         );
+    }
+
+    /**
+     * Forgot password endpoint
+     * Generates reset token and sends email for existing users
+     * Returns success for all requests (prevents email enumeration)
+     *
+     * Endpoint: POST /api/v1/auth/password/forgot
+     */
+    @PostMapping("/password/forgot")
+    public ResponseEntity<Map<String, String>> forgotPassword(
+            @Valid @RequestBody ForgotPasswordRequest request) {
+
+        // Process forgot password request
+        authenticationService.forgotPassword(request.getEmail());
+
+        // Always return success message
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "If your email exists in our system, you will receive a password reset link shortly.");
+        response.put("status", "success");
+
+        return ResponseEntity.ok(response);
     }
 
 

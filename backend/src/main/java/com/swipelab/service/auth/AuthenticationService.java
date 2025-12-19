@@ -193,5 +193,37 @@ public class AuthenticationService {
         userRepository.save(user);
     }
 
+    /**
+     * Handles forgot password request
+     * Generates reset token and sends email for existing users
+     * Returns success for non-existing emails (security best practice)
+     *
+     * @param email User's email address
+     */
+    @Transactional
+    public void forgotPassword(String email) {
+        // Look up user by email
+        User user = userRepository.findByEmail(email).orElse(null);
+
+        // If user exists, generate token and send email
+        if (user != null) {
+            // Generate password reset token
+            String resetToken = UUID.randomUUID().toString();
+
+            // Set token and expiry (1 hour)
+            user.setResetPasswordToken(resetToken);
+            user.setResetTokenExpiry(LocalDateTime.now().plusHours(1));
+
+            // Save user with reset token
+            userRepository.save(user);
+
+            // Send password reset email asynchronously
+            emailService.sendPasswordResetEmail(user.getEmail(), resetToken);
+        }
+
+        // Always return success, regardless of whether email exists
+        // This prevents email enumeration attacks
+    }
+
 
 }
