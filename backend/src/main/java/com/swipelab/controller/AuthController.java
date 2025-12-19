@@ -1,12 +1,10 @@
 package com.swipelab.controller;
 
-import com.swipelab.dto.request.EmailVerificationRequest;
-import com.swipelab.dto.request.ForgotPasswordRequest;
-import com.swipelab.dto.request.LoginRequest;
-import com.swipelab.dto.request.RegisterRequest;
+import com.swipelab.dto.request.*;
 import com.swipelab.dto.response.AuthResponse;
 import com.swipelab.dto.response.UserProfileResponse;
 import com.swipelab.exception.EmailVerificationException;
+import com.swipelab.exception.PasswordResetException;
 import com.swipelab.exception.UnauthorizedException;
 import com.swipelab.service.auth.AuthenticationService;
 import com.swipelab.service.user.UserService;
@@ -187,6 +185,32 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * Reset password endpoint
+     * Validates reset token and updates user password
+     * Token is invalidated after use (one-time use only)
+     *
+     * Endpoint: POST /api/v1/auth/password/reset
+     */
+    @PostMapping("/password/reset")
+    public ResponseEntity<Map<String, String>> resetPassword(
+            @Valid @RequestBody ResetPasswordRequest request) {
+        try {
+            // Process password reset
+            authenticationService.resetPassword(request);
 
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Password reset successfully. You can now login with your new password.");
+            response.put("status", "success");
+
+            return ResponseEntity.ok(response);
+        } catch (PasswordResetException e) {
+            Map<String, String> response = new HashMap<>();
+            response.put("message", e.getMessage());
+            response.put("status", "error");
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+    }
 
 }
