@@ -168,29 +168,26 @@ public class AuthController {
 
     @PostMapping("/login/google")
     public ResponseEntity<AuthResponse> loginGoogle(@RequestBody Map<String, String> payload) {
-        // NOTE: In a real implementation with ID Token, we would verify the token here
-        // using Google's verifier.
-        // Since we didn't add the google-api-client dependency, we assume the payload
-        // *is* the verified user info or mock it for now,
-        // OR we just map the fields if we trust the caller (NOT SECURE for production
-        // but fits the current scope without adding libs).
-        // Best approach if "Verify Google ID token" is required: Use a library.
-        // For now, I will implement a placeholder that expects email/name in body to
-        // demonstrate logic connecting to OAuth2Service.
+        String token = payload.get("credential"); // Standard field for Google Identity Services
+        if (token == null) {
+            token = payload.get("idToken"); // Fallback
+        }
 
-        // However, the prompt asked to "Verify Google ID token". Without the lib, I
-        // can't do it crypto-correctly easily.
-        // I will assume for this step we rely on the Redirection flow primarily, but
-        // provide this endpoint for completeness.
+        if (token == null) {
+            throw new RuntimeException("Missing Google ID Token");
+        }
 
-        // Actually, let's extract fields.
-        String email = payload.get("email");
-        String name = payload.get("name");
-        String picture = payload.get("picture");
-        String providerId = payload.get("sub");
+        // Verify the token securely
+        com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload googlePayload = oAuth2Service
+                .verifyGoogleToken(token);
+
+        String email = googlePayload.getEmail();
+        String name = (String) googlePayload.get("name");
+        String picture = (String) googlePayload.get("picture");
+        String providerId = googlePayload.getSubject();
 
         if (email == null) {
-            throw new RuntimeException("Invalid payload");
+            throw new RuntimeException("Invalid ID Token: Email not found");
         }
 
         User user = oAuth2Service.processUserFromIdToken(email, name, picture, providerId);

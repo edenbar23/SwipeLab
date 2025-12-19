@@ -12,11 +12,41 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.gson.GsonFactory;
+import org.springframework.beans.factory.annotation.Value;
+import java.util.Collections;
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+
 @Service
 @RequiredArgsConstructor
 public class OAuth2Service {
 
     private final UserRepository userRepository;
+
+    @Value("${GOOGLE_CLIENT_ID}")
+    private String googleClientId;
+
+    public GoogleIdToken.Payload verifyGoogleToken(String idTokenString) {
+        try {
+            GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(),
+                    new GsonFactory())
+                    .setAudience(Collections.singletonList(googleClientId))
+                    .build();
+
+            GoogleIdToken idToken = verifier.verify(idTokenString);
+            if (idToken != null) {
+                return idToken.getPayload();
+            } else {
+                throw new IllegalArgumentException("Invalid ID token.");
+            }
+        } catch (GeneralSecurityException | IOException e) {
+            throw new IllegalArgumentException("Invalid ID token: " + e.getMessage());
+        }
+    }
 
     @Transactional
     public User processUserLogin(OAuth2User oAuth2User) {
