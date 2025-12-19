@@ -5,6 +5,7 @@ import com.swipelab.dto.request.LoginRequest;
 import com.swipelab.dto.request.RegisterRequest;
 import com.swipelab.dto.response.AuthResponse;
 import com.swipelab.exception.EmailVerificationException;
+import com.swipelab.exception.UnauthorizedException;
 import com.swipelab.service.auth.AuthenticationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -120,5 +121,18 @@ public class AuthController {
             @Valid @RequestBody LoginRequest request) {
         return ResponseEntity.ok(authenticationService.login(request));
     }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<AuthResponse> refreshToken(
+            @RequestHeader("Authorization") String authorizationHeader) {
+
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+            throw new UnauthorizedException("Missing refresh token");
+        }
+
+        String refreshToken = authorizationHeader.substring(7);
+        return ResponseEntity.ok(authenticationService.refresh(refreshToken));
+    }
+
 
 }
