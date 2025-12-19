@@ -1,8 +1,10 @@
 package com.swipelab.service.auth;
 
 import com.swipelab.dto.request.RegisterRequest;
+import com.swipelab.dto.request.ResetPasswordRequest;
 import com.swipelab.dto.response.AuthResponse;
 import com.swipelab.exception.EmailVerificationException;
+import com.swipelab.exception.PasswordResetException;
 import com.swipelab.model.entity.User;
 import com.swipelab.model.enums.AuthProvider;
 import com.swipelab.model.enums.UserRole;
@@ -225,5 +227,41 @@ public class AuthenticationService {
         // This prevents email enumeration attacks
     }
 
+    /**
+     * Resets user password using a valid reset token
+     *
+     * @param request Contains reset token and new password
+     * @throws PasswordResetException if token is invalid, expired, or already used
+     */
+    @Transactional
+    public void resetPassword(ResetPasswordRequest request) {
+        // Find user by reset token
+        User user = userRepository.findByResetPasswordToken(request.getToken())
+                .orElseThrow(() -> new PasswordResetException("Invalid or expired reset token"));
+
+        // Validate token expiry
+        if (user.getResetTokenExpiry() == null ||
+                LocalDateTime.now().isAfter(user.getResetTokenExpiry())) {
+            // Invalidate expired token
+            user.setResetPasswordToken(null);
+            user.setResetTokenExpiry(null);
+            userRepository.save(user);
+            throw new PasswordResetException("Reset token has expired");
+        }
+
+        // Hash the new password
+        String hashedPassword = passwordEncoder.encode(request.getNewPassword());
+        user.setPasswordHash(hashedPassword);
+
+        // Invalidate the reset token (one-time use)
+        user.setResetPasswordToken(null);
+        user.setResetTokenExpiry(null);
+
+        // Optionally: Invalidate all refresh tokens for security
+        user.setRefreshTokenHash(null);
+
+        // Save updated user
+        userRepository.save(user);
+    }
 
 }
