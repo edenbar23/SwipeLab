@@ -6,8 +6,6 @@ import com.swipelab.dto.response.AuthResponse;
 import com.swipelab.exception.EmailVerificationException;
 import com.swipelab.exception.PasswordResetException;
 import com.swipelab.model.entity.User;
-import com.swipelab.model.enums.AuthProvider;
-import com.swipelab.model.enums.UserRole;
 import com.swipelab.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -26,6 +24,7 @@ public class AuthenticationService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
+    private final com.swipelab.mapper.AuthMapper authMapper;
     private final JwtService jwtService;
 
     @Transactional
@@ -43,19 +42,11 @@ public class AuthenticationService {
         // Generate email verification token
         String verificationToken = UUID.randomUUID().toString();
 
-        // Create new user
-        User user = new User();
-        user.setUsername(request.getUsername());
-        user.setEmail(request.getEmail());
+        // Create new user using Mapper
+        User user = authMapper.toUser(request);
         user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
-        user.setDisplayName(request.getDisplayName());
-        user.setProvider(AuthProvider.LOCAL);
-        user.setRole(UserRole.USER);
-        user.setEmailVerified(false);
         user.setEmailVerificationToken(verificationToken);
         user.setVerificationTokenExpiry(LocalDateTime.now().plusHours(24)); // 24-hour expiry
-        user.setActive(true);
-        user.setAccountLocked(false);
 
         // Save user
         User savedUser = userRepository.save(user);
@@ -67,12 +58,7 @@ public class AuthenticationService {
         String accessToken = jwtService.generateAccessToken(savedUser);
         String refreshToken = jwtService.generateRefreshToken(savedUser);
 
-        return AuthResponse.builder()
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .expiresIn(2592000) // 30 days in seconds
-                .message("Registration successful. Please check your email to verify your account.")
-                .build();
+        return authMapper.toAuthResponse(accessToken, refreshToken, savedUser);
     }
 
     /**
@@ -165,12 +151,7 @@ public class AuthenticationService {
         user.setLastLogin(LocalDateTime.now());
         userRepository.save(user);
 
-        return AuthResponse.builder()
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .expiresIn(jwtService.getAccessTokenExpirySeconds())
-                .message("Login successful")
-                .build();
+        return authMapper.toAuthResponse(accessToken, refreshToken, user);
     }
 
     @Transactional

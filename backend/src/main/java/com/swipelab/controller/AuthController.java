@@ -30,6 +30,7 @@ public class AuthController {
 
     private final UserService userService;
     private final com.swipelab.service.auth.OAuth2Service oAuth2Service;
+    private final com.swipelab.mapper.AuthMapper authMapper;
     private final com.swipelab.service.auth.JwtService jwtService;
 
     /**
@@ -195,12 +196,8 @@ public class AuthController {
         String accessToken = jwtService.generateAccessToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
 
-        return ResponseEntity.ok(AuthResponse.builder()
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .expiresIn(jwtService.getAccessTokenExpirySeconds())
-                .message("Google Login successful")
-                .build());
+        // Use mapper
+        return ResponseEntity.ok(authMapper.toAuthResponse(accessToken, refreshToken, user));
     }
 
     /**
