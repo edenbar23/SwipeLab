@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import com.swipelab.model.entity.User;
 
 import java.security.Principal;
 import java.util.HashMap;
@@ -26,7 +27,10 @@ import java.util.Map;
 public class AuthController {
 
     private final AuthenticationService authenticationService;
+
     private final UserService userService;
+    private final com.swipelab.service.auth.OAuth2Service oAuth2Service;
+    private final com.swipelab.service.auth.JwtService jwtService;
 
     /**
      * Register a new user
@@ -159,8 +163,44 @@ public class AuthController {
         }
 
         return ResponseEntity.ok(
-                userService.getUserProfile(principal.getName())
-        );
+                userService.getUserProfile(principal.getName()));
+    }
+
+    @PostMapping("/login/google")
+    public ResponseEntity<AuthResponse> loginGoogle(@RequestBody Map<String, String> payload) {
+        String token = payload.get("credential"); // Standard field for Google Identity Services
+        if (token == null) {
+            token = payload.get("idToken"); // Fallback
+        }
+
+        if (token == null) {
+            throw new RuntimeException("Missing Google ID Token");
+        }
+
+        // Verify the token securely
+        com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload googlePayload = oAuth2Service
+                .verifyGoogleToken(token);
+
+        String email = googlePayload.getEmail();
+        String name = (String) googlePayload.get("name");
+        String picture = (String) googlePayload.get("picture");
+        String providerId = googlePayload.getSubject();
+
+        if (email == null) {
+            throw new RuntimeException("Invalid ID Token: Email not found");
+        }
+
+        User user = oAuth2Service.processUserFromIdToken(email, name, picture, providerId);
+
+        String accessToken = jwtService.generateAccessToken(user);
+        String refreshToken = jwtService.generateRefreshToken(user);
+
+        return ResponseEntity.ok(AuthResponse.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .expiresIn(jwtService.getAccessTokenExpirySeconds())
+                .message("Google Login successful")
+                .build());
     }
 
     /**

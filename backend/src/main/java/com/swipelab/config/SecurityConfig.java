@@ -1,6 +1,9 @@
 package com.swipelab.config;
 
-import com.swipelab.security.*;
+import com.swipelab.security.CustomOAuth2UserService;
+import com.swipelab.security.JwtAuthenticationFilter;
+import com.swipelab.security.OAuth2AuthenticationFailureHandler;
+import com.swipelab.security.OAuth2AuthenticationSuccessHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -41,10 +44,6 @@ public class SecurityConfig {
         private String allowedOrigins;
 
         // ADD THIS BEAN
-        @Bean
-        public PasswordEncoder passwordEncoder() {
-                return new BCryptPasswordEncoder();
-        }
 
         @Bean
         public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
