@@ -176,4 +176,22 @@ public class AuthenticationService {
         return jwtService.refreshTokens(refreshToken);
     }
 
+    @Transactional
+    public void logout(String refreshToken) {
+
+        if (!jwtService.isRefreshToken(refreshToken)) {
+            throw new UnauthorizedException("Invalid refresh token");
+        }
+
+        String username = jwtService.extractUsername(refreshToken);
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UnauthorizedException("User not found"));
+
+        // Invalidate refresh token
+        user.setRefreshTokenHash(null);
+        userRepository.save(user);
+    }
+
+
 }
