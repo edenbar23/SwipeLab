@@ -3,8 +3,7 @@ package com.swipelab.controller;
 import com.swipelab.dto.request.*;
 import com.swipelab.dto.response.AuthResponse;
 import com.swipelab.dto.response.UserProfileResponse;
-import com.swipelab.exception.EmailVerificationException;
-import com.swipelab.exception.PasswordResetException;
+
 import com.swipelab.exception.UnauthorizedException;
 import com.swipelab.service.auth.AuthenticationService;
 import com.swipelab.service.user.UserService;
@@ -38,15 +37,8 @@ public class AuthController {
      */
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
-        try {
-            AuthResponse response = authenticationService.register(request);
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(AuthResponse.builder()
-                            .message(e.getMessage())
-                            .build());
-        }
+        AuthResponse response = authenticationService.register(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     /**
@@ -56,21 +48,13 @@ public class AuthController {
     @PostMapping("/email/verify")
     public ResponseEntity<Map<String, String>> verifyEmail(
             @Valid @RequestBody EmailVerificationRequest request) {
-        try {
-            authenticationService.verifyEmail(request.getToken());
+        authenticationService.verifyEmail(request.getToken());
 
-            Map<String, String> response = new HashMap<>();
-            response.put("message", "Email verified successfully");
-            response.put("status", "success");
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Email verified successfully");
+        response.put("status", "success");
 
-            return ResponseEntity.ok(response);
-        } catch (EmailVerificationException e) {
-            Map<String, String> response = new HashMap<>();
-            response.put("message", e.getMessage());
-            response.put("status", "error");
-
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-        }
+        return ResponseEntity.ok(response);
     }
 
     /**
@@ -80,21 +64,13 @@ public class AuthController {
     @PostMapping("/email/resend")
     public ResponseEntity<Map<String, String>> resendVerificationEmail(
             @RequestParam String email) {
-        try {
-            authenticationService.resendVerificationEmail(email);
+        authenticationService.resendVerificationEmail(email);
 
-            Map<String, String> response = new HashMap<>();
-            response.put("message", "Verification email sent successfully");
-            response.put("status", "success");
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Verification email sent successfully");
+        response.put("status", "success");
 
-            return ResponseEntity.ok(response);
-        } catch (EmailVerificationException e) {
-            Map<String, String> response = new HashMap<>();
-            response.put("message", e.getMessage());
-            response.put("status", "error");
-
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-        }
+        return ResponseEntity.ok(response);
     }
 
     /**
@@ -232,22 +208,14 @@ public class AuthController {
     @PostMapping("/password/reset")
     public ResponseEntity<Map<String, String>> resetPassword(
             @Valid @RequestBody ResetPasswordRequest request) {
-        try {
-            // Process password reset
-            authenticationService.resetPassword(request);
+        // Process password reset
+        authenticationService.resetPassword(request);
 
-            Map<String, String> response = new HashMap<>();
-            response.put("message", "Password reset successfully. You can now login with your new password.");
-            response.put("status", "success");
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Password reset successfully. You can now login with your new password.");
+        response.put("status", "success");
 
-            return ResponseEntity.ok(response);
-        } catch (PasswordResetException e) {
-            Map<String, String> response = new HashMap<>();
-            response.put("message", e.getMessage());
-            response.put("status", "error");
-
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-        }
+        return ResponseEntity.ok(response);
     }
 
 }
