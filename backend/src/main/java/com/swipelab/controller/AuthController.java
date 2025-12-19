@@ -4,9 +4,11 @@ import com.swipelab.dto.request.EmailVerificationRequest;
 import com.swipelab.dto.request.LoginRequest;
 import com.swipelab.dto.request.RegisterRequest;
 import com.swipelab.dto.response.AuthResponse;
+import com.swipelab.dto.response.UserProfileResponse;
 import com.swipelab.exception.EmailVerificationException;
 import com.swipelab.exception.UnauthorizedException;
 import com.swipelab.service.auth.AuthenticationService;
+import com.swipelab.service.user.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -15,6 +17,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,6 +27,7 @@ import java.util.Map;
 public class AuthController {
 
     private final AuthenticationService authenticationService;
+    private final UserService userService;
 
     /**
      * Register a new user
@@ -146,6 +150,18 @@ public class AuthController {
         authenticationService.logout(refreshToken);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<UserProfileResponse> me(Principal principal) {
+
+        if (principal == null) {
+            throw new UnauthorizedException("Unauthorized");
+        }
+
+        return ResponseEntity.ok(
+                userService.getUserProfile(principal.getName())
+        );
     }
 
 
