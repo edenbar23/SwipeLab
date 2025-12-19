@@ -11,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.swipelab.dto.request.LoginRequest;
+import com.swipelab.exception.UnauthorizedException;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -130,4 +132,43 @@ public class AuthenticationService {
         // Send new verification email
         emailService.sendVerificationEmail(user.getEmail(), verificationToken);
     }
+
+    @Transactional
+    public AuthResponse login(LoginRequest request) {
+
+        User user = userRepository.findByUsername(request.getUsername())
+                .orElseThrow(() -> new UnauthorizedException("User not exists"));
+
+        // Account state checks
+        if (!Boolean.TRUE.equals(user.getActive()) ||
+                Boolean.TRUE.equals(user.getAccountLocked())) {
+            throw new UnauthorizedException("Account disabled or locked");
+        }
+
+        // Email verification check
+        if (!Boolean.TRUE.equals(user.getEmailVerified())) {
+            throw new UnauthorizedException("Email not verified");
+        }
+
+        // Password validation
+        if (user.getPasswordHash() == null ||
+                !passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
+            throw new UnauthorizedException("Wrong password");
+        }
+
+        // Generate tokens
+        String accessToken = jwtService.generateAccessToken(user);
+        String refreshToken = jwtService.generateRefreshToken(user);
+
+        user.setLastLogin(LocalDateTime.now());
+        userRepository.save(user);
+
+        return AuthResponse.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .expiresIn(jwtService.getAccessTokenExpirySeconds())
+                .message("Login successful")
+                .build();
+    }
+
 }
