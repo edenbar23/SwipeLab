@@ -20,5 +20,8 @@ public class Label {
     @Column(nullable = false, unique = true)
     private String name;
 
+    @Column(name = "common_name")
+    private String commonName;
+
     private String description;
 }
