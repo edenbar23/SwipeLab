@@ -14,3 +14,7 @@ Git-Workflow-Guidelines.md
 
 # Secrets
 secrets.properties
+
+# Editors
+.vscode/
+~$*

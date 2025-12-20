@@ -26,7 +26,34 @@ public class Task {
     private Long id;
 
     @Column(nullable = false)
-    private String title;
+    private String name;
+
+    private LocalDateTime deadline;
+
+    @Column(name = "min_classifications_per_image")
+    @Builder.Default
+    private Integer minClassificationsPerImage = 3;
+
+    @Column(name = "consensus_threshold")
+    @Builder.Default
+    private Double consensusThreshold = 80.0;
+
+    @ElementCollection
+    @CollectionTable(name = "task_experiments", joinColumns = @JoinColumn(name = "task_id"))
+    @Column(name = "experiment_id")
+    @Builder.Default
+    private List<Long> experiments = new ArrayList<>();
+
+    @ElementCollection
+    @CollectionTable(name = "task_recipient_groups", joinColumns = @JoinColumn(name = "task_id"))
+    @Column(name = "recipient_group_id")
+    @Builder.Default
+    private List<Long> recipientGroups = new ArrayList<>();
+
+    @ManyToMany
+    @JoinTable(name = "task_target_species", joinColumns = @JoinColumn(name = "task_id"), inverseJoinColumns = @JoinColumn(name = "label_id"))
+    @Builder.Default
+    private List<Label> targetSpecies = new ArrayList<>();
 
     private String description;
 

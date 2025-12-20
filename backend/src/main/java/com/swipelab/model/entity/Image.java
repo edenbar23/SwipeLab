@@ -20,8 +20,16 @@ public class Image {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String url;
+    @Column(name = "image_url", nullable = false)
+    private String imageUrl;
+
+    @Column(name = "thumbnail_url")
+    private String thumbnailUrl;
+
+    private String caption;
+
+    @Column(name = "experiment_id")
+    private Long experimentId;
 
     @Column(nullable = false)
     @Builder.Default
