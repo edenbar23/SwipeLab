@@ -10,7 +10,9 @@ import lombok.Data;
 @AllArgsConstructor
 public class UserProfileResponse {
 
-    private String email;
     private String username;
+    private String email;
+    private String displayName;
+    private String profileImageUrl;
     private UserRole role;
 }
