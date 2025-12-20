@@ -37,6 +37,8 @@ public class AuthMapper {
         return UserProfileResponse.builder()
                 .username(user.getUsername())
                 .email(user.getEmail())
+                .displayName(user.getDisplayName())
+                .profileImageUrl(user.getProfileImageUrl())
                 .role(user.getRole())
                 .build();
     }
