@@ -29,13 +29,14 @@ export default function RootNavigator() {
   }
 
   // Logged in → if user is ADMIN, mode determines flow
-  const effectiveMode = role === "ADMIN" ? mode : "user";
+  const isAdmin = role === "ADMIN";
 
-  return (
-    <SafeAreaView style={{ flex: 1}}>
-      <NavigationContainer>
-        {effectiveMode === "admin" ? <AdminNavigator /> : <UserNavigator />}
-      </NavigationContainer>
-    </SafeAreaView>
-  );
+return (
+  <SafeAreaView style={{ flex: 1 }}>
+    <NavigationContainer>
+      {isAdmin ? <AdminNavigator /> : <UserNavigator />}
+    </NavigationContainer>
+  </SafeAreaView>
+);
+
 }

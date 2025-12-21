@@ -2,8 +2,10 @@ import * as Google from "expo-auth-session/providers/google";
 import * as WebBrowser from "expo-web-browser";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { apiFetch } from "../../api/apiFetch";
 import RegisterForm from "../../components/RegisterForm";
 import { useAuthStore } from "../../stores/authStore";
+
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -28,21 +30,38 @@ export default function LoginScreen() {
     }
   }, [response]);
 
-  const handleLogin = async () => {
-    setLoading(true);
-    setError("");
-    try {
-      if (username === "admin" && password === "1234") {
-        setAuth("mock-jwt-token", "ADMIN");
-      } else if (username === "user" && password === "1234") {
-        setAuth("mock-jwt-token", "USER");
-      } else {
-        setError("Invalid username or password");
-      }
-    } finally {
-      setLoading(false);
+ const handleLogin = async () => {
+  setLoading(true);
+  setError("");
+
+  try {
+    const res = await apiFetch("/api/v1/auth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        username,
+        password,
+      }),
+    });
+
+    if (!res.ok) {
+      setError("Invalid username or password");
+      return;
     }
-  };
+
+    const data = await res.json();
+
+    // data comes from auth.mock.ts
+    setAuth(data.accessToken, data.user.role);
+  } catch (e) {
+    setError("Something went wrong. Please try again.");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <View style={styles.screenContainer}>
@@ -84,7 +103,7 @@ export default function LoginScreen() {
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => setShowRegister(true)} style={{ marginTop: 20 }}>
-          <Text style={styles.registerText}>Don't have an account? Register</Text>
+          <Text style={styles.registerText}>Don&apos;t have an account? Register</Text>
         </TouchableOpacity>
       </View>
 
