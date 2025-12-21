@@ -1,10 +1,10 @@
 import { create } from "zustand";
 
-type Mode = "user" | "admin" | null;
+type Mode = "USER" | "ADMIN" | null;
 
 interface ModeState {
   mode: Mode;
-  setMode: (mode: Exclude<Mode, null>) => void;
+  setMode: (mode: "ADMIN" | "USER") => void;
   resetMode: () => void;
 }
 

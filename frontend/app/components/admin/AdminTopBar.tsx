@@ -21,16 +21,16 @@ export default function AdminTopBar() {
 
       {/* Blue card */}
       <View style={styles.card}>
-        <TouchableOpacity onPress={() => setMode("admin")}>
+        <TouchableOpacity onPress={() => setMode("ADMIN")}>
           <Text style={styles.text}>Manager</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          onPress={() => setMode(mode === "admin" ? "user" : "admin")}
+          onPress={() => setMode(mode === "ADMIN" ? "USER" : "ADMIN")}
           style={{ marginTop: 10 }}
         >
           <Text style={styles.switchText}>
-            Switch to {mode === "admin" ? "Play" : "Admin"}
+            Switch to {mode === "ADMIN" ? "Play" : "Management"}
           </Text>
         </TouchableOpacity>
       </View>

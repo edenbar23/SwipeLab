@@ -17,9 +17,8 @@ import LoginScreen from "../screens/shared/LoginScreen";
 
 export default function RootNavigator() {
   const { token, role } = useAuthStore();       // "USER" | "ADMIN" | null
-  const { mode } = useModeStore();              // "user" | "admin"
+  const { mode } = useModeStore();              // "USER" | "ADMIN"
 
-  // Not logged in → go to Login
   if (!token) {
     return (
       <NavigationContainer>
@@ -28,15 +27,16 @@ export default function RootNavigator() {
     );
   }
 
-  // Logged in → if user is ADMIN, mode determines flow
   const isAdmin = role === "ADMIN";
 
-return (
-  <SafeAreaView style={{ flex: 1 }}>
-    <NavigationContainer>
-      {isAdmin ? <AdminNavigator /> : <UserNavigator />}
-    </NavigationContainer>
-  </SafeAreaView>
-);
-
+  return (
+    <SafeAreaView style={{ flex: 1 }}>
+      <NavigationContainer>
+        {isAdmin ? mode === "ADMIN"
+            ? <AdminNavigator />
+            : <UserNavigator />
+          : <UserNavigator />}
+      </NavigationContainer>
+    </SafeAreaView>
+  );
 }
