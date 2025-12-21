@@ -16,7 +16,7 @@ export default function UserNavigator() {
       {/* Middle Navigator */}
       <View style={styles.content}>
         <Stack.Navigator screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="Swipe" component={SwipeScreen} />
+          <Stack.Screen name="SwipeLab" component={SwipeScreen} />
           {/* other screens */}
         </Stack.Navigator>
       </View>

@@ -9,7 +9,7 @@ export default function TopBar() {
   const { role } = useAuthStore();
   const { mode } = useModeStore();
 
-  const effectiveMode = role === "ADMIN" ? mode : "user";
+  const effectiveMode = role === "ADMIN" ? "ADMIN" : "USER";
 
-  return effectiveMode === "admin" ? <AdminTopBar /> : <UserTopBar />;
+  return effectiveMode === "ADMIN" ? <AdminTopBar /> : <UserTopBar />;
 }
