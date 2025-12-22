@@ -16,8 +16,8 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users", uniqueConstraints = {
-                @UniqueConstraint(columnNames = "username"),
-                @UniqueConstraint(columnNames = "email")
+        @UniqueConstraint(columnNames = "username"),
+        @UniqueConstraint(columnNames = "email")
 })
 @Data
 @NoArgsConstructor
@@ -88,10 +88,25 @@ public class User {
         @Column(name = "profile_image_url")
         private String profileImageUrl;
 
-        // Credibility
+        // Credibility metrics
         @Column(name = "credibility_score", nullable = false)
         @Builder.Default
         private Double credibilityScore = 0.0;
+
+        @Column(name = "cohen_kappa_avg")
+        @Builder.Default
+        private Double cohenKappaAvg = 0.0;
+
+        @Column(name = "fleiss_kappa_avg")
+        @Builder.Default
+        private Double fleissKappaAvg = 0.0;
+
+        @Column(name = "total_classifications")
+        @Builder.Default
+        private Integer totalClassifications = 0;
+
+        @Column(name = "credibility_last_updated")
+        private LocalDateTime credibilityLastUpdated;
 
         @CreationTimestamp
         @Column(name = "created_at", nullable = false, updatable = false)
