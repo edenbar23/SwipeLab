@@ -75,7 +75,7 @@ class CredibilityServiceTest {
 
     @Test
     @DisplayName("Should calculate images in common with experts correctly")
-    void testGetCredibilityStats_CommonImages() {
+    void testGetCredibilityStats_CalculatesCommonImagesCorrectly() {
         // TODO: Test calculation of common images with experts
     }
 }

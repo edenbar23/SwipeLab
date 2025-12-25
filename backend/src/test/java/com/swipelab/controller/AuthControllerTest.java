@@ -1,7 +1,23 @@
 package com.swipelab.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.test.web.servlet.MockMvc;
+import com.swipelab.service.auth.AuthenticationService;
+import com.swipelab.service.auth.OAuth2Service;
+import com.swipelab.service.auth.JwtService;
+import com.swipelab.service.user.UserService;
+import com.swipelab.mapper.AuthMapper;
+import com.swipelab.security.JwtTokenProvider;
+import com.swipelab.security.OAuth2AuthenticationSuccessHandler;
+import com.swipelab.security.OAuth2AuthenticationFailureHandler;
+import com.swipelab.security.CustomOAuth2UserService;
 
 /**
  * Auth Controller Tests
@@ -25,7 +41,46 @@ import org.junit.jupiter.api.Test;
  * - Security checks (401 Unauthorized)
  */
 @DisplayName("Auth Controller Tests")
+@WebMvcTest(AuthController.class)
+@AutoConfigureMockMvc(addFilters = false)
 class AuthControllerTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @MockBean
+    private AuthenticationService authenticationService;
+
+    @MockBean
+    private UserService userService;
+
+    @MockBean
+    private OAuth2Service oAuth2Service;
+
+    @MockBean
+    private AuthMapper authMapper;
+
+    @MockBean
+    private JwtService jwtService;
+
+    // MockBeans for security configuration dependencies
+    @MockBean
+    private JwtTokenProvider jwtTokenProvider;
+
+    @MockBean
+    private UserDetailsService userDetailsService;
+
+    @MockBean
+    private OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
+
+    @MockBean
+    private OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
+
+    @MockBean
+    private CustomOAuth2UserService customOAuth2UserService;
 
     @Test
     @DisplayName("Should register user successfully")
