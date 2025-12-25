@@ -1,74 +1,146 @@
 package com.swipelab.service.user;
 
-import org.junit.jupiter.api.DisplayName;
+import com.swipelab.dto.request.UpdateProfileRequest;
+import com.swipelab.dto.response.UserProfileResponse;
+import com.swipelab.exception.ResourceNotFoundException;
+import com.swipelab.mapper.AuthMapper;
+import com.swipelab.model.entity.User;
+import com.swipelab.model.enums.UserRole;
+import com.swipelab.repository.UserRepository;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
-/**
- * User Service Tests
- * 
- * Tests for user profile retrieval and updates.
- * 
- * What this test should cover:
- * - Get user profile by username
- * - Get current authenticated user profile (different auth types: User entity, UserDetails, String)
- * - Update user profile (full update, partial updates)
- * - Error handling (user not found, not authenticated)
- */
-@DisplayName("User Service Tests")
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
 class UserServiceTest {
 
-    @Test
-    @DisplayName("Should get user profile by username successfully")
-    void testGetUserProfile_Success() {
-        // TODO: Test getting user profile by username
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    private AuthMapper authMapper;
+
+    @Mock
+    private SecurityContext securityContext;
+
+    @Mock
+    private Authentication authentication;
+
+    @InjectMocks
+    private UserService userService;
+
+    private User testUser;
+    private MockedStatic<SecurityContextHolder> mockedSecurityContextHolder;
+
+    @BeforeEach
+    void setUp() {
+        testUser = User.builder()
+                .username("testuser")
+                .email("test@example.com")
+                .role(UserRole.USER)
+                .displayName("Test User")
+                .build();
+
+        // Initialize static mock for SecurityContextHolder
+        mockedSecurityContextHolder = mockStatic(SecurityContextHolder.class);
+    }
+
+    @AfterEach
+    void tearDown() {
+        // Close static mock after each test to avoid memory leaks or interference
+        mockedSecurityContextHolder.close();
     }
 
     @Test
-    @DisplayName("Should throw exception when user not found")
-    void testGetUserProfile_UserNotFound() {
-        // TODO: Test handling of non-existent user
+    void getUserProfile_Success() {
+        when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(testUser));
+        when(authMapper.toUserProfileResponse(testUser))
+                .thenReturn(UserProfileResponse.builder().username("testuser").build());
+
+        UserProfileResponse response = userService.getUserProfile("testuser");
+
+        assertNotNull(response);
+        assertEquals("testuser", response.getUsername());
+        verify(userRepository).findByUsername("testuser");
     }
 
     @Test
-    @DisplayName("Should get current user profile when authenticated with User entity")
-    void testGetCurrentUserProfile_WithUserEntity() {
-        // TODO: Test when SecurityContext has User entity
+    void getUserProfile_NotFound() {
+        when(userRepository.findByUsername("unknown")).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> userService.getUserProfile("unknown"));
     }
 
     @Test
-    @DisplayName("Should get current user profile when authenticated with UserDetails")
-    void testGetCurrentUserProfile_WithUserDetails() {
-        // TODO: Test when SecurityContext has UserDetails
+    void getCurrentUserProfile_Success() {
+        // Mock Security Context behavior
+        mockedSecurityContextHolder.when(SecurityContextHolder::getContext).thenReturn(securityContext);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.isAuthenticated()).thenReturn(true);
+        when(authentication.getPrincipal()).thenReturn(testUser); // Principal is the User entity directly
+
+        when(authMapper.toUserProfileResponse(testUser))
+                .thenReturn(UserProfileResponse.builder().username("testuser").build());
+
+        UserProfileResponse response = userService.getCurrentUserProfile();
+
+        assertNotNull(response);
+        assertEquals("testuser", response.getUsername());
     }
 
     @Test
-    @DisplayName("Should get current user profile when authenticated with string principal")
-    void testGetCurrentUserProfile_WithStringPrincipal() {
-        // TODO: Test when SecurityContext has String principal
+    void getCurrentUserProfile_AuthenticatedUserNotFoundInRepo_WhenPrincipalIsString() {
+        mockedSecurityContextHolder.when(SecurityContextHolder::getContext).thenReturn(securityContext);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.isAuthenticated()).thenReturn(true);
+        when(authentication.getPrincipal()).thenReturn("testuser"); // Principal is String
+        when(authentication.getName()).thenReturn("testuser");
+
+        when(userRepository.findByUsername("testuser")).thenReturn(Optional.empty());
+
+        assertThrows(RuntimeException.class, () -> userService.getCurrentUserProfile());
     }
 
     @Test
-    @DisplayName("Should throw exception when not authenticated")
-    void testGetCurrentUserProfile_NotAuthenticated() {
-        // TODO: Test handling of unauthenticated requests
-    }
+    void updateUserProfile_Success() {
+        // Mock Security Context
+        mockedSecurityContextHolder.when(SecurityContextHolder::getContext).thenReturn(securityContext);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.isAuthenticated()).thenReturn(true);
+        when(authentication.getPrincipal()).thenReturn(testUser);
 
-    @Test
-    @DisplayName("Should update user profile successfully")
-    void testUpdateUserProfile_Success() {
-        // TODO: Test full profile update
-    }
+        // Mock Update
+        UpdateProfileRequest request = new UpdateProfileRequest();
+        request.setDisplayName("New Name");
+        request.setProfileImageUrl("http://image.com/new.png");
 
-    @Test
-    @DisplayName("Should update only display name when profile image URL is null")
-    void testUpdateUserProfile_OnlyDisplayName() {
-        // TODO: Test partial update (display name only)
-    }
+        when(userRepository.save(any(User.class))).thenReturn(testUser);
+        when(authMapper.toUserProfileResponse(any(User.class)))
+                .thenReturn(UserProfileResponse.builder().displayName("New Name").build());
 
-    @Test
-    @DisplayName("Should update only profile image URL when display name is null")
-    void testUpdateUserProfile_OnlyProfileImageUrl() {
-        // TODO: Test partial update (image URL only)
+        UserProfileResponse response = userService.updateUserProfile(request);
+
+        assertNotNull(response);
+        assertEquals("New Name", response.getDisplayName());
+
+        // Verify user object was updated before save
+        assertEquals("New Name", testUser.getDisplayName());
+        assertEquals("http://image.com/new.png", testUser.getProfileImageUrl());
+
+        verify(userRepository).save(testUser);
     }
 }
-
