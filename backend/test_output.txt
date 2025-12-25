@@ -24,43 +24,17 @@
 [INFO] -------------------------------------------------------
 [INFO]  T E S T S
 [INFO] -------------------------------------------------------
-[INFO] Running com.swipelab.service.auth.OAuth2ServiceTest
+[INFO] Running com.swipelab.service.user.CredibilityServiceTest
 OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
-[ERROR] Tests run: 3, Failures: 1, Errors: 1, Skipped: 0, Time elapsed: 2.099 s <<< FAILURE! -- in com.swipelab.service.auth.OAuth2ServiceTest
-[ERROR] com.swipelab.service.auth.OAuth2ServiceTest.processUserLogin_ShouldUpdateExistingUser_WhenUserExists -- Time elapsed: 1.983 s <<< FAILURE!
-org.opentest4j.AssertionFailedError: expected: <Updated Name> but was: <Old Name>
-	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
-	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
-	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
-	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
-	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
-	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
-	at com.swipelab.service.auth.OAuth2ServiceTest.processUserLogin_ShouldUpdateExistingUser_WhenUserExists(OAuth2ServiceTest.java:92)
-	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
-	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
-	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+19:17:13.230 [main] INFO com.swipelab.service.user.CredibilityService -- Recalculating credibility for all users who classified image: 10
+19:17:13.237 [main] INFO com.swipelab.service.user.CredibilityService -- Recalculation complete for 2 users
+[ERROR] Tests run: 3, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 1.540 s <<< FAILURE! -- in com.swipelab.service.user.CredibilityServiceTest
+[ERROR] com.swipelab.service.user.CredibilityServiceTest.updateUserCredibility_ShouldUpdateScores_WhenUserIsRegular -- Time elapsed: 0.010 s <<< ERROR!
+java.lang.Error: 
+Unresolved compilation problem: 
+	Arrays cannot be resolved
 
-[ERROR] com.swipelab.service.auth.OAuth2ServiceTest.processUserLogin_ShouldLinkProviderId_WhenLocalUserExists -- Time elapsed: 0.034 s <<< ERROR!
-org.mockito.exceptions.misusing.PotentialStubbingProblem: 
-
-Strict stubbing argument mismatch. Please check:
- - this invocation of 'getAttribute' method:
-    oAuth2User.getAttribute("name");
-    -> at com.swipelab.service.auth.OAuth2Service.processUserLogin(OAuth2Service.java:54)
- - has following stubbing(s) with different arguments:
-    1. oAuth2User.getAttribute("sub");
-      -> at com.swipelab.service.auth.OAuth2ServiceTest.processUserLogin_ShouldLinkProviderId_WhenLocalUserExists(OAuth2ServiceTest.java:113)
-Typically, stubbing argument mismatch indicates user mistake when writing tests.
-Mockito fails early so that you can debug potential problem easily.
-However, there are legit scenarios when this exception generates false negative signal:
-  - stubbing the same method multiple times using 'given().will()' or 'when().then()' API
-    Please use 'will().given()' or 'doReturn().when()' API for stubbing.
-  - stubbed method is intentionally invoked with different arguments by code under test
-    Please use default or 'silent' JUnit Rule (equivalent of Strictness.LENIENT).
-For more information see javadoc for PotentialStubbingProblem class.
-	at org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal.getAttribute(OAuth2AuthenticatedPrincipal.java:44)
-	at com.swipelab.service.auth.OAuth2Service.processUserLogin(OAuth2Service.java:54)
-	at com.swipelab.service.auth.OAuth2ServiceTest.processUserLogin_ShouldLinkProviderId_WhenLocalUserExists(OAuth2ServiceTest.java:119)
+	at com.swipelab.service.user.CredibilityServiceTest.updateUserCredibility_ShouldUpdateScores_WhenUserIsRegular(CredibilityServiceTest.java:75)
 	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
 	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
 	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
@@ -68,35 +42,20 @@ For more information see javadoc for PotentialStubbingProblem class.
 [INFO] 
 [INFO] Results:
 [INFO] 
-[ERROR] Failures: 
-[ERROR]   OAuth2ServiceTest.processUserLogin_ShouldUpdateExistingUser_WhenUserExists:92 expected: <Updated Name> but was: <Old Name>
 [ERROR] Errors: 
-[ERROR]   OAuth2ServiceTest.processUserLogin_ShouldLinkProviderId_WhenLocalUserExists:119 ╗ PotentialStubbingProblem 
-Strict stubbing argument mismatch. Please check:
- - this invocation of 'getAttribute' method:
-    oAuth2User.getAttribute("name");
-    -> at com.swipelab.service.auth.OAuth2Service.processUserLogin(OAuth2Service.java:54)
- - has following stubbing(s) with different arguments:
-    1. oAuth2User.getAttribute("sub");
-      -> at com.swipelab.service.auth.OAuth2ServiceTest.processUserLogin_ShouldLinkProviderId_WhenLocalUserExists(OAuth2ServiceTest.java:113)
-Typically, stubbing argument mismatch indicates user mistake when writing tests.
-Mockito fails early so that you can debug potential problem easily.
-However, there are legit scenarios when this exception generates false negative signal:
-  - stubbing the same method multiple times using 'given().will()' or 'when().then()' API
-    Please use 'will().given()' or 'doReturn().when()' API for stubbing.
-  - stubbed method is intentionally invoked with different arguments by code under test
-    Please use default or 'silent' JUnit Rule (equivalent of Strictness.LENIENT).
-For more information see javadoc for PotentialStubbingProblem class.
+[ERROR]   CredibilityServiceTest.updateUserCredibility_ShouldUpdateScores_WhenUserIsRegular:75  Unresolved compilation problem: 
+	Arrays cannot be resolved
+
 [INFO] 
-[ERROR] Tests run: 3, Failures: 1, Errors: 1, Skipped: 0
+[ERROR] Tests run: 3, Failures: 0, Errors: 1, Skipped: 0
 [INFO] 
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD FAILURE
 [INFO] ------------------------------------------------------------------------
-[INFO] Total time:  5.046 s
-[INFO] Finished at: 2025-12-25T19:14:01+02:00
+[INFO] Total time:  4.256 s
+[INFO] Finished at: 2025-12-25T19:17:13+02:00
 [INFO] ------------------------------------------------------------------------
-[ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:3.1.2:test (default-test) on project backend: There are test failures.
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:3.1.2:test (default-test) on project backend: 
 [ERROR] 
 [ERROR] Please refer to C:\Users\AvihooAmos\Desktop\Study\Semeter_last\SwipeLab\backend\target\surefire-reports for the individual test results.
 [ERROR] Please refer to dump files (if any exist) [date].dump, [date]-jvmRun[N].dump and [date].dumpstream.
