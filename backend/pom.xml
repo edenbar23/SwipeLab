@@ -109,6 +109,12 @@
 			<artifactId>google-http-client-gson</artifactId>
 			<version>1.43.3</version>
 		</dependency>
+
+		<!-- NEW: Flyway for Database Migration -->
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-core</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>

@@ -1,5 +1,7 @@
 package com.swipelab.repository;
 
-public class GoldImageRepository {
-    
+import com.swipelab.model.entity.GoldImage;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface GoldImageRepository extends JpaRepository<GoldImage, Long> {
 }
