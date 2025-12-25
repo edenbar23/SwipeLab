@@ -1,181 +1,97 @@
 package com.swipelab.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.DisplayName;
+import com.swipelab.dto.request.LoginRequest;
+import com.swipelab.dto.request.RegisterRequest;
+import com.swipelab.dto.response.AuthResponse;
+import com.swipelab.service.auth.AuthenticationService;
+import com.swipelab.service.auth.JwtService;
+import com.swipelab.service.auth.OAuth2Service;
+import com.swipelab.service.user.UserService;
+import com.swipelab.mapper.AuthMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import com.swipelab.service.auth.AuthenticationService;
-import com.swipelab.service.auth.OAuth2Service;
-import com.swipelab.service.auth.JwtService;
-import com.swipelab.service.user.UserService;
-import com.swipelab.mapper.AuthMapper;
-import com.swipelab.security.JwtTokenProvider;
-import com.swipelab.security.OAuth2AuthenticationSuccessHandler;
-import com.swipelab.security.OAuth2AuthenticationFailureHandler;
-import com.swipelab.security.CustomOAuth2UserService;
 
-/**
- * Auth Controller Tests
- * 
- * REST endpoint tests for authentication endpoints.
- * 
- * What this test should cover:
- * - POST /api/v1/auth/register - User registration endpoint
- * - POST /api/v1/auth/email/verify - Email verification endpoint
- * - POST /api/v1/auth/email/resend - Resend verification email
- * - GET /api/v1/auth/user - Get current authenticated user
- * - GET /api/v1/auth/test - Test endpoint
- * - POST /api/v1/auth/login - User login endpoint
- * - POST /api/v1/auth/refresh - Refresh token endpoint
- * - POST /api/v1/auth/logout - Logout endpoint
- * - GET /api/v1/auth/me - Get current user profile
- * - POST /api/v1/auth/login/google - Google OAuth login
- * - POST /api/v1/auth/password/forgot - Forgot password endpoint
- * - POST /api/v1/auth/password/reset - Reset password endpoint
- * - Request validation (400 Bad Request)
- * - Security checks (401 Unauthorized)
- */
-@DisplayName("Auth Controller Tests")
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 @WebMvcTest(AuthController.class)
-@AutoConfigureMockMvc(addFilters = false)
+@AutoConfigureMockMvc(addFilters = false) // Disable security filters for simple unit testing
 class AuthControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+        @Autowired
+        private MockMvc mockMvc;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+        @Autowired
+        private ObjectMapper objectMapper;
 
-    @MockBean
-    private AuthenticationService authenticationService;
+        @MockBean
+        private AuthenticationService authenticationService;
 
-    @MockBean
-    private UserService userService;
+        @MockBean
+        private UserService userService;
 
-    @MockBean
-    private OAuth2Service oAuth2Service;
+        @MockBean
+        private OAuth2Service oAuth2Service;
 
-    @MockBean
-    private AuthMapper authMapper;
+        @MockBean
+        private AuthMapper authMapper;
 
-    @MockBean
-    private JwtService jwtService;
+        @MockBean
+        private JwtService jwtService;
 
-    // MockBeans for security configuration dependencies
-    @MockBean
-    private JwtTokenProvider jwtTokenProvider;
+        @MockBean
+        private com.swipelab.security.JwtTokenProvider jwtTokenProvider;
 
-    @MockBean
-    private UserDetailsService userDetailsService;
+        @MockBean
+        private org.springframework.security.core.userdetails.UserDetailsService userDetailsService;
 
-    @MockBean
-    private OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
+        @Test
+        void register_ShouldReturnCreated() throws Exception {
+                RegisterRequest request = new RegisterRequest();
+                request.setUsername("newuser");
+                request.setEmail("new@example.com");
+                request.setPassword("password123");
+                request.setDisplayName("New User");
 
-    @MockBean
-    private OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
+                AuthResponse response = AuthResponse.builder()
+                                .accessToken("access")
+                                .refreshToken("refresh")
+                                .build();
 
-    @MockBean
-    private CustomOAuth2UserService customOAuth2UserService;
+                when(authenticationService.register(any(RegisterRequest.class))).thenReturn(response);
 
-    @Test
-    @DisplayName("Should register user successfully")
-    void testRegister_Success() {
-        // TODO: Test POST /api/v1/auth/register returns 201 Created
-    }
+                mockMvc.perform(post("/api/v1/auth/register")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                                .andExpect(status().isCreated())
+                                .andExpect(jsonPath("$.accessToken").value("access"));
+        }
 
-    @Test
-    @DisplayName("Should return 400 when register request is invalid")
-    void testRegister_InvalidRequest() {
-        // TODO: Test validation errors return 400
-    }
+        @Test
+        void login_ShouldReturnOk() throws Exception {
+                LoginRequest request = new LoginRequest();
+                request.setUsername("testuser");
+                request.setPassword("password123");
 
-    @Test
-    @DisplayName("Should verify email successfully")
-    void testVerifyEmail_Success() {
-        // TODO: Test POST /api/v1/auth/email/verify
-    }
+                AuthResponse response = AuthResponse.builder()
+                                .accessToken("access")
+                                .build();
 
-    @Test
-    @DisplayName("Should resend verification email successfully")
-    void testResendVerificationEmail_Success() {
-        // TODO: Test POST /api/v1/auth/email/resend
-    }
+                when(authenticationService.login(any(LoginRequest.class))).thenReturn(response);
 
-    @Test
-    @DisplayName("Should get current user when authenticated")
-    void testGetCurrentUser_Authenticated() {
-        // TODO: Test GET /api/v1/auth/user with authentication
-    }
-
-    @Test
-    @DisplayName("Should return not authenticated when no user")
-    void testGetCurrentUser_NotAuthenticated() {
-        // TODO: Test GET /api/v1/auth/user without authentication
-    }
-
-    @Test
-    @DisplayName("Should return test endpoint message")
-    void testTestEndpoint() {
-        // TODO: Test GET /api/v1/auth/test
-    }
-
-    @Test
-    @DisplayName("Should login successfully")
-    void testLogin_Success() {
-        // TODO: Test POST /api/v1/auth/login
-    }
-
-    @Test
-    @DisplayName("Should refresh token successfully")
-    void testRefreshToken_Success() {
-        // TODO: Test POST /api/v1/auth/refresh
-    }
-
-    @Test
-    @DisplayName("Should return 401 when refresh token is missing")
-    void testRefreshToken_MissingToken() {
-        // TODO: Test refresh without token returns 401
-    }
-
-    @Test
-    @DisplayName("Should logout successfully")
-    void testLogout_Success() {
-        // TODO: Test POST /api/v1/auth/logout
-    }
-
-    @Test
-    @DisplayName("Should get current user profile")
-    void testGetMe_Success() {
-        // TODO: Test GET /api/v1/auth/me
-    }
-
-    @Test
-    @DisplayName("Should return 401 when getting profile without authentication")
-    void testGetMe_Unauthorized() {
-        // TODO: Test GET /api/v1/auth/me without auth returns 401
-    }
-
-    @Test
-    @DisplayName("Should handle Google login successfully")
-    void testLoginGoogle_Success() {
-        // TODO: Test POST /api/v1/auth/login/google
-    }
-
-    @Test
-    @DisplayName("Should handle forgot password successfully")
-    void testForgotPassword_Success() {
-        // TODO: Test POST /api/v1/auth/password/forgot
-    }
-
-    @Test
-    @DisplayName("Should reset password successfully")
-    void testResetPassword_Success() {
-        // TODO: Test POST /api/v1/auth/password/reset
-    }
+                mockMvc.perform(post("/api/v1/auth/login")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.accessToken").value("access"));
+        }
 }
-
