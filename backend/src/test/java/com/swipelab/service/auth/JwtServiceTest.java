@@ -258,7 +258,7 @@ class JwtServiceTest {
         assertEquals(newRefreshToken, result.getRefreshToken());
         assertTrue(result.getExpiresIn() > 0);
         // refreshTokens calls generateRefreshToken which saves once
-        verify(userRepository, atLeastOnce()).save(any(User.class));
+        verify(userRepository, times(1)).save(any(User.class));
     }
 
     @Test
