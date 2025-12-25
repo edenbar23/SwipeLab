@@ -52,6 +52,13 @@
 			<scope>test</scope>
 		</dependency>
 
+		<!-- NEW: H2 Database for Testing -->
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<scope>test</scope>
+		</dependency>
+
 		<!-- NEW: OAuth2 Client for Google Sign-In -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
