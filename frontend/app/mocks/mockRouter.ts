@@ -126,6 +126,34 @@ export async function mockRouter(
     return jsonResponse(dashboardAdminMock.tasks)
   }
 
+  if (method === 'GET' && url.match(/\/api\/v1\/dashboard\/tasks\/\d+$/)) {
+    // Extract task ID from URL
+    const idMatch = url.match(/\/api\/v1\/dashboard\/tasks\/(\d+)$/)
+    const taskId = idMatch ? parseInt(idMatch[1], 10) : null
+
+    if (!taskId) return jsonResponse({ message: 'Invalid task ID' }, 400)
+
+    // Find task in mock
+    const task = dashboardAdminMock.tasks.tasks.find(t => t.taskId === taskId)
+
+    if (!task) return jsonResponse({ message: 'Task not found' }, 404)
+
+    // Construct task details (example: same structure as your API returns)
+    const taskDetails = {
+      ...task,
+      // Add extra fields if needed
+      targetSpecies: task.targetSpecies || [],
+      experiments: task.experiments || [],
+      recipientGroups: task.recipientGroups || [],
+      progress: task.progress || { totalImages: 0, imagesClassified: 0 },
+      minClassificationsPerImage: task.minClassificationsPerImage || 3,
+      consensusThreshold: task.consensusThreshold || 80.0
+    }
+
+    return jsonResponse(taskDetails)
+}
+
+
   // ---------- CLASSIFICATION ----------
   if (method === 'GET' && url.endsWith('/api/v1/classifications/next-batch')) {
     return jsonResponse(classificationMock.nextBatch)

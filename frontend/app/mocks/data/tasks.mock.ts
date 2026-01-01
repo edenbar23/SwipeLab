@@ -16,6 +16,9 @@ export const tasksMock = {
               {
                 imageUrl: 'https://swipelab.com/ref1.jpg',
                 caption: 'Dorsal view'
+              }, {
+                imageUrl: 'https://swipelab.com/ref2.jpg',
+                caption: 'Top view'
               }
             ]
           }
@@ -37,7 +40,10 @@ export const tasksMock = {
           {
             imageUrl: 'https://swipelab.com/ref1.jpg',
             caption: 'Dorsal view'
-          }
+          }, {
+                imageUrl: 'https://swipelab.com/ref2.jpg',
+                caption: 'Top view'
+              }
         ]
       }
     ],

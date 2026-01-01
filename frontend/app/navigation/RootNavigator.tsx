@@ -1,6 +1,7 @@
 // app/navigation/RootNavigator.tsx
 
 import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import React from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -18,11 +19,19 @@ import LoginScreen from "../screens/shared/LoginScreen";
 export default function RootNavigator() {
   const { token, role } = useAuthStore();       // "USER" | "ADMIN" | null
   const { mode } = useModeStore();              // "USER" | "ADMIN"
+  const Stack = createNativeStackNavigator();
+
 
   if (!token) {
     return (
       <NavigationContainer>
-        <LoginScreen />
+        <Stack.Navigator>
+          <Stack.Screen 
+            name="Login" 
+            component={LoginScreen} 
+            options={{ headerShown: false }} 
+          />
+        </Stack.Navigator>
       </NavigationContainer>
     );
   }
