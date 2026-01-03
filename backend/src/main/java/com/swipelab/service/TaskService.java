@@ -1,6 +1,6 @@
 package com.swipelab.service;
 
-import com.swipelab.dto.request.TaskCreateRequest;
+import com.swipelab.dto.request.CreateTaskRequest;
 import com.swipelab.dto.response.TaskResponse;
 import com.swipelab.exception.ResourceNotFoundException;
 import com.swipelab.model.entity.Task;
@@ -23,14 +23,14 @@ public class TaskService {
     private final UserRepository userRepository;
 
     @Transactional
-    public TaskResponse createTask(String username, TaskCreateRequest request) {
+    public TaskResponse createTask(String username, CreateTaskRequest request) {
         User user = userRepository.findByEmail(username)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found: " + username));
 
         Task task = Task.builder()
-                .title(request.getTitle())
+                .title(request.getName())
                 .description(request.getDescription())
-                .status(request.getStatus())
+                .status(TaskStatus.ACTIVE) // Defaulting to ACTIVE per project requirements
                 .createdBy(user)
                 .build();
 
@@ -58,12 +58,15 @@ public class TaskService {
 
     private TaskResponse mapToResponse(Task task) {
         return TaskResponse.builder()
-                .id(task.getId())
-                .title(task.getTitle())
+                .taskId(task.getId()) // DTO uses taskId, Entity uses id
+                .name(task.getTitle()) // DTO uses name, Entity uses title
                 .description(task.getDescription())
-                .status(task.getStatus())
-                .createdBy(task.getCreatedBy().getUsername())
-                .createdAt(task.getCreatedAt())
+                .status(task.getStatus() != null ? task.getStatus().name() : null) // Convert Enum to String
+                // For now, these can be empty lists to allow compilation until the full logic is added
+                .targetSpecies(java.util.Collections.emptyList())
+                .experiments(java.util.Collections.emptyList())
+                .recipientGroups(java.util.Collections.emptyList())
+                .progress(null)
                 .build();
     }
 }

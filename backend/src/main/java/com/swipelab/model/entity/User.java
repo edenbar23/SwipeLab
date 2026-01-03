@@ -167,4 +167,8 @@ public class User {
         @Column(name = "account_locked", nullable = false)
         @Builder.Default
         private Boolean accountLocked = false;
+
+        @Column(name = "is_flagged", nullable = false)
+        @Builder.Default
+        private Boolean isFlagged = false;
 }

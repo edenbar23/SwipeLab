@@ -17,4 +17,7 @@ public class ClassificationRequest {
 
     @NotNull(message = "Label ID is required")
     private Long labelId;
+
+    @NotNull(message = "Response time is required for fraud detection")
+    private Long responseTimeMs;
 }

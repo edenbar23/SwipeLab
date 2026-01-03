@@ -12,6 +12,7 @@ import com.swipelab.repository.ClassificationRepository;
 import com.swipelab.repository.ImageRepository;
 import com.swipelab.repository.LabelRepository;
 import com.swipelab.repository.UserRepository;
+import com.swipelab.service.classification.FraudDetectionService;
 import com.swipelab.service.gamification.BadgeService;
 import com.swipelab.service.gamification.PointsService;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,7 @@ public class ClassificationService {
     private final UserRepository userRepository;
     private final BadgeService badgeService;
     private final PointsService pointsService;
+    private final FraudDetectionService fraudDetectionService;
 
     @Transactional
     public ClassificationResponse submitClassification(String username, ClassificationRequest request) {
@@ -52,6 +54,8 @@ public class ClassificationService {
                 .build();
 
         Classification saved = classificationRepository.save(classification);
+
+        fraudDetectionService.analyzeClassification(user, request.getResponseTimeMs());
 
         // Update User Stats
         user.setTotalClassifications(user.getTotalClassifications() + 1);

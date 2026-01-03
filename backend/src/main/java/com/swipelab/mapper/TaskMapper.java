@@ -28,7 +28,7 @@ public class TaskMapper {
         }
 
         return Task.builder()
-                .name(request.getName())
+                .title(request.getName())
                 .description(request.getDescription())
                 .minClassificationsPerImage(request.getMinClassificationsPerImage())
                 .consensusThreshold(request.getConsensusThreshold())
@@ -52,7 +52,7 @@ public class TaskMapper {
         }
 
         if (request.getName() != null) {
-            task.setName(request.getName());
+            task.setTitle(request.getName());
         }
 
         if (request.getDescription() != null) {
@@ -81,7 +81,7 @@ public class TaskMapper {
         return TaskResponse.builder()
                 .taskId(task.getId())
                 .status(task.getStatus().name())
-                .name(task.getName())
+                .name(task.getTitle())
                 .description(task.getDescription())
                 .experiments(task.getExperiments())
                 .recipientGroups(task.getRecipientGroups())
