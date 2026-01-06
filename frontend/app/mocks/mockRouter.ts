@@ -2,8 +2,17 @@ import { authMock } from './data/auth.mock'
 import { classificationMock } from './data/classification.mock'
 import { dashboardAdminMock } from './data/dashboard.admin.mock'
 import { dashboardUserMock } from './data/dashboard.user.mock'
+
 import { leaderboardMock } from './data/leaderboard.mock'
-import { statisticsMock } from './data/statistics.mock'
+import { refinedChallengesMock } from './data/challenges.mock'
+import { statisticsMock, setUserAccuracy } from './data/statistics.mock'
+import { getLeaderboardData, setUserScore } from './data/leaderboard.mock'
+import {
+  addRecipientGroup,
+  addUserToGroup,
+  removeUserFromGroup,
+  getRecipientGroups
+} from './data/recipients.mock'
 
 type Method = 'GET' | 'POST' | 'PUT' | 'DELETE'
 
@@ -151,7 +160,7 @@ export async function mockRouter(
     }
 
     return jsonResponse(taskDetails)
-}
+  }
 
 
   // ---------- CLASSIFICATION ----------
@@ -169,7 +178,17 @@ export async function mockRouter(
 
   // ---------- LEADERBOARD ----------
   if (method === 'GET' && url.includes('/api/v1/leaderboard/')) {
-    return jsonResponse(leaderboardMock)
+    return jsonResponse(getLeaderboardData())
+  }
+
+  // Update user score (for testing dynamic ranking)
+  if (method === 'POST' && url.endsWith('/api/v1/leaderboard/update-score')) {
+    const { score } = body as { score: number }
+    if (typeof score === 'number') {
+      setUserScore(score)
+      return jsonResponse({ success: true, newRank: getLeaderboardData().currentUser.rank })
+    }
+    return jsonResponse({ message: 'Invalid score' }, 400)
   }
 
   // ---------- STATISTICS ----------
@@ -191,6 +210,61 @@ export async function mockRouter(
 
   if (method === 'GET' && url.endsWith('/timeseries')) {
     return jsonResponse(statisticsMock.timeseries)
+  }
+
+  // CHALLENGES
+  if (method === 'GET' && url.endsWith('/api/v1/challenges')) {
+    return jsonResponse(refinedChallengesMock)
+  }
+
+  if (method === 'POST' && url.endsWith('/api/v1/statistics/update-accuracy')) {
+    const { accuracy } = body;
+    if (typeof accuracy === 'number') {
+      setUserAccuracy(accuracy);
+      return jsonResponse({ message: 'Accuracy updated', newStats: statisticsMock.summary });
+    }
+    return jsonResponse({ message: 'Invalid accuracy' }, 400);
+  }
+
+  // ---------- MANAGER / RECIPIENTS ----------
+  if (method === 'GET' && url.endsWith('/api/v1/manager/recipient-groups')) {
+    return jsonResponse(getRecipientGroups())
+  }
+
+  // Create Group
+  if (method === 'POST' && url.endsWith('/api/v1/manager/recipient-groups')) {
+    const { name } = body as { name: string };
+    const newGroup = addRecipientGroup(name);
+    return jsonResponse(newGroup, 201);
+  }
+
+  // Add User(s) to Group
+  if (method === 'POST' && url.match(/\/api\/v1\/manager\/recipient-groups\/\d+\/users$/)) {
+    const groupId = parseInt(url.split('/recipient-groups/')[1].split('/')[0]);
+
+    // Support batch { userIds: [] } or single { userId }
+    const userIds = body.userIds || (body.userId ? [body.userId] : []);
+
+    let updatedGroup;
+    userIds.forEach((uid: number) => {
+      updatedGroup = addUserToGroup(groupId, uid);
+    });
+
+    if (!updatedGroup && userIds.length > 0) return jsonResponse({ message: 'Group or User not found' }, 404);
+
+    // Return the latest state of the group
+    return jsonResponse(getRecipientGroups().find(g => g.id === groupId));
+  }
+
+  // Remove User from Group
+  if (method === 'DELETE' && url.match(/\/api\/v1\/manager\/recipient-groups\/\d+\/users\/\d+$/)) {
+    const parts = url.split('/');
+    const groupId = parseInt(parts[parts.indexOf('recipient-groups') + 1]);
+    const userId = parseInt(parts[parts.indexOf('users') + 1]);
+
+    const updatedGroup = removeUserFromGroup(groupId, userId);
+    if (!updatedGroup) return jsonResponse({ message: 'Group not found' }, 404);
+    return jsonResponse(updatedGroup);
   }
 
   // ---------- FALLBACK ----------

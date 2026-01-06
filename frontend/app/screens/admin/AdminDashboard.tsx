@@ -25,6 +25,9 @@ const buttons = [
   { title: "Recipients List", image: recipientsImg },
   { title: "Gold Images", image: goldImagesImg, screen: "GoldImagesManagement" },
   { title: "Add Gold Image", image: addGoldImg, screen: "AddGoldImage" },
+  { title: "Recipients List", image: recipientsImg, screen: "RecipientsList" },
+  { title: "Gold Images", image: goldImagesImg },
+  { title: "Add Gold Image", image: addGoldImg },
 ];
 
 export default function AdminDashboard({ navigation }: any) {

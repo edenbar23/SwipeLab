@@ -1,6 +1,7 @@
 import { useNavigation } from "@react-navigation/native";
 import React from "react";
 import { Image, ImageSourcePropType, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useThemeStore } from "../../stores/themeStore";
 
 interface NavItem {
   label: string;
@@ -14,10 +15,17 @@ interface Props {
 
 export default function BottomBar({ items }: Props) {
   const navigation = useNavigation<any>();
+  const { theme } = useThemeStore();
+
+  const isDarkMode = theme === 'dark';
+
+  const dynamicStyles = {
+    container: { backgroundColor: isDarkMode ? '#1f1f2e' : '#fff', borderColor: isDarkMode ? '#374151' : '#ddd' },
+    label: { color: isDarkMode ? '#9ca3af' : '#333' },
+  };
 
   return (
-    
-    <View style={styles.container}>
+    <View style={[styles.container, dynamicStyles.container]}>
       {items.map((item) => (
         <TouchableOpacity
           key={item.route}
@@ -26,10 +34,10 @@ export default function BottomBar({ items }: Props) {
         >
           <Image
             source={item.icon}
-            style={styles.icon}
+            style={[styles.icon, { tintColor: isDarkMode ? '#9ca3af' : undefined }]}
             resizeMode="contain"
           />
-          <Text style={styles.label}>{item.label}</Text>
+          <Text style={[styles.label, dynamicStyles.label]}>{item.label}</Text>
         </TouchableOpacity>
       ))}
     </View>
@@ -39,17 +47,11 @@ export default function BottomBar({ items }: Props) {
 const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
-    backgroundColor: "#fff",
     borderTopWidth: 1,
-    borderColor: "#ddd",
     paddingVertical: 10,
     justifyContent: "space-around",
   },
-  button: {alignItems: "center", padding: 6 },
-  icon: {
-    width: 22,
-    height: 22,
-    marginBottom: 2,
-  },
+  button: { alignItems: "center", padding: 6 },
+  icon: { width: 22, height: 22, marginBottom: 2 },
   label: { fontSize: 14, fontWeight: "600" },
 });

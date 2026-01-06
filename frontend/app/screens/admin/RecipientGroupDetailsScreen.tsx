@@ -1,0 +1,336 @@
+import React, { useEffect, useState } from 'react';
+import {
+    ActivityIndicator,
+    Alert,
+    Image,
+    Modal,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from 'react-native';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { apiFetch } from '../../api/apiFetch';
+import { RecipientGroup } from '../../mocks/data/recipients.mock';
+import { User, usersMock } from '../../mocks/data/users.mock';
+
+// Utility for colors
+function getColorForType(type: string) {
+    switch (type) {
+        case 'Student': return '#4B7BE5'; // Blue
+        case 'Expert': return '#FFD700'; // Gold
+        case 'Volunteer': return '#50C878'; // Green
+        case 'Researcher': return '#FF6B6B'; // Red
+        default: return '#ccc';
+    }
+}
+
+export default function RecipientGroupDetailsScreen() {
+    const navigation = useNavigation();
+    const route = useRoute();
+    const { group } = route.params as { group: RecipientGroup };
+
+    const [currentGroup, setCurrentGroup] = useState<RecipientGroup>(group);
+
+    // Add Member Modal State
+    const [addMemberModalVisible, setAddMemberModalVisible] = useState(false);
+    const [activeTab, setActiveTab] = useState<'USERS' | 'GROUPS'>('USERS');
+
+    // Selection State
+    const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
+    const [selectedGroupIds, setSelectedGroupIds] = useState<number[]>([]);
+
+    // Data Sources
+    const [allUsers, setAllUsers] = useState<User[]>(usersMock);
+    const [allGroups, setAllGroups] = useState<RecipientGroup[]>([]);
+
+    useEffect(() => {
+        // Fetch all groups for the "Add Group" tab
+        const fetchGroups = async () => {
+            try {
+                const res = await apiFetch('/api/v1/manager/recipient-groups');
+                if (res.ok) {
+                    setAllGroups(await res.json());
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        };
+        fetchGroups();
+    }, []);
+
+    const refreshGroup = async () => {
+        const res = await apiFetch('/api/v1/manager/recipient-groups');
+        if (res.ok) {
+            const groups: RecipientGroup[] = await res.json();
+            const updated = groups.find(g => g.id === currentGroup.id);
+            if (updated) setCurrentGroup(updated);
+        }
+    };
+
+    const handleAddSelected = async () => {
+        let finalUserIdsToAdd: number[] = [];
+
+        if (activeTab === 'USERS') {
+            finalUserIdsToAdd = selectedUserIds;
+        } else {
+            // Merge users from selected groups
+            const groupsToAdd = allGroups.filter(g => selectedGroupIds.includes(g.id));
+            groupsToAdd.forEach(g => {
+                g.users.forEach(u => {
+                    if (!currentGroup.users.some(existing => existing.id === u.id)) {
+                        finalUserIdsToAdd.push(u.id);
+                    }
+                });
+            });
+            // Unique IDs only
+            finalUserIdsToAdd = Array.from(new Set(finalUserIdsToAdd));
+        }
+
+        if (finalUserIdsToAdd.length === 0) {
+            setAddMemberModalVisible(false);
+            return;
+        }
+
+        try {
+            // Batch Add Request
+            const res = await apiFetch(`/api/v1/manager/recipient-groups/${currentGroup.id}/users`, {
+                method: 'POST',
+                body: JSON.stringify({ userIds: finalUserIdsToAdd })
+            });
+
+            if (res.ok) {
+                setAddMemberModalVisible(false);
+                setSelectedUserIds([]);
+                setSelectedGroupIds([]);
+                refreshGroup();
+            } else {
+                Alert.alert("Error", "Failed to add members");
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const toggleUserSelection = (userId: number) => {
+        if (selectedUserIds.includes(userId)) {
+            setSelectedUserIds(selectedUserIds.filter(id => id !== userId));
+        } else {
+            setSelectedUserIds([...selectedUserIds, userId]);
+        }
+    };
+
+    const toggleGroupSelection = (groupId: number) => {
+        if (selectedGroupIds.includes(groupId)) {
+            setSelectedGroupIds(selectedGroupIds.filter(id => id !== groupId));
+        } else {
+            setSelectedGroupIds([...selectedGroupIds, groupId]);
+        }
+    };
+
+    const handleRemoveUser = async (userId: number) => {
+        try {
+            const res = await apiFetch(`/api/v1/manager/recipient-groups/${currentGroup.id}/users/${userId}`, {
+                method: 'DELETE'
+            });
+            if (res.ok) {
+                refreshGroup();
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    // --- Composition Logic ---
+    const getComposition = () => {
+        const total = currentGroup.users.length;
+        if (total === 0) return [];
+        const counts: Record<string, number> = {};
+        currentGroup.users.forEach(u => {
+            const type = u.description || 'Other';
+            counts[type] = (counts[type] || 0) + 1;
+        });
+        return Object.keys(counts).map(type => ({
+            type,
+            count: counts[type],
+            percent: Math.round((counts[type] / total) * 100),
+            color: getColorForType(type)
+        }));
+    };
+
+    const composition = getComposition();
+
+    return (
+        <View style={styles.container}>
+            <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+                <Text style={styles.backButtonText}>← Back to Lists</Text>
+            </TouchableOpacity>
+
+            <View style={styles.header}>
+                <Text style={styles.title}>{currentGroup.name}</Text>
+                <TouchableOpacity onPress={() => setAddMemberModalVisible(true)} style={styles.addBtn}>
+                    <Image source={require('../../../assets/images/users.png')} style={{ width: 24, height: 24, tintColor: '#fff' }} />
+                    <Text style={styles.addBtnText}>+</Text>
+                </TouchableOpacity>
+            </View>
+
+            {/* Composition Bar */}
+            {composition.length > 0 && (
+                <View style={styles.compositionContainer}>
+                    <Text style={styles.compTitle}>Group Composition:</Text>
+                    <View style={styles.barContainer}>
+                        {composition.map((comp) => (
+                            <View key={comp.type} style={[styles.barSegment, { flex: comp.percent, backgroundColor: comp.color }]}>
+                                {comp.percent > 10 && <Text style={styles.barText}>{comp.percent}%</Text>}
+                            </View>
+                        ))}
+                    </View>
+                    <View style={styles.legendContainer}>
+                        {composition.map(comp => (
+                            <View key={comp.type} style={styles.legendItem}>
+                                <View style={[styles.dot, { backgroundColor: comp.color }]} />
+                                <Text style={styles.legendText}>{comp.type} ({comp.count})</Text>
+                            </View>
+                        ))}
+                    </View>
+                </View>
+            )}
+
+            <ScrollView contentContainerStyle={styles.list}>
+                {currentGroup.users.length === 0 ? (
+                    <Text style={styles.emptyText}>No users in this group.</Text>
+                ) : (
+                    currentGroup.users.map(user => (
+                        <View key={user.id} style={styles.userRow}>
+                            <View>
+                                <Text style={styles.username}>{user.username}</Text>
+                                <Text style={styles.userDesc}>{user.description || 'User'}</Text>
+                            </View>
+                            <TouchableOpacity onPress={() => handleRemoveUser(user.id)} style={styles.deleteBtn}>
+                                <Text style={styles.deleteText}>🗑️</Text>
+                            </TouchableOpacity>
+                        </View>
+                    ))
+                )}
+            </ScrollView>
+
+            {/* Advanced Add Member Modal */}
+            <Modal visible={addMemberModalVisible} animationType="slide" transparent>
+                <View style={styles.modalContainer}>
+                    <View style={styles.modalContent}>
+                        <Text style={styles.modalTitle}>Add Members</Text>
+
+                        {/* Tabs */}
+                        <View style={styles.tabsContainer}>
+                            <TouchableOpacity
+                                style={[styles.tab, activeTab === 'USERS' && styles.activeTab]}
+                                onPress={() => setActiveTab('USERS')}
+                            >
+                                <Text style={[styles.tabText, activeTab === 'USERS' && styles.activeTabText]}>Users</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[styles.tab, activeTab === 'GROUPS' && styles.activeTab]}
+                                onPress={() => setActiveTab('GROUPS')}
+                            >
+                                <Text style={[styles.tabText, activeTab === 'GROUPS' && styles.activeTabText]}>Groups</Text>
+                            </TouchableOpacity>
+                        </View>
+
+                        <ScrollView style={{ maxHeight: 300 }}>
+                            {activeTab === 'USERS' ? (
+                                // Users List
+                                allUsers.map(u => {
+                                    const isAlreadyIn = currentGroup.users.some(existing => existing.id === u.id);
+                                    if (isAlreadyIn) return null;
+                                    const isSelected = selectedUserIds.includes(u.id);
+                                    return (
+                                        <TouchableOpacity key={u.id} style={[styles.selectRow, isSelected && styles.selectedRow]} onPress={() => toggleUserSelection(u.id)}>
+                                            <Text style={styles.selectText}>{isSelected ? '☑' : '☐'} {u.username}</Text>
+                                            <Text style={styles.subText}>{u.description}</Text>
+                                        </TouchableOpacity>
+                                    );
+                                })
+                            ) : (
+                                // Groups List
+                                allGroups.map(g => {
+                                    if (g.id === currentGroup.id) return null; // Don't add self
+                                    const isSelected = selectedGroupIds.includes(g.id);
+                                    return (
+                                        <TouchableOpacity key={g.id} style={[styles.selectRow, isSelected && styles.selectedRow]} onPress={() => toggleGroupSelection(g.id)}>
+                                            <Text style={styles.selectText}>{isSelected ? '☑' : '☐'} {g.name}</Text>
+                                            <Text style={styles.subText}>{g.usersCount} users</Text>
+                                        </TouchableOpacity>
+                                    );
+                                })
+                            )}
+                        </ScrollView>
+
+                        <View style={styles.modalActions}>
+                            <TouchableOpacity style={styles.closeBtn} onPress={() => setAddMemberModalVisible(false)}>
+                                <Text style={styles.closeText}>Cancel</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.confirmBtn} onPress={handleAddSelected}>
+                                <Text style={styles.confirmText}>
+                                    Add Selected ({activeTab === 'USERS' ? selectedUserIds.length : selectedGroupIds.length})
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+        </View>
+    );
+}
+
+const styles = StyleSheet.create({
+    container: { flex: 1, backgroundColor: '#fff', padding: 16 },
+    backButton: { marginBottom: 16, paddingVertical: 4 },
+    backButtonText: { fontSize: 16, color: '#003366', fontWeight: '500' },
+
+    header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
+    title: { fontSize: 24, fontWeight: 'bold', color: '#003366' },
+    addBtn: { flexDirection: 'row', backgroundColor: '#4B7BE5', padding: 8, borderRadius: 8, alignItems: 'center' },
+    addBtnText: { color: '#fff', fontWeight: 'bold', marginLeft: 4, fontSize: 18 },
+
+    // Composition Styles
+    compositionContainer: { marginBottom: 20 },
+    compTitle: { fontSize: 14, fontWeight: 'bold', color: '#666', marginBottom: 6 },
+    barContainer: { flexDirection: 'row', height: 24, borderRadius: 12, overflow: 'hidden', marginBottom: 8 },
+    barSegment: { justifyContent: 'center', alignItems: 'center' },
+    barText: { fontSize: 10, color: '#fff', fontWeight: 'bold' },
+    legendContainer: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
+    legendItem: { flexDirection: 'row', alignItems: 'center' },
+    dot: { width: 10, height: 10, borderRadius: 5, marginRight: 4 },
+    legendText: { fontSize: 12, color: '#555' },
+
+    list: {},
+    userRow: { flexDirection: 'row', justifyContent: 'space-between', padding: 12, backgroundColor: '#f9f9f9', borderRadius: 8, marginBottom: 8, alignItems: 'center' },
+    username: { fontSize: 16, fontWeight: '600', color: '#333' },
+    userDesc: { fontSize: 12, color: '#666' },
+    emptyText: { textAlign: 'center', color: '#888', marginTop: 20 },
+    deleteBtn: { padding: 4 },
+    deleteText: { fontSize: 18 },
+
+    // Modal Styles
+    modalContainer: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', padding: 20 },
+    modalContent: { backgroundColor: '#fff', borderRadius: 12, padding: 20, maxHeight: '80%' },
+    modalTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 16, textAlign: 'center' },
+
+    tabsContainer: { flexDirection: 'row', marginBottom: 16, borderBottomWidth: 1, borderColor: '#eee' },
+    tab: { flex: 1, paddingVertical: 12, alignItems: 'center' },
+    activeTab: { borderBottomWidth: 2, borderColor: '#4B7BE5' },
+    tabText: { fontSize: 16, color: '#888' },
+    activeTabText: { color: '#4B7BE5', fontWeight: 'bold' },
+
+    selectRow: { flexDirection: 'row', justifyContent: 'space-between', padding: 12, borderBottomWidth: 1, borderBottomColor: '#f0f0f0', alignItems: 'center' },
+    selectedRow: { backgroundColor: '#F0F8FF' },
+    selectText: { fontSize: 16, color: '#333' },
+    subText: { fontSize: 12, color: '#888' },
+
+    modalActions: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 },
+    closeBtn: { padding: 12 },
+    closeText: { color: '#666', fontWeight: 'bold' },
+    confirmBtn: { backgroundColor: '#4B7BE5', paddingVertical: 12, paddingHorizontal: 24, borderRadius: 8 },
+    confirmText: { color: '#fff', fontWeight: 'bold' }
+});

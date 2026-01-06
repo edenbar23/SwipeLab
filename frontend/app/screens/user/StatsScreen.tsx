@@ -1,1 +1,423 @@
-// user screen for viewing stats
+import React, { useCallback, useEffect, useState } from 'react';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View, RefreshControl } from 'react-native';
+import { apiFetch } from '../../api/apiFetch';
+
+const DEBUG_MODE = false; // Set to true for testing controls
+
+interface SummaryData {
+    score: number;
+    rankGlobal: number;
+    completedTasks: number;
+    accuracy: number;
+    currentStreakDays: number;
+    longestStreakDays: number;
+}
+
+interface VsExpertsData {
+    userAccuracy: number;
+    expertAccuracy: number;
+    difference: number;
+}
+
+interface VsUsersData {
+    percentile: number;
+    averageUserAccuracy: number;
+}
+
+interface TaskBreakdown {
+    taskId: number;
+    taskName: string;
+    classifications: number;
+    accuracy: number;
+}
+
+interface BreakdownData {
+    byTask: TaskBreakdown[];
+}
+
+interface StatsData {
+    summary: SummaryData;
+    vsExperts: VsExpertsData;
+    vsUsers: VsUsersData;
+    breakdown: BreakdownData;
+}
+
+function ProgressBar({ value, color, label, maxValue = 1 }: { value: number; color: string; label: string; maxValue?: number }) {
+    const percentage = Math.min(100, Math.max(0, (value / maxValue) * 100));
+    return (
+        <View style={styles.progressContainer}>
+            <View style={styles.progressLabelRow}>
+                <Text style={styles.progressLabel}>{label}</Text>
+                <Text style={styles.progressValue}>{(value * 100).toFixed(1)}%</Text>
+            </View>
+            <View style={styles.progressBarTrack}>
+                <View style={[styles.progressBarFill, { width: `${percentage}%`, backgroundColor: color }]} />
+            </View>
+        </View>
+    );
+}
+
+function SummaryCard({ title, value, subtext }: { title: string; value: string | number; subtext?: string }) {
+    return (
+        <View style={styles.summaryCard}>
+            <Text style={styles.cardTitle}>{title}</Text>
+            <Text style={styles.cardValue}>{value}</Text>
+            {subtext && <Text style={styles.cardSubtext}>{subtext}</Text>}
+        </View>
+    );
+}
+
+export default function StatsScreen() {
+    const [data, setData] = useState<StatsData | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
+
+    const fetchStats = useCallback(async () => {
+        try {
+            // Fetch all stats in parallel
+            const [summaryRes, expertsRes, usersRes, breakdownRes] = await Promise.all([
+                apiFetch('/api/v1/statistics/me'),
+                apiFetch('/api/v1/statistics/me/vs-experts'),
+                apiFetch('/api/v1/statistics/me/vs-users'),
+                apiFetch('/api/v1/statistics/me/breakdown'),
+            ]);
+
+            if (summaryRes.ok && expertsRes.ok && usersRes.ok && breakdownRes.ok) {
+                setData({
+                    summary: await summaryRes.json(),
+                    vsExperts: await expertsRes.json(),
+                    vsUsers: await usersRes.json(),
+                    breakdown: await breakdownRes.json(),
+                });
+            }
+        } catch (error) {
+            console.error('Failed to fetch stats', error);
+        } finally {
+            setLoading(false);
+            setRefreshing(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchStats();
+    }, [fetchStats]);
+
+    const onRefresh = useCallback(() => {
+        setRefreshing(true);
+        fetchStats();
+    }, [fetchStats]);
+
+    const updateAccuracy = async (newAcc: number) => {
+        setLoading(true);
+        await apiFetch('/api/v1/statistics/update-accuracy', {
+            method: 'POST',
+            body: JSON.stringify({ accuracy: newAcc }),
+        });
+        fetchStats();
+    };
+
+    if (loading && !refreshing && !data) {
+        return (
+            <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color="#4B7BE5" />
+            </View>
+        );
+    }
+
+    if (!data) return null;
+
+    return (
+        <ScrollView
+            style={styles.container}
+            contentContainerStyle={styles.content}
+            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        >
+            <Text style={styles.headerTitle}>Your Performance</Text>
+
+            {/* User Profile Summary */}
+            <View style={styles.grid}>
+                <SummaryCard title="Global Rank" value={`#${data.summary.rankGlobal}`} subtext="Top 1%" />
+                <SummaryCard title="Score" value={data.summary.score.toLocaleString()} />
+                <SummaryCard title="Tasks Done" value={data.summary.completedTasks} />
+                <SummaryCard title="Accuracy" value={`${(data.summary.accuracy * 100).toFixed(1)}%`} subtext="Overall" />
+            </View>
+
+            {/* Streak */}
+            <View style={styles.section}>
+                <Text style={styles.sectionTitle}>🔥 Streak</Text>
+                <View style={styles.streakContainer}>
+                    <Text style={styles.streakText}>Current: <Text style={styles.streakBold}>{data.summary.currentStreakDays} days</Text></Text>
+                    <Text style={styles.streakText}>Longest: <Text style={styles.streakBold}>{data.summary.longestStreakDays} days</Text></Text>
+                </View>
+            </View>
+
+            {/* Comparisons */}
+            <View style={styles.section}>
+                <Text style={styles.sectionTitle}>⚖️ Comparisons</Text>
+                <View style={styles.card}>
+                    <Text style={styles.chartTitle}>Vs Experts</Text>
+                    <ProgressBar
+                        label="Your Accuracy"
+                        value={data.vsExperts.userAccuracy}
+                        color="#4B7BE5"
+                    />
+                    <ProgressBar
+                        label="Expert Benchmark"
+                        value={data.vsExperts.expertAccuracy}
+                        color="#8B008B"
+                    />
+                    <Text style={styles.insightText}>
+                        You are {Math.abs(data.vsExperts.difference * 100).toFixed(1)}%
+                        {data.vsExperts.difference >= 0 ? ' above ' : ' below '}
+                        expert level.
+                    </Text>
+
+                    <View style={styles.separator} />
+
+                    <Text style={styles.chartTitle}>Vs Community</Text>
+                    <ProgressBar
+                        label="Average User"
+                        value={data.vsUsers.averageUserAccuracy}
+                        color="#FFA500"
+                    />
+                    <Text style={styles.insightText}>
+                        You're in the top {100 - data.vsUsers.percentile}% of contributors!
+                    </Text>
+                </View>
+            </View>
+
+            {/* Breakdown */}
+            <View style={styles.section}>
+                <Text style={styles.sectionTitle}>📝 Task Breakdown</Text>
+                {data.breakdown.byTask.map((task) => (
+                    <View key={task.taskId} style={styles.taskRow}>
+                        <View style={styles.taskInfo}>
+                            <Text style={styles.taskName}>{task.taskName}</Text>
+                            <Text style={styles.taskCount}>{task.classifications} classifications</Text>
+                        </View>
+                        <View style={styles.taskStat}>
+                            <Text style={styles.taskAccuracy}>{(task.accuracy * 100).toFixed(1)}%</Text>
+                        </View>
+                    </View>
+                ))}
+            </View>
+
+            {/* Debug Controls */}
+            {DEBUG_MODE && (
+                <View style={styles.debugControls}>
+                    <Text style={styles.debugTitle}>⚡ Debug: Adjust Accuracy</Text>
+                    <View style={styles.debugButtons}>
+                        <TouchableOpacity style={styles.debugBtn} onPress={() => updateAccuracy(0.65)}>
+                            <Text style={styles.debugBtnText}>Low (65%)</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.debugBtn} onPress={() => updateAccuracy(0.88)}>
+                            <Text style={styles.debugBtnText}>Avg (88%)</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.debugBtn} onPress={() => updateAccuracy(0.98)}>
+                            <Text style={styles.debugBtnText}>Expert (98%)</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            )}
+
+            <View style={{ height: 40 }} />
+        </ScrollView>
+    );
+}
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#f5f7fa',
+    },
+    content: {
+        padding: 16,
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    headerTitle: {
+        fontSize: 28,
+        fontWeight: 'bold',
+        color: '#1a1a2e',
+        marginBottom: 20,
+    },
+    grid: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'space-between',
+        marginBottom: 24,
+    },
+    summaryCard: {
+        width: '48%',
+        backgroundColor: '#fff',
+        padding: 16,
+        borderRadius: 12,
+        marginBottom: 12,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 4,
+        elevation: 2,
+    },
+    cardTitle: {
+        fontSize: 14,
+        color: '#666',
+        marginBottom: 8,
+    },
+    cardValue: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: '#1a1a2e',
+    },
+    cardSubtext: {
+        fontSize: 12,
+        color: '#4B7BE5',
+        marginTop: 4,
+    },
+    section: {
+        marginBottom: 24,
+    },
+    sectionTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#1a1a2e',
+        marginBottom: 12,
+    },
+    card: {
+        backgroundColor: '#fff',
+        padding: 16,
+        borderRadius: 12,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 4,
+        elevation: 2,
+    },
+    streakContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        backgroundColor: '#fff',
+        padding: 16,
+        borderRadius: 12,
+        elevation: 2,
+    },
+    streakText: {
+        fontSize: 16,
+        color: '#333',
+    },
+    streakBold: {
+        fontWeight: 'bold',
+        color: '#FF6347',
+    },
+    chartTitle: {
+        fontSize: 16,
+        fontWeight: '600',
+        marginBottom: 12,
+        marginTop: 8,
+        color: '#333',
+    },
+    progressContainer: {
+        marginBottom: 12,
+    },
+    progressLabelRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 4,
+    },
+    progressLabel: {
+        fontSize: 14,
+        color: '#666',
+    },
+    progressValue: {
+        fontSize: 14,
+        fontWeight: 'bold',
+        color: '#333',
+    },
+    progressBarTrack: {
+        height: 10,
+        backgroundColor: '#e0e0e0',
+        borderRadius: 5,
+        overflow: 'hidden',
+    },
+    progressBarFill: {
+        height: '100%',
+        borderRadius: 5,
+    },
+    insightText: {
+        fontSize: 14,
+        color: '#666',
+        fontStyle: 'italic',
+        marginTop: 4,
+        marginBottom: 8,
+    },
+    separator: {
+        height: 1,
+        backgroundColor: '#eee',
+        marginVertical: 12,
+    },
+    taskRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        backgroundColor: '#fff',
+        padding: 16,
+        borderRadius: 12,
+        marginBottom: 8,
+        elevation: 1,
+    },
+    taskInfo: {
+        flex: 1,
+    },
+    taskName: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#333',
+        marginBottom: 4,
+    },
+    taskCount: {
+        fontSize: 12,
+        color: '#888',
+    },
+    taskStat: {
+        backgroundColor: '#e8f0fe',
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 16,
+    },
+    taskAccuracy: {
+        color: '#4B7BE5',
+        fontWeight: 'bold',
+    },
+    debugControls: {
+        padding: 16,
+        backgroundColor: '#f0f4ff',
+        borderRadius: 12,
+        borderWidth: 2,
+        borderColor: '#4B7BE5',
+        borderStyle: 'dashed',
+        marginTop: 20,
+    },
+    debugTitle: {
+        textAlign: 'center',
+        color: '#4B7BE5',
+        fontWeight: 'bold',
+        marginBottom: 10,
+    },
+    debugButtons: {
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+    },
+    debugBtn: {
+        backgroundColor: '#4B7BE5',
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        borderRadius: 8,
+    },
+    debugBtnText: {
+        color: '#fff',
+        fontWeight: 'bold',
+    },
+});

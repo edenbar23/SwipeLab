@@ -3,68 +3,80 @@ import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import profileImg from "../../../assets/images/profile.png";
 import { useAuthStore } from "../../stores/authStore";
 import { useModeStore } from "../../stores/modeStore";
+import { useThemeStore } from "../../stores/themeStore";
+import { Ionicons } from '@expo/vector-icons';
+import { useNavigation, CommonActions } from '@react-navigation/native';
 
 export default function AdminTopBar() {
   const { logout, username } = useAuthStore();
-  const { mode, setMode } = useModeStore();
+  const { setMode } = useModeStore();
+  const { theme } = useThemeStore();
+  const navigation = useNavigation<any>();
+
+  const isDarkMode = theme === 'dark';
+
+  const handleSwitchToPlayer = () => {
+    setMode("USER");
+    navigation.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [{ name: 'SwipeLab' }],
+      })
+    );
+  };
+
+  const dynamicStyles = {
+    container: { backgroundColor: isDarkMode ? '#1f1f2e' : '#fff' },
+    username: { color: isDarkMode ? '#9ca3af' : '#888' },
+    actionText: { color: isDarkMode ? '#9ca3af' : '#888' },
+  };
 
   return (
-    <View style={styles.container}>
-      {/* Profile */}
+    <View style={[styles.container, dynamicStyles.container]}>
       <View style={styles.profileSection}>
-        <Image
-          source={profileImg}
-          style={styles.avatar}
-        />
-        <Text style={styles.username}>{username || "Admin"}</Text>
+        <View style={styles.avatarContainer}>
+          <Image source={profileImg} style={styles.avatar} />
+          <Text style={[styles.username, dynamicStyles.username]}>{username || "Admin"}</Text>
+        </View>
       </View>
 
-      {/* Blue card */}
       <View style={styles.card}>
-        <TouchableOpacity onPress={() => setMode("ADMIN")}>
-          <Text style={styles.text}>Manager</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          onPress={() => setMode(mode === "ADMIN" ? "USER" : "ADMIN")}
-          style={{ marginTop: 10 }}
-        >
-          <Text style={styles.switchText}>
-            Switch to {mode === "ADMIN" ? "Play" : "Management"}
-          </Text>
-        </TouchableOpacity>
+        <Text style={styles.text}>Manager Dashboard</Text>
+        <Text style={styles.subText}>Overview</Text>
       </View>
 
-      {/* Logout */}
-      <TouchableOpacity style={styles.logoutBtn} onPress={logout}>
-        <Text style={styles.logoutText}>Logout</Text>
-      </TouchableOpacity>
+      <View style={styles.rightSection}>
+        <TouchableOpacity onPress={handleSwitchToPlayer} style={styles.switchBtn}>
+          <Ionicons name="game-controller-outline" size={20} color="#0EA5E9" />
+          <Text style={[styles.logoutText, dynamicStyles.actionText]}>Play</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.logoutBtn} onPress={logout}>
+          <Ionicons name="log-out-outline" size={24} color="#EF4444" />
+          <Text style={[styles.logoutText, dynamicStyles.actionText]}>Logout</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: "row",
-    padding: 10,
-    alignItems: "center",
-    backgroundColor: "#f7f7f7",
+    flexDirection: "row", justifyContent: 'space-between',
+    paddingHorizontal: 16, paddingVertical: 12, alignItems: "center",
+    borderBottomWidth: 1, borderBottomColor: '#f0f0f0',
   },
-  profileSection: { flex: 1 },
-  avatar: { width: 45, height: 45, borderRadius: 25, marginBottom: 4 },
-  username: { fontWeight: "bold", fontSize: 16 },
-
+  profileSection: { alignItems: 'center', justifyContent: 'center' },
+  avatarContainer: { alignItems: 'center' },
+  avatar: { width: 40, height: 40, borderRadius: 20, marginBottom: 4, backgroundColor: '#ddd' },
+  username: { fontSize: 12, fontWeight: '600' },
   card: {
-    flex: 2,
-    backgroundColor: "#4B7BE5",
-    padding: 10,
-    borderRadius: 12,
-    alignItems: "center",
+    backgroundColor: "#0EA5E9", paddingHorizontal: 20, paddingVertical: 8,
+    borderRadius: 12, alignItems: "center", justifyContent: 'center', height: 70,
   },
-  text: { color: "white", fontWeight: "700", fontSize: 16 },
-
-  switchText: { color: "white", fontWeight: "600" },
-
-  logoutBtn: { flex: 1, alignItems: "flex-end" },
-  logoutText: { color: "red", fontWeight: "600" },
+  text: { color: "white", fontWeight: "700", fontSize: 13, lineHeight: 18 },
+  subText: { color: "white", fontSize: 10, opacity: 0.9 },
+  rightSection: { flexDirection: 'row', alignItems: 'center' },
+  switchBtn: { alignItems: 'center', marginRight: 16 },
+  logoutBtn: { alignItems: "center", justifyContent: "center" },
+  logoutText: { fontSize: 10, marginTop: 2 },
 });

@@ -12,6 +12,10 @@ import TaskDetailsScreen from "../screens/admin/TaskDetailsScreen";
 import TasksManagementScreen from "../screens/admin/TasksManagementScreen";
 import GoldImagesManagementScreen from "../screens/admin/GoldImagesManagementScreen";
 import AddGoldImageScreen from "../screens/admin/AddGoldImageScreen";
+import RecipientsListScreen from "../screens/admin/RecipientsListScreen";
+import RecipientGroupDetailsScreen from "../screens/admin/RecipientGroupDetailsScreen";
+import UsersManagementScreen from "../screens/admin/UsersManagementScreen";
+import SettingsScreen from "../screens/shared/SettingsScreen";
 
 import { AdminStackParamList } from "./adminStack.types";
 
@@ -65,6 +69,27 @@ export default function AdminNavigator() {
             name="AddGoldImage"
             component={AddGoldImageScreen}
             options={{ title: "Add Gold Image" }}
+            name="RecipientsList"
+            component={RecipientsListScreen}
+            options={{ title: "Recipients List" }}
+          />
+
+          <Stack.Screen
+            name="RecipientGroupDetails"
+            component={RecipientGroupDetailsScreen}
+            options={{ title: "Group Details" }}
+          />
+
+          <Stack.Screen
+            name="UsersManagement"
+            component={UsersManagementScreen}
+            options={{ title: "Users Management" }}
+          />
+
+          <Stack.Screen
+            name="UserSettings"
+            component={SettingsScreen}
+            options={{ title: "Settings" }}
           />
         </Stack.Navigator>
 
@@ -76,6 +101,10 @@ export default function AdminNavigator() {
           { label: "Users", route: "Users", icon: require("../../assets/images/users.png") },
           { label: "Leaderboard", route: "Leaderboard", icon: require("../../assets/images/leaderboard.png") },
           { label: "Analytics", route: "Analytics", icon: require("../../assets/images/stats.png") },
+          { label: "Home", route: "AdminDashboard", icon: require("../../assets/images/home.png") },
+          { label: "Users", route: "UsersManagement", icon: require("../../assets/images/users.png") },
+          { label: "Leaderboard", route: "Leaderboard", icon: require("../../assets/images/leaderboard.png") },
+          { label: "Stats", route: "Analytics", icon: require("../../assets/images/stats.png") },
           { label: "Settings", route: "UserSettings", icon: require("../../assets/images/settings.png") },
         ]}
       />

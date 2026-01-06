@@ -6,4 +6,8 @@ export type AdminStackParamList = {
   EditTask: { taskId: number };
   GoldImagesManagement: undefined;
   AddGoldImage: undefined;
+  RecipientsList: undefined;
+  RecipientGroupDetails: { group: any };
+  UsersManagement: undefined;
+  UserSettings: undefined;
 };
