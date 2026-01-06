@@ -16,19 +16,19 @@ export default function ScreenHeaderLayout({
       {/* Header */}
       <View style={styles.header}>
         {/* Left (current screen) */}
-        <View style={styles.headerItem}>
+        <View style={styles.leftHeaderItem}>
           <Image source={leftIcon} style={styles.icon} />
-          <Text style={styles.title}>{leftTitle}</Text>
+          <Text style={styles.title} numberOfLines={1}>{leftTitle}</Text>
         </View>
 
         {/* Right (navigation action) */}
         <TouchableOpacity
-          style={styles.headerItem}
+          style={styles.rightHeaderItem}
           onPress={onRightPress}
           disabled={!onRightPress}
         >
           <Image source={rightIcon} style={styles.icon} />
-          <Text style={styles.button}>{rightTitle}</Text>
+          <Text style={styles.button} numberOfLines={1}>{rightTitle}</Text>
         </TouchableOpacity>
       </View>
 
@@ -50,10 +50,18 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderColor: "#E0E0E0",
   },
-  headerItem: {
+  leftHeaderItem: {
     alignItems: "center",
     flexDirection: "row",
     gap: 8,
+    flex: 1.5,
+  },
+  rightHeaderItem: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 8,
+    flex: 1,
+    justifyContent: "flex-end",
   },
   icon: {
     width: 28,
@@ -61,11 +69,12 @@ const styles = StyleSheet.create({
     resizeMode: "contain",
   },
   title: {
-    fontSize: 25,
+    fontSize: 18,
     fontWeight: "600",
+    flex: 1,
   },
   button: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "600",
   },
   content: {

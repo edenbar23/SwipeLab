@@ -18,3 +18,5 @@ secrets.properties
 # Editors
 .vscode/
 ~$*
+backend/.env 
+backend/.env 
