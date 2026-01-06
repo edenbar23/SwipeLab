@@ -7,6 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { statisticsMock } from '../../mocks/data/statistics.mock';
 import { useNavigation, CommonActions } from '@react-navigation/native';
 
+
 interface UserTopBarProps {
   username?: string;
   score?: number;
@@ -61,14 +62,18 @@ export default function UserTopBar({
 
   return (
     <View style={[styles.container, dynamicStyles.container]}>
-      <View style={styles.profileSection}>
+      {/* User Profile */}
+      <TouchableOpacity
+        style={styles.profileSection}
+        onPress={() => navigation.navigate("Profile")}
+      >
         <View style={styles.avatarContainer}>
           <View style={[styles.avatar, { backgroundColor: isDarkMode ? '#374151' : '#e8f0fe' }]}>
             <Ionicons name="person" size={24} color={isDarkMode ? '#9ca3af' : '#666'} />
           </View>
           <Text style={[styles.username, dynamicStyles.username]}>{displayUsername}</Text>
         </View>
-      </View>
+      </TouchableOpacity>
 
       <View style={styles.statsBlock}>
         <Text style={styles.statsText}>Score: {formattedScore}</Text>

@@ -7,11 +7,12 @@ import { useThemeStore } from "../../stores/themeStore";
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, CommonActions } from '@react-navigation/native';
 
+
 export default function AdminTopBar() {
+  const navigation = useNavigation<any>();
   const { logout, username } = useAuthStore();
   const { setMode } = useModeStore();
   const { theme } = useThemeStore();
-  const navigation = useNavigation<any>();
 
   const isDarkMode = theme === 'dark';
 
@@ -33,12 +34,16 @@ export default function AdminTopBar() {
 
   return (
     <View style={[styles.container, dynamicStyles.container]}>
-      <View style={styles.profileSection}>
+      {/* Profile */}
+      <TouchableOpacity
+        style={styles.profileSection}
+        onPress={() => navigation.navigate("Profile")}
+      >
         <View style={styles.avatarContainer}>
           <Image source={profileImg} style={styles.avatar} />
           <Text style={[styles.username, dynamicStyles.username]}>{username || "Admin"}</Text>
         </View>
-      </View>
+      </TouchableOpacity>
 
       <View style={styles.card}>
         <Text style={styles.text}>Manager Dashboard</Text>

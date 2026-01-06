@@ -14,6 +14,7 @@ import RecipientsListScreen from "../screens/admin/RecipientsListScreen";
 import RecipientGroupDetailsScreen from "../screens/admin/RecipientGroupDetailsScreen";
 import UsersManagementScreen from "../screens/admin/UsersManagementScreen";
 import SettingsScreen from "../screens/shared/SettingsScreen";
+import ProfileScreen from "../screens/shared/ProfileScreen";
 
 import { AdminStackParamList } from "./adminStack.types";
 
@@ -80,6 +81,12 @@ export default function AdminNavigator() {
             component={SettingsScreen}
             options={{ title: "Settings" }}
           />
+          <Stack.Screen
+            name="Profile"
+            component={ProfileScreen}
+            options={{ title: "My Profile" }}
+          />
+
         </Stack.Navigator>
 
       </View>

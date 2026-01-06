@@ -18,5 +18,12 @@ export const authMock = {
       password: '1234', //not part of the contract only for mock
       role: 'ADMIN'
     }
-  ]
+  ],
+  profile: {
+    username: "SwipeMaster2024",
+    email: "user@swipelab.com",
+    rank: "Gold Tier",
+    score: 1250,
+    badges: ["🏆", "🔥", "⭐", "💎", "🛡️"]
+  }
 }

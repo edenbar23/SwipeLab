@@ -6,6 +6,7 @@ import { dashboardUserMock } from './data/dashboard.user.mock'
 import { leaderboardMock } from './data/leaderboard.mock'
 import { refinedChallengesMock } from './data/challenges.mock'
 import { statisticsMock, setUserAccuracy } from './data/statistics.mock'
+
 import { getLeaderboardData, setUserScore } from './data/leaderboard.mock'
 import {
   addRecipientGroup,
@@ -116,6 +117,19 @@ export async function mockRouter(
       role: user.role
     })
   }
+
+  if (url.endsWith('/api/v1/auth/profile') && method === 'GET') {
+    return jsonResponse(authMock.profile)
+  }
+
+  if (url.endsWith('/api/v1/auth/password/change') && method === 'POST') {
+    // Validate that newPassword exists in body
+    if (!body.newPassword) {
+      return jsonResponse({ message: 'New password is required' }, 400);
+    }
+    return jsonResponse({ message: 'Password has been reset successfully' });
+  }
+
 
   // ---------- DASHBOARD (USER) ----------
   if (method === 'GET' && url.endsWith('/api/v1/dashboard/my-tasks')) {
