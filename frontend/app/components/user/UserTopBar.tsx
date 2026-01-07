@@ -3,7 +3,10 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useAuthStore } from "../../stores/authStore";
 import { useModeStore } from "../../stores/modeStore";
 import { useThemeStore } from "../../stores/themeStore";
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons as VectorIcons } from '@expo/vector-icons';
+
+// Cast to any to accept strict React 19 types
+const Ionicons = VectorIcons as any;
 import { statisticsMock } from '../../mocks/data/statistics.mock';
 import { useNavigation, CommonActions } from '@react-navigation/native';
 

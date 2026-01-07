@@ -123,7 +123,7 @@ export default function AdminNavigator() {
         items={[
           { label: "Home", route: "AdminDashboard", icon: require("../../assets/images/home.png") },
           { label: "Users", route: "UsersManagement", icon: require("../../assets/images/users.png") },
-          { label: "Leaderboard", route: "Leaderboard", icon: require("../../assets/images/leaderboard.png") },
+          { label: "Tasks", route: "TasksManagement", icon: require("../../assets/images/tasks_mgmt.png") },
           { label: "Analytics", route: "Analytics", icon: require("../../assets/images/stats.png") },
           { label: "Settings", route: "UserSettings", icon: require("../../assets/images/settings.png") },
         ]}

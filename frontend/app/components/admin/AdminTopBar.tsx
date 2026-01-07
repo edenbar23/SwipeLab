@@ -1,10 +1,12 @@
 import React from "react";
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import profileImg from "../../../assets/images/profile.png";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useAuthStore } from "../../stores/authStore";
 import { useModeStore } from "../../stores/modeStore";
 import { useThemeStore } from "../../stores/themeStore";
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons as VectorIcons } from '@expo/vector-icons';
+
+// Cast to any to accept strict React 19 types
+const Ionicons = VectorIcons as any;
 import { useNavigation, CommonActions } from '@react-navigation/native';
 
 
@@ -40,7 +42,9 @@ export default function AdminTopBar() {
         onPress={() => navigation.navigate("Profile")}
       >
         <View style={styles.avatarContainer}>
-          <Image source={profileImg} style={styles.avatar} />
+          <View style={[styles.avatar, { backgroundColor: isDarkMode ? '#374151' : '#e8f0fe' }]}>
+            <Ionicons name="person" size={24} color={isDarkMode ? '#9ca3af' : '#666'} />
+          </View>
           <Text style={[styles.username, dynamicStyles.username]}>{username || "Admin"}</Text>
         </View>
       </TouchableOpacity>
@@ -72,7 +76,10 @@ const styles = StyleSheet.create({
   },
   profileSection: { alignItems: 'center', justifyContent: 'center' },
   avatarContainer: { alignItems: 'center' },
-  avatar: { width: 40, height: 40, borderRadius: 20, marginBottom: 4, backgroundColor: '#ddd' },
+  avatar: {
+    width: 40, height: 40, borderRadius: 20, marginBottom: 4, backgroundColor: '#ddd',
+    alignItems: 'center', justifyContent: 'center',
+  },
   username: { fontSize: 12, fontWeight: '600' },
   card: {
     backgroundColor: "#0EA5E9", paddingHorizontal: 20, paddingVertical: 8,
