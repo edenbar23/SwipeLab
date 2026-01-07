@@ -39,7 +39,7 @@ export default function UserNavigator() {
         items={[
           { label: "Home", route: "SwipeLab", icon: require("../../assets/images/home.png") },
           { label: "My Tasks", route: "Tasks", icon: require("../../assets/images/tasks.png") },
-          { label: "Challenges", route: "Challenges", icon: require("../../assets/images/leaderboard.png") },
+          { label: "Leaderboard", route: "Leaderboard", icon: require("../../assets/images/leaderboard.png") },
           { label: "Stats", route: "Stats", icon: require("../../assets/images/stats.png") },
           { label: "Settings", route: "UserSettings", icon: require("../../assets/images/settings.png") },
         ]}

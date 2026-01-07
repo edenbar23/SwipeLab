@@ -75,11 +75,11 @@ export default function UserTopBar({
         </View>
       </TouchableOpacity>
 
-      <View style={styles.statsBlock}>
+      <TouchableOpacity style={styles.statsBlock} onPress={() => navigation.navigate("Challenges")}>
         <Text style={styles.statsText}>Score: {formattedScore}</Text>
         <Text style={styles.statsText}>Rank: {displayRank}</Text>
         <Text style={styles.statsText}>{displayStreak} days streak</Text>
-      </View>
+      </TouchableOpacity>
 
       <View style={styles.rightSection}>
         {role === 'ADMIN' && (
