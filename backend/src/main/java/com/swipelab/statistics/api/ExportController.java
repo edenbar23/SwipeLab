@@ -1,6 +1,6 @@
-package com.swipelab.controller;
+package com.swipelab.statistics.api;
 
-import com.swipelab.service.analytics.ExportService;
+import com.swipelab.statistics.application.ExportService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;

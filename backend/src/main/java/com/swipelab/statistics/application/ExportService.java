@@ -1,4 +1,4 @@
-package com.swipelab.service.analytics;
+package com.swipelab.statistics.application;
 
 import com.swipelab.classification.domain.Classification;
 import com.swipelab.classification.domain.Image;

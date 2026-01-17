@@ -1,4 +1,4 @@
-package com.swipelab.service.analytics;
+package com.swipelab.statistics.application;
 
 import com.swipelab.dto.response.DashboardStatsResponse;
 import com.swipelab.tasks.domain.TaskStatus;

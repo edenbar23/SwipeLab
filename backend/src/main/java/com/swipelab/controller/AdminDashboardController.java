@@ -5,7 +5,7 @@ import com.swipelab.dto.request.CreateTaskRequest;
 import com.swipelab.dto.request.UpdateRecipientGroupRequest;
 import com.swipelab.dto.request.UpdateTaskRequest;
 import com.swipelab.dto.response.*;
-import com.swipelab.service.analytics.AnalyticsService;
+import com.swipelab.statistics.application.AnalyticsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
