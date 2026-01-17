@@ -1,4 +1,4 @@
-package com.swipelab.model.entity;
+package com.swipelab.tasks.domain;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -8,18 +8,16 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import com.swipelab.model.entity.User;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(
-        name = "recipient_groups",
-        uniqueConstraints = {
-                @UniqueConstraint(columnNames = "name")
-        }
-)
+@Table(name = "recipient_groups", uniqueConstraints = {
+        @UniqueConstraint(columnNames = "name")
+})
 @Data
 @Builder
 @NoArgsConstructor
@@ -51,11 +49,7 @@ public class RecipientGroup {
      */
     @BatchSize(size = 50)
     @ManyToMany
-    @JoinTable(
-            name = "recipient_group_users",
-            joinColumns = @JoinColumn(name = "group_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
+    @JoinTable(name = "recipient_group_users", joinColumns = @JoinColumn(name = "group_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
     @Builder.Default
     private Set<User> users = new HashSet<>();
 

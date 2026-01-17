@@ -5,7 +5,6 @@ import com.swipelab.dto.request.CreateTaskRequest;
 import com.swipelab.dto.request.UpdateRecipientGroupRequest;
 import com.swipelab.dto.request.UpdateTaskRequest;
 import com.swipelab.dto.response.*;
-import com.swipelab.service.AdminDashboardService;
 import com.swipelab.service.analytics.AnalyticsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,41 +18,42 @@ import java.util.List;
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminDashboardController {
 
-    private final AdminDashboardService adminDashboardService;
+    private final com.swipelab.tasks.application.TaskService taskService;
+    private final com.swipelab.tasks.application.RecipientGroupService recipientGroupService;
     private final AnalyticsService analyticsService;
 
     // ===== TASKS =====
 
     @GetMapping("/tasks")
     public List<TaskResponse> getTasks() {
-        return adminDashboardService.getAllTasks();
+        return taskService.getAllTasks();
     }
 
     @PostMapping("/tasks/create")
     public TaskResponse createTask(@RequestBody CreateTaskRequest request) {
-        return adminDashboardService.createTask(request);
+        return taskService.createTask(request);
     }
 
     @PostMapping("/tasks/archive/{taskId}")
     public TaskResponse archiveTask(@PathVariable Long taskId) {
-        return adminDashboardService.archiveTask(taskId);
+        return taskService.archiveTask(taskId);
     }
 
     @PutMapping("/tasks/{taskId}")
     public TaskResponse updateTask(
             @PathVariable Long taskId,
             @RequestBody UpdateTaskRequest request) {
-        return adminDashboardService.updateTask(taskId, request);
+        return taskService.updateTask(taskId, request);
     }
 
     @PostMapping("/tasks/{taskId}/activate")
     public TaskResponse activateTask(@PathVariable Long taskId) {
-        return adminDashboardService.activateTask(taskId);
+        return taskService.activateTask(taskId);
     }
 
     @PostMapping("/tasks/{taskId}/pause")
     public TaskResponse pauseTask(@PathVariable Long taskId) {
-        return adminDashboardService.pauseTask(taskId);
+        return taskService.pauseTask(taskId);
     }
 
     // ===== ANALYTICS =====
@@ -77,24 +77,24 @@ public class AdminDashboardController {
 
     @GetMapping("/recipients")
     public List<RecipientGroupResponse> getRecipients() {
-        return adminDashboardService.getRecipientGroups();
+        return recipientGroupService.getRecipientGroups();
     }
 
     @PostMapping("/recipients/create")
     public RecipientGroupResponse createRecipients(
             @RequestBody CreateRecipientGroupRequest request) {
-        return adminDashboardService.createRecipientGroup(request);
+        return recipientGroupService.createRecipientGroup(request);
     }
 
     @DeleteMapping("/recipients/{groupId}")
     public void deleteRecipients(@PathVariable Long groupId) {
-        adminDashboardService.deleteRecipientGroup(groupId);
+        recipientGroupService.deleteRecipientGroup(groupId);
     }
 
     @PutMapping("/recipients/{groupId}/update")
     public RecipientGroupResponse updateRecipients(
             @PathVariable Long groupId,
             @RequestBody UpdateRecipientGroupRequest request) {
-        return adminDashboardService.updateRecipientGroup(groupId, request);
+        return recipientGroupService.updateRecipientGroup(groupId, request);
     }
 }

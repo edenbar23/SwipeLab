@@ -1,8 +1,8 @@
-package com.swipelab.controller;
+package com.swipelab.tasks.api;
 
 import com.swipelab.dto.request.CreateTaskRequest;
 import com.swipelab.dto.response.TaskResponse;
-import com.swipelab.service.TaskService;
+import com.swipelab.tasks.application.TaskService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

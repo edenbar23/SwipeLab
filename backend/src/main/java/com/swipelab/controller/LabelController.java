@@ -1,8 +1,8 @@
 package com.swipelab.controller;
 
-import com.swipelab.model.entity.Label;
+import com.swipelab.classification.domain.Label;
 
-import com.swipelab.service.LabelService;
+import com.swipelab.classification.application.LabelService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

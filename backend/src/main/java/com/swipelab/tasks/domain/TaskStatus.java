@@ -1,4 +1,4 @@
-package com.swipelab.model.enums;
+package com.swipelab.tasks.domain;
 
 public enum TaskStatus {
     DRAFT,

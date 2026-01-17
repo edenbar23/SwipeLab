@@ -1,18 +1,18 @@
-package com.swipelab.service;
+package com.swipelab.classification.application;
 
 // Service for handling image classifications
 import com.swipelab.dto.request.ClassificationRequest;
 import com.swipelab.dto.response.ClassificationResponse;
 import com.swipelab.exception.ResourceNotFoundException;
-import com.swipelab.model.entity.Classification;
-import com.swipelab.model.entity.Image;
-import com.swipelab.model.entity.Label;
+import com.swipelab.classification.domain.Classification;
+import com.swipelab.classification.domain.Image;
+import com.swipelab.classification.domain.Label;
 import com.swipelab.model.entity.User;
-import com.swipelab.repository.ClassificationRepository;
-import com.swipelab.repository.ImageRepository;
-import com.swipelab.repository.LabelRepository;
+import com.swipelab.classification.infrastructure.ClassificationRepository;
+import com.swipelab.classification.infrastructure.ImageRepository;
+import com.swipelab.classification.infrastructure.LabelRepository;
 import com.swipelab.repository.UserRepository;
-import com.swipelab.service.classification.FraudDetectionService;
+import com.swipelab.classification.application.FraudDetectionService;
 import com.swipelab.gamification.application.BadgeService;
 import com.swipelab.gamification.application.PointsService;
 import com.swipelab.gamification.application.StreakService;

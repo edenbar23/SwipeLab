@@ -1,6 +1,6 @@
-package com.swipelab.model.entity;
+package com.swipelab.tasks.domain;
 
-import com.swipelab.model.enums.TaskStatus;
+import com.swipelab.tasks.domain.TaskStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,6 +9,9 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import com.swipelab.model.entity.User;
+import com.swipelab.classification.domain.Label;
+import com.swipelab.classification.domain.Image;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -55,31 +58,21 @@ public class Task {
 
     @BatchSize(size = 20)
     @ElementCollection
-    @CollectionTable(
-            name = "task_experiments",
-            joinColumns = @JoinColumn(name = "task_id")
-    )
+    @CollectionTable(name = "task_experiments", joinColumns = @JoinColumn(name = "task_id"))
     @Column(name = "experiment_id")
     @Builder.Default
     private List<Long> experiments = new ArrayList<>();
 
     @BatchSize(size = 20)
     @ElementCollection
-    @CollectionTable(
-            name = "task_recipient_groups",
-            joinColumns = @JoinColumn(name = "task_id")
-    )
+    @CollectionTable(name = "task_recipient_groups", joinColumns = @JoinColumn(name = "task_id"))
     @Column(name = "recipient_group_id")
     @Builder.Default
     private List<Long> recipientGroups = new ArrayList<>();
 
     @BatchSize(size = 20)
     @ManyToMany
-    @JoinTable(
-            name = "task_target_species",
-            joinColumns = @JoinColumn(name = "task_id"),
-            inverseJoinColumns = @JoinColumn(name = "label_id")
-    )
+    @JoinTable(name = "task_target_species", joinColumns = @JoinColumn(name = "task_id"), inverseJoinColumns = @JoinColumn(name = "label_id"))
     @Builder.Default
     private List<Label> targetSpecies = new ArrayList<>();
 
@@ -87,11 +80,7 @@ public class Task {
     @JoinColumn(name = "created_by", nullable = false)
     private User createdBy;
 
-    @OneToMany(
-            mappedBy = "task",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true
-    )
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<Image> images = new ArrayList<>();
 
@@ -121,7 +110,7 @@ public class Task {
 
     /**
      * Allowed:
-     * DRAFT  -> ACTIVE
+     * DRAFT -> ACTIVE
      * PAUSED -> ACTIVE
      */
     public void activate() {
@@ -129,8 +118,7 @@ public class Task {
             this.status = TaskStatus.ACTIVE;
         } else {
             throw new IllegalStateException(
-                    "Cannot activate task from status: " + status
-            );
+                    "Cannot activate task from status: " + status);
         }
     }
 
@@ -143,23 +131,21 @@ public class Task {
             this.status = TaskStatus.PAUSED;
         } else {
             throw new IllegalStateException(
-                    "Only ACTIVE tasks can be paused"
-            );
+                    "Only ACTIVE tasks can be paused");
         }
     }
 
     /**
      * Allowed:
-     * ACTIVE  -> ARCHIVED
-     * PAUSED  -> ARCHIVED
+     * ACTIVE -> ARCHIVED
+     * PAUSED -> ARCHIVED
      */
     public void archive() {
         if (status == TaskStatus.ACTIVE || status == TaskStatus.PAUSED) {
             this.status = TaskStatus.ARCHIVED;
         } else {
             throw new IllegalStateException(
-                    "Cannot archive task from status: " + status
-            );
+                    "Cannot archive task from status: " + status);
         }
     }
 

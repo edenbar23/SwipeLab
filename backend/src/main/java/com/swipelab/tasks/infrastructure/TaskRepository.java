@@ -1,7 +1,7 @@
-package com.swipelab.repository;
+package com.swipelab.tasks.infrastructure;
 
-import com.swipelab.model.entity.Task;
-import com.swipelab.model.enums.TaskStatus;
+import com.swipelab.tasks.domain.Task;
+import com.swipelab.tasks.domain.TaskStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

@@ -1,9 +1,9 @@
 package com.swipelab.service.analytics;
 
-import com.swipelab.model.entity.Classification;
-import com.swipelab.model.entity.Image;
-import com.swipelab.repository.ClassificationRepository;
-import com.swipelab.repository.ImageRepository;
+import com.swipelab.classification.domain.Classification;
+import com.swipelab.classification.domain.Image;
+import com.swipelab.classification.infrastructure.ClassificationRepository;
+import com.swipelab.classification.infrastructure.ImageRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

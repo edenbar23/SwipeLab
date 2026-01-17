@@ -1,16 +1,16 @@
-package com.swipelab.service;
+package com.swipelab.classification.application;
 
 import com.swipelab.dto.request.ImageUploadRequest;
 import com.swipelab.dto.response.ImageBatchResponse;
 import com.swipelab.dto.response.ImageResponse;
 import com.swipelab.exception.ResourceNotFoundException;
-import com.swipelab.model.entity.Image;
-import com.swipelab.model.entity.Label;
-import com.swipelab.model.entity.Task;
-import com.swipelab.repository.ImageRepository;
-import com.swipelab.repository.LabelRepository;
-import com.swipelab.repository.TaskRepository;
-import com.swipelab.repository.ClassificationRepository;
+import com.swipelab.classification.domain.Image;
+import com.swipelab.classification.domain.Label;
+import com.swipelab.tasks.domain.Task;
+import com.swipelab.classification.infrastructure.ImageRepository;
+import com.swipelab.classification.infrastructure.LabelRepository;
+import com.swipelab.tasks.infrastructure.TaskRepository;
+import com.swipelab.classification.infrastructure.ClassificationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

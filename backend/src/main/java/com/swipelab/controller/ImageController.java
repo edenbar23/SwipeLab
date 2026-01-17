@@ -3,7 +3,7 @@ package com.swipelab.controller;
 import com.swipelab.dto.request.ImageUploadRequest;
 import com.swipelab.dto.response.ImageBatchResponse;
 import com.swipelab.dto.response.ImageResponse;
-import com.swipelab.service.ImageService;
+import com.swipelab.classification.application.ImageService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

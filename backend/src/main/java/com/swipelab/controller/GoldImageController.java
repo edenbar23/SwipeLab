@@ -2,7 +2,7 @@ package com.swipelab.controller;
 
 import com.swipelab.dto.request.GoldImageRequest;
 import com.swipelab.dto.response.GoldImageResponse;
-import com.swipelab.service.GoldImageService;
+import com.swipelab.classification.application.GoldImageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

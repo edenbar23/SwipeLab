@@ -1,10 +1,10 @@
 package com.swipelab.service.analytics;
 
 import com.swipelab.dto.response.DashboardStatsResponse;
-import com.swipelab.model.enums.TaskStatus;
-import com.swipelab.repository.ClassificationRepository;
-import com.swipelab.repository.ImageRepository;
-import com.swipelab.repository.TaskRepository;
+import com.swipelab.tasks.domain.TaskStatus;
+import com.swipelab.classification.infrastructure.ClassificationRepository;
+import com.swipelab.classification.infrastructure.ImageRepository;
+import com.swipelab.tasks.infrastructure.TaskRepository;
 import com.swipelab.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

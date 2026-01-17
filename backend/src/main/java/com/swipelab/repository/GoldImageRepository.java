@@ -1,6 +1,6 @@
 package com.swipelab.repository;
 
-import com.swipelab.model.entity.GoldImage;
+import com.swipelab.classification.domain.GoldImage;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

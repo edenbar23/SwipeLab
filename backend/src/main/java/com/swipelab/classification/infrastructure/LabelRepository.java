@@ -1,6 +1,6 @@
-package com.swipelab.repository;
+package com.swipelab.classification.infrastructure;
 
-import com.swipelab.model.entity.Label;
+import com.swipelab.classification.domain.Label;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

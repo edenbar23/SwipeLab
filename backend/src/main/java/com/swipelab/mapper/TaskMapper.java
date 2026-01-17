@@ -7,8 +7,8 @@ import com.swipelab.dto.response.TaskResponse;
 import com.swipelab.dto.response.TargetSpeciesResponse;
 import com.swipelab.dto.response.ReferenceImageResponse;
 
-import com.swipelab.model.entity.Label;
-import com.swipelab.model.entity.Task;
+import com.swipelab.classification.domain.Label;
+import com.swipelab.tasks.domain.Task;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;

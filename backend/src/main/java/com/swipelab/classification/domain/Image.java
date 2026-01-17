@@ -1,4 +1,4 @@
-package com.swipelab.model.entity;
+package com.swipelab.classification.domain;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
+//this is a problem
+import com.swipelab.tasks.domain.Task;
 
 import java.time.LocalDateTime;
 

@@ -1,7 +1,7 @@
-package com.swipelab.service;
+package com.swipelab.classification.application;
 
-import com.swipelab.model.entity.Label;
-import com.swipelab.repository.LabelRepository;
+import com.swipelab.classification.domain.Label;
+import com.swipelab.classification.infrastructure.LabelRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

@@ -1,8 +1,8 @@
-package com.swipelab.controller;
+package com.swipelab.classification.api;
 
 import com.swipelab.dto.request.ClassificationRequest;
 import com.swipelab.dto.response.ClassificationResponse;
-import com.swipelab.service.ClassificationService;
+import com.swipelab.classification.application.ClassificationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

@@ -1,6 +1,6 @@
-package com.swipelab.repository;
+package com.swipelab.tasks.infrastructure;
 
-import com.swipelab.model.entity.RecipientGroup;
+import com.swipelab.tasks.domain.RecipientGroup;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

@@ -1,4 +1,4 @@
-package com.swipelab.service.classification;
+package com.swipelab.classification.application;
 
 import com.swipelab.model.entity.User;
 import com.swipelab.repository.UserRepository;

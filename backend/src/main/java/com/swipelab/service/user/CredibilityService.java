@@ -1,10 +1,10 @@
 package com.swipelab.service.user;
 
-import com.swipelab.model.entity.Classification;
-import com.swipelab.model.entity.Label;
+import com.swipelab.classification.domain.Classification;
+import com.swipelab.classification.domain.Label;
 import com.swipelab.model.entity.User;
 import com.swipelab.model.enums.UserRole;
-import com.swipelab.repository.ClassificationRepository;
+import com.swipelab.classification.infrastructure.ClassificationRepository;
 import com.swipelab.repository.UserRepository;
 import com.swipelab.util.CredibilityCalculator;
 import lombok.RequiredArgsConstructor;
