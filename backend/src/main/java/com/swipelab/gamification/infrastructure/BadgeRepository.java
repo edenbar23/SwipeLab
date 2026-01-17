@@ -1,6 +1,6 @@
-package com.swipelab.repository;
+package com.swipelab.gamification.infrastructure;
 
-import com.swipelab.model.entity.Badge;
+import com.swipelab.gamification.domain.Badge;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface BadgeRepository extends JpaRepository<Badge, Long> {

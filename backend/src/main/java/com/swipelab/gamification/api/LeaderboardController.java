@@ -1,7 +1,7 @@
-package com.swipelab.controller;
+package com.swipelab.gamification.api;
 
 import com.swipelab.model.entity.User;
-import com.swipelab.service.gamification.LeaderboardService;
+import com.swipelab.gamification.application.LeaderboardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

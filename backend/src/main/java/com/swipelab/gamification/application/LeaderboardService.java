@@ -1,4 +1,4 @@
-package com.swipelab.service.gamification;
+package com.swipelab.gamification.application;
 
 import com.swipelab.model.entity.User;
 import com.swipelab.repository.UserRepository;

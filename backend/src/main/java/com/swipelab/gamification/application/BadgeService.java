@@ -1,8 +1,8 @@
-package com.swipelab.service.gamification;
+package com.swipelab.gamification.application;
 
-import com.swipelab.model.entity.Badge;
+import com.swipelab.gamification.domain.Badge;
 import com.swipelab.model.entity.User;
-import com.swipelab.repository.BadgeRepository;
+import com.swipelab.gamification.infrastructure.BadgeRepository;
 import com.swipelab.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -58,13 +58,7 @@ public class BadgeService {
     }
 
     private void awardBadge(User user, String badgeName) {
-        Optional<Badge> badgeOpt = badgeRepository.findByName(badgeName);
-        if (badgeOpt.isPresent()) {
-            Badge badge = badgeOpt.get();
-            if (!user.getBadges().contains(badge)) {
-                user.getBadges().add(badge);
-                userRepository.save(user);
-            }
-        }
+        throw new UnsupportedOperationException("Unimplemented method 'awardBadge'");
+        // Need to be updated throw user event
     }
 }
