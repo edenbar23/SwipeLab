@@ -1,8 +1,8 @@
-package com.swipelab.security;
+package com.swipelab.auth.infrastructure;
 
-import com.swipelab.service.auth.OAuth2Service;
+import com.swipelab.auth.application.OAuth2Service;
 
-import com.swipelab.service.auth.JwtService;
+import com.swipelab.auth.application.JwtService;
 import com.swipelab.model.entity.User;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

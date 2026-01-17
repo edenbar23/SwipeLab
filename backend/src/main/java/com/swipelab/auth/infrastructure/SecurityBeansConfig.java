@@ -1,4 +1,4 @@
-package com.swipelab.config;
+package com.swipelab.auth.infrastructure;
 
 
 import org.springframework.context.annotation.Bean;

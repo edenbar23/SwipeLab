@@ -1,9 +1,9 @@
-package com.swipelab.config;
+package com.swipelab.auth.infrastructure;
 
-import com.swipelab.security.CustomOAuth2UserService;
-import com.swipelab.security.JwtAuthenticationFilter;
-import com.swipelab.security.OAuth2AuthenticationFailureHandler;
-import com.swipelab.security.OAuth2AuthenticationSuccessHandler;
+import com.swipelab.auth.infrastructure.CustomOAuth2UserService;
+import com.swipelab.auth.infrastructure.JwtAuthenticationFilter;
+import com.swipelab.auth.infrastructure.OAuth2AuthenticationFailureHandler;
+import com.swipelab.auth.infrastructure.OAuth2AuthenticationSuccessHandler;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

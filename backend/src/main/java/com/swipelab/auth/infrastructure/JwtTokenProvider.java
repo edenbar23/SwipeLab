@@ -1,7 +1,7 @@
-package com.swipelab.security;
+package com.swipelab.auth.infrastructure;
 
-import com.swipelab.config.JwtConfig;
-import com.swipelab.security.enums.TokenType;
+import com.swipelab.auth.infrastructure.JwtConfig;
+import com.swipelab.auth.infrastructure.enums.TokenType;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;

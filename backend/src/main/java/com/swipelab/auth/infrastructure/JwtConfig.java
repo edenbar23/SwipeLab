@@ -1,4 +1,4 @@
-package com.swipelab.config;
+package com.swipelab.auth.infrastructure;
 
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;

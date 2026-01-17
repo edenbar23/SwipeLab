@@ -1,4 +1,4 @@
-package com.swipelab.service.auth;
+package com.swipelab.auth.application;
 
 import com.swipelab.model.entity.User;
 import com.swipelab.model.enums.AuthProvider;

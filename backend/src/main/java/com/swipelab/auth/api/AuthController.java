@@ -1,11 +1,11 @@
-package com.swipelab.controller;
+package com.swipelab.auth.api;
 
 import com.swipelab.dto.request.*;
 import com.swipelab.dto.response.AuthResponse;
 import com.swipelab.dto.response.UserProfileResponse;
 
 import com.swipelab.exception.UnauthorizedException;
-import com.swipelab.service.auth.AuthenticationService;
+import com.swipelab.auth.application.AuthenticationService;
 import com.swipelab.service.user.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -28,9 +28,9 @@ public class AuthController {
     private final AuthenticationService authenticationService;
 
     private final UserService userService;
-    private final com.swipelab.service.auth.OAuth2Service oAuth2Service;
+    private final com.swipelab.auth.application.OAuth2Service oAuth2Service;
     private final com.swipelab.mapper.AuthMapper authMapper;
-    private final com.swipelab.service.auth.JwtService jwtService;
+    private final com.swipelab.auth.application.JwtService jwtService;
 
     /**
      * Register a new user

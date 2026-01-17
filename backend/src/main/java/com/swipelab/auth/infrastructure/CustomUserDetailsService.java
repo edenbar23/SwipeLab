@@ -1,4 +1,4 @@
-package com.swipelab.security;
+package com.swipelab.auth.infrastructure;
 
 import com.swipelab.model.entity.User;
 import com.swipelab.repository.UserRepository;

@@ -1,12 +1,12 @@
-package com.swipelab.service.auth;
+package com.swipelab.auth.application;
 
-import com.swipelab.config.JwtConfig;
+import com.swipelab.auth.infrastructure.JwtConfig;
 import com.swipelab.dto.response.AuthResponse;
 import com.swipelab.exception.UnauthorizedException;
 import com.swipelab.model.entity.User;
 import com.swipelab.repository.UserRepository;
-import com.swipelab.security.JwtTokenProvider;
-import com.swipelab.security.enums.TokenType;
+import com.swipelab.auth.infrastructure.JwtTokenProvider;
+import com.swipelab.auth.infrastructure.enums.TokenType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -29,8 +29,7 @@ public class JwtService {
                 user.getUsername(),
                 user.getRole().name(),
                 TokenType.ACCESS,
-                Duration.ofMinutes(jwtConfig.getAccessTokenExpirationMinutes())
-        );
+                Duration.ofMinutes(jwtConfig.getAccessTokenExpirationMinutes()));
     }
 
     public String generateRefreshToken(User user) {
@@ -38,8 +37,7 @@ public class JwtService {
                 user.getUsername(),
                 user.getRole().name(),
                 TokenType.REFRESH,
-                Duration.ofDays(jwtConfig.getRefreshTokenExpirationDays())
-        );
+                Duration.ofDays(jwtConfig.getRefreshTokenExpirationDays()));
 
         user.setRefreshTokenHash(passwordEncoder.encode(refreshToken));
         userRepository.save(user);
@@ -64,7 +62,6 @@ public class JwtService {
         return user;
     }
 
-
     public AuthResponse rotateTokens(String refreshToken) {
         User user = validateRefreshToken(refreshToken);
 
@@ -76,7 +73,8 @@ public class JwtService {
                 .refreshToken(newRefreshToken)
                 .expiresIn(jwtConfig.getAccessTokenExpirationMinutes() * 60) // Convert to seconds
                 .message("Tokens refreshed successfully")
-                .build();    }
+                .build();
+    }
 
     public void revokeRefreshToken(User user) {
         user.setRefreshTokenHash(null);
@@ -124,9 +122,7 @@ public class JwtService {
                 tokenProvider.extractTokenType(token) == TokenType.REFRESH;
     }
 
-
     public String extractUsername(String refreshToken) {
         return tokenProvider.extractUsername(refreshToken);
     }
 }
-

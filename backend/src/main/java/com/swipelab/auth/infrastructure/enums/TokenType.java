@@ -1,4 +1,4 @@
-package com.swipelab.security.enums;
+package com.swipelab.auth.infrastructure.enums;
 
 public enum TokenType {
     ACCESS,

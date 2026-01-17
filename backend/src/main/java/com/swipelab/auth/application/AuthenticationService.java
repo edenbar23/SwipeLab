@@ -1,4 +1,4 @@
-package com.swipelab.service.auth;
+package com.swipelab.auth.application;
 
 import com.swipelab.dto.request.RegisterRequest;
 import com.swipelab.dto.request.ResetPasswordRequest;

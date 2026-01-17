@@ -1,4 +1,4 @@
-package com.swipelab.security;
+package com.swipelab.auth.infrastructure;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
