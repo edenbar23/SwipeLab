@@ -1,6 +1,6 @@
 package com.swipelab.gamification.api;
 
-import com.swipelab.model.entity.User;
+import com.swipelab.users.domain.User;
 import com.swipelab.gamification.application.LeaderboardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

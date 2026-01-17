@@ -1,7 +1,7 @@
-package com.swipelab.controller;
+package com.swipelab.users.api;
 
 import com.swipelab.dto.response.dashboard.*;
-import com.swipelab.service.UserDashboardService;
+import com.swipelab.users.application.UserDashboardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 

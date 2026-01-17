@@ -1,6 +1,6 @@
-package com.swipelab.repository;
+package com.swipelab.users.infrastructure;
 
-import com.swipelab.model.entity.User;
+import com.swipelab.users.domain.User;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.data.jpa.repository.JpaRepository;
 

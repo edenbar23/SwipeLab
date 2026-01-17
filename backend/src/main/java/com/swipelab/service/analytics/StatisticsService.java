@@ -5,7 +5,7 @@ import com.swipelab.tasks.domain.TaskStatus;
 import com.swipelab.classification.infrastructure.ClassificationRepository;
 import com.swipelab.classification.infrastructure.ImageRepository;
 import com.swipelab.tasks.infrastructure.TaskRepository;
-import com.swipelab.repository.UserRepository;
+import com.swipelab.users.infrastructure.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

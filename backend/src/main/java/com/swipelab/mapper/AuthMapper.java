@@ -3,7 +3,7 @@ package com.swipelab.mapper;
 import com.swipelab.dto.request.RegisterRequest;
 import com.swipelab.dto.response.AuthResponse;
 import com.swipelab.dto.response.UserProfileResponse;
-import com.swipelab.model.entity.User;
+import com.swipelab.users.domain.User;
 import com.swipelab.model.enums.AuthProvider;
 import com.swipelab.model.enums.UserRole;
 import org.springframework.stereotype.Component;

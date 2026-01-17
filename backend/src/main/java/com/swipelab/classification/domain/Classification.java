@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
-import com.swipelab.model.entity.User;
+import com.swipelab.users.domain.User;
 
 import java.time.LocalDateTime;
 

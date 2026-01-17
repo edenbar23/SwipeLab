@@ -1,8 +1,8 @@
-package com.swipelab.controller;
+package com.swipelab.users.api;
 
 import com.swipelab.dto.request.UpdateProfileRequest;
 import com.swipelab.dto.response.UserProfileResponse;
-import com.swipelab.service.user.UserService;
+import com.swipelab.users.application.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

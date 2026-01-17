@@ -1,7 +1,7 @@
 package com.swipelab.auth.infrastructure;
 
-import com.swipelab.model.entity.User;
-import com.swipelab.repository.UserRepository;
+import com.swipelab.users.domain.User;
+import com.swipelab.users.infrastructure.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import com.swipelab.model.entity.User;
+import com.swipelab.users.domain.User;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;

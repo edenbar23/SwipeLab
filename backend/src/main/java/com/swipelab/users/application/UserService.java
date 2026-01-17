@@ -1,11 +1,11 @@
-package com.swipelab.service.user;
+package com.swipelab.users.application;
 
 import com.swipelab.dto.request.UpdateProfileRequest;
 import com.swipelab.dto.response.UserProfileResponse;
 import com.swipelab.exception.ResourceNotFoundException;
 import com.swipelab.mapper.AuthMapper;
-import com.swipelab.model.entity.User;
-import com.swipelab.repository.UserRepository;
+import com.swipelab.users.domain.User;
+import com.swipelab.users.infrastructure.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;

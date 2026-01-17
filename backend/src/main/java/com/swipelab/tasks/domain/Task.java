@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import com.swipelab.model.entity.User;
+import com.swipelab.users.domain.User;
 import com.swipelab.classification.domain.Label;
 import com.swipelab.classification.domain.Image;
 

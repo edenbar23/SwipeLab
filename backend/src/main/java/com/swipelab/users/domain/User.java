@@ -1,4 +1,4 @@
-package com.swipelab.model.entity;
+package com.swipelab.users.domain;
 
 import com.swipelab.model.enums.AuthProvider;
 import com.swipelab.model.enums.UserRole;
@@ -11,6 +11,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import com.swipelab.gamification.domain.Badge;
 
 import java.time.LocalDateTime;
 
@@ -178,6 +179,5 @@ public class User {
         @Column(name = "is_flagged", nullable = false)
         @Builder.Default
         private Boolean isFlagged = false;
-
 
 }

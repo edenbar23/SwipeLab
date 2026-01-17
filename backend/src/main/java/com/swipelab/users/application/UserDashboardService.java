@@ -1,13 +1,13 @@
-package com.swipelab.service;
+package com.swipelab.users.application;
 
 import com.swipelab.dto.response.dashboard.*;
 import com.swipelab.exception.ResourceNotFoundException;
 import com.swipelab.classification.domain.Image;
 import com.swipelab.tasks.domain.Task;
-import com.swipelab.model.entity.User;
+import com.swipelab.users.domain.User;
 import com.swipelab.classification.infrastructure.ImageRepository;
 import com.swipelab.tasks.infrastructure.TaskRepository;
-import com.swipelab.repository.UserRepository;
+import com.swipelab.users.infrastructure.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;

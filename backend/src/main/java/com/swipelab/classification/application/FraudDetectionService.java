@@ -1,7 +1,7 @@
 package com.swipelab.classification.application;
 
-import com.swipelab.model.entity.User;
-import com.swipelab.repository.UserRepository;
+import com.swipelab.users.domain.User;
+import com.swipelab.users.infrastructure.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

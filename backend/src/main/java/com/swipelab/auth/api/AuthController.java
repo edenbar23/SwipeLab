@@ -14,7 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-import com.swipelab.model.entity.User;
+import com.swipelab.users.domain.User;
 
 import java.security.Principal;
 import java.util.HashMap;

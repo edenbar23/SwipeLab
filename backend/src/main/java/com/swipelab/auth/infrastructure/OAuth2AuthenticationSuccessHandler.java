@@ -3,7 +3,7 @@ package com.swipelab.auth.infrastructure;
 import com.swipelab.auth.application.OAuth2Service;
 
 import com.swipelab.auth.application.JwtService;
-import com.swipelab.model.entity.User;
+import com.swipelab.users.domain.User;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
