@@ -5,11 +5,15 @@ import com.swipelab.dto.request.CreateTaskRequest;
 import com.swipelab.dto.request.UpdateRecipientGroupRequest;
 import com.swipelab.dto.request.UpdateTaskRequest;
 import com.swipelab.dto.response.*;
-import com.swipelab.statistics.application.AnalyticsService;
+// Note: TaskAnalyticsResponse might be in dto.response package too. 
+// We want com.swipelab.analytics.dto.TaskAnalyticsResponse
+// So we import it explicitly to override the star import if needed.
+import com.swipelab.analytics.dto.TaskAnalyticsResponse;
+import com.swipelab.analytics.application.AnalyticsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.http.ResponseEntity;
+
 import java.util.List;
 
 @RestController
@@ -19,7 +23,7 @@ import java.util.List;
 public class AdminDashboardController {
 
     private final com.swipelab.tasks.application.TaskService taskService;
-    private final com.swipelab.tasks.application.RecipientGroupService recipientGroupService;
+    private final com.swipelab.recipients.application.RecipientGroupService recipientGroupService;
     private final AnalyticsService analyticsService;
 
     // ===== TASKS =====

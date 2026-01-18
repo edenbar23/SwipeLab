@@ -1,0 +1,121 @@
+package com.swipelab.tasks.domain;
+
+import com.swipelab.dto.request.CreateTaskRequest;
+import com.swipelab.dto.request.UpdateTaskRequest;
+import com.swipelab.dto.response.TaskProgressResponse;
+import com.swipelab.dto.response.TaskResponse;
+import com.swipelab.dto.response.TargetSpeciesResponse;
+
+import com.swipelab.classification.domain.Label;
+
+import org.springframework.stereotype.Component;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Component
+public class TaskMapper {
+
+    // =========================
+    // REQUEST → ENTITY
+    // =========================
+
+    public Task toEntity(CreateTaskRequest request) {
+        if (request == null) {
+            return null;
+        }
+
+        return Task.builder()
+                .title(request.getName())
+                .description(request.getDescription())
+                .minClassificationsPerImage(request.getMinClassificationsPerImage())
+                .consensusThreshold(request.getConsensusThreshold())
+                .experiments(
+                        request.getExperiments() != null
+                                ? request.getExperiments()
+                                : Collections.emptyList())
+                .recipientGroups(
+                        request.getRecipientGroups() != null
+                                ? request.getRecipientGroups()
+                                : Collections.emptyList())
+                // targetSpecies resolved in service
+                .build();
+    }
+
+    public void updateEntity(Task task, UpdateTaskRequest request) {
+        if (task == null || request == null) {
+            return;
+        }
+
+        if (request.getName() != null) {
+            task.setTitle(request.getName());
+        }
+
+        if (request.getDescription() != null) {
+            task.setDescription(request.getDescription());
+        }
+
+        if (request.getExperiments() != null) {
+            task.setExperiments(request.getExperiments());
+        }
+
+        if (request.getRecipientGroups() != null) {
+            task.setRecipientGroups(request.getRecipientGroups());
+        }
+        // targetSpecies handled in service
+    }
+
+    // =========================
+    // ENTITY → RESPONSE
+    // =========================
+
+    public TaskResponse toResponse(Task task) {
+        if (task == null) {
+            return null;
+        }
+
+        return TaskResponse.builder()
+                .taskId(task.getId())
+                .status(task.getStatus().name())
+                .name(task.getTitle())
+                .description(task.getDescription())
+                .experiments(task.getExperiments())
+                .recipientGroups(task.getRecipientGroups())
+                .targetSpecies(
+                        task.getTargetSpecies() != null
+                                ? task.getTargetSpecies()
+                                        .stream()
+                                        .map(this::toTargetSpeciesResponse)
+                                        .collect(Collectors.toList())
+                                : Collections.emptyList())
+                .progress(TaskProgressResponse.empty())
+                .build();
+    }
+
+    public List<TaskResponse> toResponseList(List<Task> tasks) {
+        if (tasks == null) {
+            return Collections.emptyList();
+        }
+
+        return tasks.stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    // =========================
+    // HELPERS
+    // =========================
+
+    private TargetSpeciesResponse toTargetSpeciesResponse(Label label) {
+        if (label == null) {
+            return null;
+        }
+
+        return TargetSpeciesResponse.builder()
+                .name(label.getName())
+                .referenceImages(Collections.emptyList()) // filled later if needed
+                .build();
+    }
+
+}

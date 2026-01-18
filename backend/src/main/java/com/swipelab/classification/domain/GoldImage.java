@@ -5,9 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "gold_images")
@@ -25,14 +22,14 @@ public class GoldImage {
     @JoinColumn(name = "image_id", nullable = false, unique = true)
     private Image image;
 
-    @Column(name = "difficulty_level")
-    @Builder.Default
-    private String difficultyLevel = "MEDIUM";
+    @Column(nullable = false)
+    private String species;
 
-    @Column(columnDefinition = "TEXT")
-    private String explanation;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "correct_answer", nullable = false)
+    private UserResponse correctAnswer;
 
-    @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    public enum UserResponse {
+        YES, NO, DONT_KNOW, TRASH
+    }
 }

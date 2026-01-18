@@ -38,6 +38,12 @@ public class Task {
 
     private String description;
 
+    @Column(name = "query_species")
+    private String querySpecies;
+
+    @Column(name = "question")
+    private String question;
+
     private LocalDateTime deadline;
 
     // =========================

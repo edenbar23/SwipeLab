@@ -42,4 +42,9 @@ public class TaskController {
     public ResponseEntity<TaskResponse> getTaskById(@PathVariable Long id) {
         return ResponseEntity.ok(taskService.getTaskById(id));
     }
+
+    @GetMapping("/user/{username}")
+    public ResponseEntity<List<TaskResponse>> getTasksByUser(@PathVariable String username) {
+        return ResponseEntity.ok(taskService.getTasksByUser(username));
+    }
 }

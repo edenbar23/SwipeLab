@@ -1,7 +1,8 @@
 package com.swipelab.gamification.api;
 
-import com.swipelab.users.domain.User;
-import com.swipelab.gamification.application.LeaderboardService;
+import com.swipelab.gamification.domain.Gamification;
+import com.swipelab.gamification.domain.LeaderboardService;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,7 +20,7 @@ public class LeaderboardController {
     private final LeaderboardService leaderboardService;
 
     @GetMapping("/global")
-    public ResponseEntity<List<User>> getGlobalLeaderboard(
+    public ResponseEntity<List<Gamification>> getGlobalLeaderboard(
             @RequestParam(defaultValue = "10") int limit) {
         return ResponseEntity.ok(leaderboardService.getGlobalLeaderboard(limit));
     }

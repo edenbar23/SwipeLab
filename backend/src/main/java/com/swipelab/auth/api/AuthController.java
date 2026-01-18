@@ -29,7 +29,7 @@ public class AuthController {
 
     private final UserService userService;
     private final com.swipelab.auth.application.OAuth2Service oAuth2Service;
-    private final com.swipelab.mapper.AuthMapper authMapper;
+    private final com.swipelab.auth.domain.AuthMapper authMapper;
     private final com.swipelab.auth.application.JwtService jwtService;
 
     /**

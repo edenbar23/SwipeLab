@@ -6,7 +6,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
-//this is a problem
 import com.swipelab.tasks.domain.Task;
 
 import java.time.LocalDateTime;
@@ -22,8 +21,9 @@ public class Image {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "image_url", nullable = false)
-    private String imageUrl;
+    // Use src_path as requested, mapped to image_url for consistency or rename
+    @Column(name = "src_path", nullable = false)
+    private String srcPath;
 
     @Column(name = "thumbnail_url")
     private String thumbnailUrl;
@@ -37,14 +37,26 @@ public class Image {
     @Builder.Default
     private Integer priority = 0;
 
-    @Column(name = "is_gold_standard", nullable = false)
-    @Builder.Default
-    private Boolean isGoldStandard = false;
+    // Removed isGoldStandard and correctLabel from here as they are moved to
+    // GoldImage entity
+    // or kept if hybrid approach. User requested GoldImage Repository, imply
+    // separation.
+    // However, existing code uses isGoldStandard. I will deprecate or remove them
+    // to force using GoldImage.
+    // For now, I'll comment them out to strictly follow the "GoldImage Repository"
+    // design which implies a separate table/entity for gold data.
 
-    // Optional: Correct label if it's a gold standard image
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "correct_label_id")
-    private Label correctLabel;
+    /*
+     * @Column(name = "is_gold_standard", nullable = false)
+     * 
+     * @Builder.Default
+     * private Boolean isGoldStandard = false;
+     * 
+     * @ManyToOne(fetch = FetchType.LAZY)
+     * 
+     * @JoinColumn(name = "correct_label_id")
+     * private Label correctLabel;
+     */
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "task_id", nullable = false)
@@ -53,4 +65,9 @@ public class Image {
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime createdAt;
+
+    // Helper to get ID as image_id
+    public Long getImageId() {
+        return id;
+    }
 }

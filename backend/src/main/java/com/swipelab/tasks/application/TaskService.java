@@ -4,12 +4,10 @@ import com.swipelab.dto.request.CreateTaskRequest;
 import com.swipelab.dto.request.UpdateTaskRequest;
 import com.swipelab.dto.response.TaskResponse;
 import com.swipelab.exception.ResourceNotFoundException;
-import com.swipelab.mapper.TaskMapper;
 import com.swipelab.tasks.domain.Task;
-import com.swipelab.users.domain.User;
+import com.swipelab.tasks.domain.TaskMapper;
 import com.swipelab.tasks.domain.TaskStatus;
 import com.swipelab.tasks.infrastructure.TaskRepository;
-import com.swipelab.users.infrastructure.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,7 +20,6 @@ import java.util.stream.Collectors;
 public class TaskService {
 
     private final TaskRepository taskRepository;
-    private final UserRepository userRepository;
     private final TaskMapper taskMapper;
 
     // --- User/Shared Operations ---
@@ -45,8 +42,7 @@ public class TaskService {
 
     @Transactional
     public TaskResponse createTask(String username, CreateTaskRequest request) {
-        User user = userRepository.findByEmail(username)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + username));
+        // VALIDATE USER THROUGH AUTH WITH EVENT DRIVEN MAYBE
 
         Task task = taskMapper.toEntity(request);
         task.setStatus(TaskStatus.ACTIVE);
@@ -101,5 +97,11 @@ public class TaskService {
 
     private TaskResponse mapToResponse(Task task) {
         return taskMapper.toResponse(task);
+    }
+
+    public List<TaskResponse> getTasksByUser(String username) {
+        return taskRepository.findByUser(username).stream()
+                .map(taskMapper::toResponse)
+                .collect(Collectors.toList());
     }
 }

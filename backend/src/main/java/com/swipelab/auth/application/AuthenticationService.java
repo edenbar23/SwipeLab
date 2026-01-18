@@ -27,8 +27,9 @@ public class AuthenticationService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
-    private final com.swipelab.mapper.AuthMapper authMapper;
+    private final com.swipelab.auth.domain.AuthMapper authMapper;
     private final JwtService jwtService;
+    private final com.swipelab.eventing.kafka.KafkaEventPublisher eventPublisher;
 
     @Value("${app.auto-verify-emails:false}")
     private boolean autoVerifyEmails;
@@ -64,6 +65,14 @@ public class AuthenticationService {
 
         // Save user
         User savedUser = userRepository.save(user);
+
+        // Publish UserCreatedEvent
+        eventPublisher.publish(com.swipelab.eventing.kafka.KafkaConfig.USER_EVENTS_TOPIC,
+                com.swipelab.users.events.UserCreatedEvent.builder()
+                        .username(savedUser.getUsername())
+                        .email(savedUser.getEmail())
+                        .displayName(savedUser.getDisplayName())
+                        .build());
 
         // Send verification email asynchronously (only if not auto-verified)
         if (!autoVerifyEmails) {

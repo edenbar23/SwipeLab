@@ -1,102 +1,189 @@
 package com.swipelab.classification.application;
 
-// Service for handling image classifications
-import com.swipelab.dto.request.ClassificationRequest;
-import com.swipelab.dto.response.ClassificationResponse;
-import com.swipelab.exception.ResourceNotFoundException;
-import com.swipelab.classification.domain.Classification;
-import com.swipelab.classification.domain.Image;
-import com.swipelab.classification.domain.Label;
-import com.swipelab.users.domain.User;
+import com.swipelab.classification.domain.*;
+import com.swipelab.classification.dto.UserClassification;
+import com.swipelab.classification.dto.api.NextBatchResponse;
+import com.swipelab.classification.dto.api.SubmitClassificationRequest;
+import com.swipelab.classification.events.ClassificationSubmittedEvent;
 import com.swipelab.classification.infrastructure.ClassificationRepository;
+import com.swipelab.classification.infrastructure.CredibilityRepository;
+import com.swipelab.classification.infrastructure.GoldImageRepository;
 import com.swipelab.classification.infrastructure.ImageRepository;
-import com.swipelab.classification.infrastructure.LabelRepository;
-import com.swipelab.users.infrastructure.UserRepository;
-import com.swipelab.classification.application.FraudDetectionService;
-import com.swipelab.gamification.application.BadgeService;
-import com.swipelab.gamification.application.PointsService;
-import com.swipelab.gamification.application.StreakService;
-import com.swipelab.users.application.CredibilityService;
+
+import com.swipelab.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class ClassificationService {
 
-    private final ClassificationRepository classificationRepository;
-    private final ImageRepository imageRepository;
-    private final LabelRepository labelRepository;
-    private final UserRepository userRepository;
-    private final BadgeService badgeService;
-    private final PointsService pointsService;
-    private final StreakService streakService;
-    private final FraudDetectionService fraudDetectionService;
-    private final CredibilityService credibilityService;
+        private final ClassificationRepository classificationRepository;
+        private final ImageRepository imageRepository;
+        private final GoldImageRepository goldImageRepository;
+        private final CredibilityRepository credibilityRepository;
+        private final KafkaTemplate<String, Object> kafkaTemplate;
 
-    @Transactional
-    public ClassificationResponse submitClassification(String username, ClassificationRequest request) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + username));
+        private final FraudDetectionService fraudDetectionService;
+        private final ImageService imageService;
 
-        Image image = imageRepository.findById(request.getImageId())
-                .orElseThrow(() -> new ResourceNotFoundException("Image not found with id: " + request.getImageId()));
+        @Transactional
+        public NextBatchResponse submitClassification(String username, String userRole, Double userCredibility,
+                        SubmitClassificationRequest request) {
+                // 1. Analyze Fraud (Response Time)
+                if (request.getResponseTimeMs() != null) {
+                        fraudDetectionService.analyzeClassification(username, request.getResponseTimeMs());
+                }
 
-        Label label = labelRepository.findById(request.getLabelId())
-                .orElseThrow(() -> new ResourceNotFoundException("Label not found with id: " + request.getLabelId()));
+                // 2. Process Classification
+                Image image = imageRepository.findById(request.getImageId())
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Image not found: " + request.getImageId()));
 
-        // Check if already classified
-        if (classificationRepository.existsByUser_UsernameAndImage_Id(username, request.getImageId())) {
-            throw new IllegalArgumentException("User has already classified this image");
+                Optional<GoldImage> goldImageOpt = goldImageRepository.findByImageId(image.getId());
+
+                String species = image.getTask() != null ? image.getTask().getQuerySpecies() : null;
+                if (goldImageOpt.isPresent() && species == null) {
+                        species = goldImageOpt.get().getSpecies();
+                }
+
+                if (goldImageOpt.isPresent()) {
+                        GoldImage goldImage = goldImageOpt.get();
+                        boolean isCorrect = goldImage.getCorrectAnswer().name()
+                                        .equals(request.getDecision().name());
+
+                        credibilityRepository.save(CredibilityRecord.builder()
+                                        .username(username)
+                                        .taskId(request.getTaskId())
+                                        .goldImage(goldImage)
+                                        .querySpecies(goldImage.getSpecies())
+                                        .userResponse(request.getDecision())
+                                        .correctAnswer(goldImage.getCorrectAnswer())
+                                        .build());
+
+                        ClassificationSubmittedEvent event = ClassificationSubmittedEvent.builder()
+                                        .username(username)
+                                        .classificationId(null)
+                                        .imageId(image.getId())
+                                        .taskId(request.getTaskId())
+                                        .isCorrect(isCorrect)
+                                        .isGoldStandard(true)
+                                        .submittedAt(java.time.LocalDateTime.now())
+                                        .species(species)
+                                        .responseTimeMs(request.getResponseTimeMs())
+                                        .userCredibility(userCredibility)
+                                        .build();
+
+                        kafkaTemplate.send("classification-events", event);
+
+                } else {
+                        Classification classification = Classification.builder()
+                                        .username(username)
+                                        .userRole(userRole)
+                                        .taskId(request.getTaskId())
+                                        .image(image)
+                                        .querySpecies(species)
+                                        .userResponse(request.getDecision())
+                                        .build();
+
+                        Classification saved = classificationRepository.save(classification);
+
+                        ClassificationSubmittedEvent event = ClassificationSubmittedEvent.builder()
+                                        .username(username)
+                                        .classificationId(saved.getId())
+                                        .imageId(image.getId())
+                                        .taskId(request.getTaskId())
+                                        .isCorrect(false)
+                                        .isGoldStandard(false)
+                                        .submittedAt(saved.getCreatedAt())
+                                        .species(species)
+                                        .responseTimeMs(request.getResponseTimeMs())
+                                        .userCredibility(userCredibility)
+                                        .build();
+
+                        kafkaTemplate.send("classification-events", event);
+                }
+
+                // 3. Return Next Batch
+                return imageService.getNextBatchForApi(request.getTaskId(), username, 10);
         }
 
-        Classification classification = Classification.builder()
-                .user(user)
-                .image(image)
-                .label(label)
-                .build();
+        @Transactional
+        public void submitBatchResponses(String username, String userRole, Long taskId,
+                        List<UserClassification> responses) {
+                // Kept for backward compatibility
+                for (UserClassification response : responses) {
+                        Image image = imageRepository.findById(response.getImageId())
+                                        .orElseThrow(() -> new ResourceNotFoundException(
+                                                        "Image not found: " + response.getImageId()));
 
-        Classification saved = classificationRepository.save(classification);
+                        String species = image.getTask() != null ? image.getTask().getQuerySpecies() : null;
 
-        fraudDetectionService.analyzeClassification(user, request.getResponseTimeMs());
+                        Optional<GoldImage> goldImageOpt = goldImageRepository.findByImageId(image.getId());
 
-        credibilityService.updateUserCredibility(username, request.getImageId());
-        // Update User Stats
-        user.setTotalClassifications(user.getTotalClassifications() + 1);
+                        if (goldImageOpt.isPresent() && species == null) {
+                                species = goldImageOpt.get().getSpecies();
+                        }
 
-        // Gamification: Update Streak
-        streakService.updateStreak(user);
+                        if (goldImageOpt.isPresent()) {
+                                GoldImage goldImage = goldImageOpt.get();
+                                boolean isCorrect = goldImage.getCorrectAnswer().name()
+                                                .equals(response.getUserResponse().name());
 
-        // Gamification: Award points with multiplier (must be after streak update)
-        pointsService.calculateAndAddPoints(user, 10);
+                                credibilityRepository.save(CredibilityRecord.builder()
+                                                .username(username)
+                                                .taskId(taskId)
+                                                .goldImage(goldImage)
+                                                .querySpecies(goldImage.getSpecies())
+                                                .userResponse(response.getUserResponse())
+                                                .correctAnswer(goldImage.getCorrectAnswer())
+                                                .build());
 
-        // Determine correctness if it's a gold standard image
-        Boolean isCorrect = null;
-        if (Boolean.TRUE.equals(image.getIsGoldStandard()) && image.getCorrectLabel() != null) {
-            isCorrect = image.getCorrectLabel().getId().equals(label.getId());
-            if (Boolean.TRUE.equals(isCorrect)) {
-                pointsService.calculateAndAddPoints(user, 50); // Bonus for correct gold standard
-            }
+                                ClassificationSubmittedEvent event = ClassificationSubmittedEvent.builder()
+                                                .username(username)
+                                                .classificationId(null)
+                                                .imageId(image.getId())
+                                                .taskId(taskId)
+                                                .isCorrect(isCorrect)
+                                                .isGoldStandard(true)
+                                                .submittedAt(java.time.LocalDateTime.now())
+                                                .species(species)
+                                                .userCredibility(null) // Not available in batch yet
+                                                .build();
+
+                                kafkaTemplate.send("classification-events", event);
+
+                        } else {
+                                Classification classification = Classification.builder()
+                                                .username(username)
+                                                .userRole(userRole)
+                                                .taskId(taskId)
+                                                .image(image)
+                                                .querySpecies(species)
+                                                .userResponse(response.getUserResponse())
+                                                .build();
+
+                                Classification saved = classificationRepository.save(classification);
+
+                                ClassificationSubmittedEvent event = ClassificationSubmittedEvent.builder()
+                                                .username(username)
+                                                .classificationId(saved.getId())
+                                                .imageId(image.getId())
+                                                .taskId(taskId)
+                                                .isCorrect(false)
+                                                .isGoldStandard(false)
+                                                .submittedAt(saved.getCreatedAt())
+                                                .species(species)
+                                                .userCredibility(null)
+                                                .build();
+
+                                kafkaTemplate.send("classification-events", event);
+                        }
+                }
         }
-
-        // Check for badges
-        badgeService.checkForBadges(user);
-
-        // Save user with updated stats (critical fix!)
-        userRepository.save(user);
-
-        return mapToResponse(saved, isCorrect);
-    }
-
-    private ClassificationResponse mapToResponse(Classification classification, Boolean isCorrect) {
-        return ClassificationResponse.builder()
-                .id(classification.getId())
-                .userId(classification.getUser().getUsername())
-                .imageId(classification.getImage().getId())
-                .labelId(classification.getLabel().getId())
-                .isCorrect(isCorrect)
-                .createdAt(classification.getCreatedAt())
-                .build();
-    }
 }

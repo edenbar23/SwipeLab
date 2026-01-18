@@ -1,7 +1,7 @@
 package com.swipelab.auth.application;
 
 import com.swipelab.users.domain.User;
-import com.swipelab.model.enums.AuthProvider;
+import com.swipelab.auth.infrastructure.AuthProvider;
 import com.swipelab.model.enums.UserRole;
 import com.swipelab.users.infrastructure.UserRepository;
 import lombok.RequiredArgsConstructor;

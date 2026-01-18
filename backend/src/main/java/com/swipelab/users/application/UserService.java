@@ -1,9 +1,9 @@
 package com.swipelab.users.application;
 
+import com.swipelab.auth.domain.AuthMapper;
 import com.swipelab.dto.request.UpdateProfileRequest;
 import com.swipelab.dto.response.UserProfileResponse;
 import com.swipelab.exception.ResourceNotFoundException;
-import com.swipelab.mapper.AuthMapper;
 import com.swipelab.users.domain.User;
 import com.swipelab.users.infrastructure.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -43,6 +43,12 @@ public class UserService {
 
         User updatedUser = userRepository.save(user);
         return authMapper.toUserProfileResponse(updatedUser);
+    }
+
+    public Double getUserCredibility(String username) {
+        return userRepository.findByUsername(username)
+                .map(User::getCredibilityScore)
+                .orElse(0.0);
     }
 
     private User getCurrentUser() {

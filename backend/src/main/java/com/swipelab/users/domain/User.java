@@ -1,6 +1,5 @@
 package com.swipelab.users.domain;
 
-import com.swipelab.model.enums.AuthProvider;
 import com.swipelab.model.enums.UserRole;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
@@ -11,7 +10,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import com.swipelab.gamification.domain.Badge;
+
+import com.swipelab.auth.infrastructure.AuthProvider;
 
 import java.time.LocalDateTime;
 
@@ -138,21 +138,7 @@ public class User {
         @Builder.Default
         private Integer totalGoldClassifications = 0;
 
-        @Column(name = "points", nullable = false)
-        @Builder.Default
-        private Long points = 0L;
-
-        @Column(name = "current_streak")
-        @Builder.Default
-        private Integer currentStreak = 0;
-
-        @Column(name = "last_streak_update")
-        private LocalDateTime lastStreakUpdate;
-
-        @ManyToMany(fetch = FetchType.EAGER)
-        @JoinTable(name = "user_badges", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "badge_id"))
-        @Builder.Default
-        private java.util.Set<Badge> badges = new java.util.HashSet<>();
+        // Gamification fields removed
 
         // ========================================
 
@@ -180,4 +166,51 @@ public class User {
         @Builder.Default
         private Boolean isFlagged = false;
 
+        public Double getCredibilityScore() {
+                return credibilityScore;
+        }
+
+        public void setCredibilityScore(Double credibilityScore) {
+                this.credibilityScore = credibilityScore;
+        }
+
+        public Double getAgreementWithExperts() {
+                return agreementWithExperts;
+        }
+
+        public void setAgreementWithExperts(Double agreementWithExperts) {
+                this.agreementWithExperts = agreementWithExperts;
+        }
+
+        public Double getMajorityAgreementScore() {
+                return majorityAgreementScore;
+        }
+
+        public void setMajorityAgreementScore(Double majorityAgreementScore) {
+                this.majorityAgreementScore = majorityAgreementScore;
+        }
+
+        public Integer getTotalClassifications() {
+                return totalClassifications;
+        }
+
+        public void setTotalClassifications(Integer totalClassifications) {
+                this.totalClassifications = totalClassifications;
+        }
+
+        public Integer getCorrectGoldClassifications() {
+                return correctGoldClassifications;
+        }
+
+        public void setCorrectGoldClassifications(Integer correctGoldClassifications) {
+                this.correctGoldClassifications = correctGoldClassifications;
+        }
+
+        public Integer getTotalGoldClassifications() {
+                return totalGoldClassifications;
+        }
+
+        public void setTotalGoldClassifications(Integer totalGoldClassifications) {
+                this.totalGoldClassifications = totalGoldClassifications;
+        }
 }

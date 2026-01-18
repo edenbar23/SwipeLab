@@ -1,5 +1,6 @@
 package com.swipelab.dto.request;
 
+import com.swipelab.classification.domain.Classification;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,9 +16,8 @@ public class ClassificationRequest {
     @NotNull(message = "Image ID is required")
     private Long imageId;
 
-    @NotNull(message = "Label ID is required")
-    private Long labelId;
+    @NotNull(message = "User Response is required")
+    private Classification.UserResponse userResponse;
 
-    @NotNull(message = "Response time is required for fraud detection")
     private Long responseTimeMs;
 }
