@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/admin/export")
+@RequestMapping("/api/v1/admin/export")
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMIN')")
 public class ExportController {
