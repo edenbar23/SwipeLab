@@ -14,7 +14,7 @@ import com.swipelab.dto.response.RecipientGroupResponse;
 import com.swipelab.recipients.application.RecipientGroupService;
 
 @RestController
-@RequestMapping("/api/v1/admin/recipient-groups")
+@RequestMapping("/api/v1/dashboard/recipients")
 @PreAuthorize("hasRole('ADMIN')")
 @RequiredArgsConstructor
 public class RecipientsGroupController {

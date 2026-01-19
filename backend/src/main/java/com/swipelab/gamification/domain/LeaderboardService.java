@@ -23,4 +23,13 @@ public class LeaderboardService {
         return gamificationRepository.findAll(
                 PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, "currentStreak"))).getContent();
     }
+
+    public Gamification getGamification(String username) {
+        return gamificationRepository.findById(username)
+                .orElse(Gamification.builder()
+                        .username(username)
+                        .score(0L)
+                        .currentStreak(0)
+                        .build());
+    }
 }

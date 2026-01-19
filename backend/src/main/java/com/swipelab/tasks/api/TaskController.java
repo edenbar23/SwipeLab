@@ -64,7 +64,7 @@ public class TaskController {
                 .body(taskService.createTask(request));
     }
 
-    @PostMapping("/archive/{taskId}")
+    @PostMapping("/{taskId}/archive")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<TaskResponse> archiveTask(@PathVariable Long taskId) {
         return ResponseEntity.ok(taskService.archiveTask(taskId));
