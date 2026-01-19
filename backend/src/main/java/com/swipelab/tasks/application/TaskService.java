@@ -100,7 +100,7 @@ public class TaskService {
     }
 
     public List<TaskResponse> getTasksByUser(String username) {
-        return taskRepository.findByUser(username).stream()
+        return taskRepository.findByCreatedBy_Username(username).stream()
                 .map(taskMapper::toResponse)
                 .collect(Collectors.toList());
     }

@@ -62,7 +62,7 @@ public class TaskDistributionService {
      * Get next gold standard image that user hasn't classified yet
      */
     private Optional<Image> getNextGoldImage(String username, Long taskId) {
-        List<Image> goldImages = imageRepository.findByTaskIdAndIsGoldStandardTrue(taskId);
+        List<Image> goldImages = imageRepository.findGoldStandardImagesByTaskId(taskId);
 
         // Filter out images already classified by this user
         List<Image> unclassifiedGold = goldImages.stream()
@@ -83,7 +83,7 @@ public class TaskDistributionService {
      * Prioritizes images with fewer classifications.
      */
     private Optional<Image> getNextRegularImage(String username, Long taskId) {
-        List<Image> regularImages = imageRepository.findByTaskIdAndIsGoldStandardFalse(taskId);
+        List<Image> regularImages = imageRepository.findRegularImagesByTaskId(taskId);
 
         // Filter out images already classified by this user
         List<Image> unclassifiedRegular = regularImages.stream()
