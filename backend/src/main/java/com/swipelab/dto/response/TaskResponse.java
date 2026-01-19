@@ -17,4 +17,10 @@ public class TaskResponse {
     private List<Long> recipientGroups;
     private TaskProgressResponse progress;
 
+    private boolean assignedToUser;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime deadline;
+    private Integer minClassificationsPerImage;
+    private Double consensusThreshold;
+
 }

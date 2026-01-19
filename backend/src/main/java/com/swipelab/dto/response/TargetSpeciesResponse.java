@@ -14,6 +14,12 @@ public class TargetSpeciesResponse {
      * Example: "Vespa mandarinia"
      */
     private String name;
+
+    /**
+     * Common name
+     * Example: "Asian Giant Hornet"
+     */
+    private String commonName;
     /**
      * Reference images shown to users/admins
      */

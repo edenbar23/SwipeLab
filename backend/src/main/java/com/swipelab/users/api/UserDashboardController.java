@@ -4,9 +4,11 @@ import com.swipelab.dto.response.dashboard.*;
 import com.swipelab.users.application.UserDashboardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 @RestController
 @RequestMapping("/api/v1/dashboard")
+@PreAuthorize("hasAnyRole('USER', 'ADMIN')")
 @RequiredArgsConstructor
 public class UserDashboardController {
 
@@ -15,8 +17,7 @@ public class UserDashboardController {
     @GetMapping("/my-tasks")
     public MyTasksPageResponse getMyTasks(
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "20") int pageSize
-    ) {
+            @RequestParam(defaultValue = "20") int pageSize) {
         return userDashboardService.getMyTasks(page, pageSize);
     }
 
@@ -28,8 +29,7 @@ public class UserDashboardController {
     @GetMapping("/my-tasks/{taskId}/play")
     public PlayTaskResponse playTask(
             @PathVariable Long taskId,
-            @RequestParam(defaultValue = "10") int count
-    ) {
+            @RequestParam(defaultValue = "10") int count) {
         return userDashboardService.playTask(taskId, count);
     }
 }

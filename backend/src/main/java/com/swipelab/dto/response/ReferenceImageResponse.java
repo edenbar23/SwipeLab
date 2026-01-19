@@ -8,6 +8,7 @@ import lombok.Data;
 public class ReferenceImageResponse {
 
     private String contentType; // image/jpeg
-    private String data;        // base64 or URL (depending on endpoint)
+    private String data; // base64 or URL (depending on endpoint)
     private String caption;
+    private String imageUrl;
 }

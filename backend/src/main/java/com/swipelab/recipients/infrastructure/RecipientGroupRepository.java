@@ -12,4 +12,6 @@ public interface RecipientGroupRepository
     Optional<RecipientGroup> findByName(String name);
 
     boolean existsByName(String name);
+
+    java.util.List<RecipientGroup> findByUsers_Username(String username);
 }

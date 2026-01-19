@@ -71,6 +71,10 @@ public class TaskMapper {
     // =========================
 
     public TaskResponse toResponse(Task task) {
+        return toResponse(task, false);
+    }
+
+    public TaskResponse toResponse(Task task, boolean assignedToUser) {
         if (task == null) {
             return null;
         }
@@ -90,6 +94,16 @@ public class TaskMapper {
                                         .collect(Collectors.toList())
                                 : Collections.emptyList())
                 .progress(TaskProgressResponse.empty())
+                // New fields
+                .createdAt(task.getCreatedAt() != null
+                        ? java.time.OffsetDateTime.of(task.getCreatedAt(), java.time.ZoneOffset.UTC)
+                        : null)
+                .deadline(task.getDeadline() != null
+                        ? java.time.OffsetDateTime.of(task.getDeadline(), java.time.ZoneOffset.UTC)
+                        : null)
+                .minClassificationsPerImage(task.getMinClassificationsPerImage())
+                .consensusThreshold(task.getConsensusThreshold())
+                .assignedToUser(assignedToUser)
                 .build();
     }
 
@@ -114,6 +128,7 @@ public class TaskMapper {
 
         return TargetSpeciesResponse.builder()
                 .name(label.getName())
+                .commonName(label.getCommonName())
                 .referenceImages(Collections.emptyList()) // filled later if needed
                 .build();
     }
