@@ -36,9 +36,8 @@ public class GoldImageService {
 
     @Transactional(readOnly = true)
     public List<GoldImageResponse> getGoldImagesByTask(Long taskId) {
-        // Assuming we want all gold images for images belonging to a task
-        return goldImageRepository.findAll().stream()
-                .filter(g -> g.getImage().getTask().getId().equals(taskId))
+        // Use database query instead of findAll() + filter for better performance
+        return goldImageRepository.findByImageTaskId(taskId).stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }

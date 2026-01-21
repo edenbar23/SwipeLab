@@ -23,6 +23,19 @@ public class FraudDetectionService {
 
     @Transactional
     public void analyzeClassification(String username, long responseTimeMs) {
+        // Validate input
+        if (responseTimeMs < 0) {
+            log.warn("Invalid negative response time for user {}: {}ms. Skipping fraud analysis.",
+                    username, responseTimeMs);
+            return;
+        }
+
+        if (responseTimeMs == 0) {
+            log.warn("Zero response time for user {}: {}ms. Skipping fraud analysis.",
+                    username, responseTimeMs);
+            return;
+        }
+
         boolean isSuspicious = false;
 
         // 1. Response Time Analysis

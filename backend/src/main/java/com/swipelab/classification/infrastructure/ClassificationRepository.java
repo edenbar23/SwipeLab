@@ -70,4 +70,13 @@ public interface ClassificationRepository extends JpaRepository<Classification, 
     @Query("SELECT COUNT(c) FROM Classification c WHERE c.image.id = :imageId")
     long countByImageId(@Param("imageId") Long imageId);
 
+    /**
+     * Batch count classifications for multiple images.
+     * Returns a map of imageId -> count.
+     * Eliminates N+1 query pattern when checking multiple images.
+     */
+    @Query("SELECT c.image.id as imageId, COUNT(c) as count FROM Classification c " +
+            "WHERE c.image.id IN :imageIds GROUP BY c.image.id")
+    List<Object[]> countClassificationsByImageIds(@Param("imageIds") List<Long> imageIds);
+
 }

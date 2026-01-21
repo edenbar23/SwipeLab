@@ -1,6 +1,8 @@
 package com.swipelab.classification.domain;
 
-import com.swipelab.classification.dto.api.*;
+import com.swipelab.classification.dto.api.BatchImageDto;
+import com.swipelab.classification.dto.api.ImageDataDto;
+import com.swipelab.classification.dto.api.NextBatchResponse;
 import com.swipelab.classification.infrastructure.GoldImageRepository;
 import com.swipelab.dto.request.ImageUploadRequest;
 import com.swipelab.dto.response.ImageBatchResponse;
@@ -26,6 +28,9 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class ImageService {
+
+        // Constants
+        private static final int IMAGE_BATCH_LIMIT = 20;
 
         private final ImageRepository imageRepository;
         private final TaskRepository taskRepository;
@@ -142,7 +147,7 @@ public class ImageService {
                 Collections.shuffle(unclassifiedImages);
 
                 List<ImageResponse> batch = unclassifiedImages.stream()
-                                .limit(20)
+                                .limit(IMAGE_BATCH_LIMIT)
                                 .map(this::mapToResponse)
                                 .collect(Collectors.toList());
 

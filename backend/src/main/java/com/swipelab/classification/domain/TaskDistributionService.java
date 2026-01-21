@@ -94,11 +94,22 @@ public class TaskDistributionService {
             return Optional.empty();
         }
 
-        // Count classifications for each image
+        // Batch count classifications for all images (eliminates N+1 query)
+        List<Long> imageIds = unclassifiedRegular.stream()
+                .map(Image::getId)
+                .collect(Collectors.toList());
+
         Map<Long, Long> classificationCounts = new HashMap<>();
-        for (Image image : unclassifiedRegular) {
-            long count = classificationRepository.countByImage_Id(image.getId());
-            classificationCounts.put(image.getId(), count);
+        List<Object[]> results = classificationRepository.countClassificationsByImageIds(imageIds);
+        for (Object[] result : results) {
+            Long imageId = (Long) result[0];
+            Long count = (Long) result[1];
+            classificationCounts.put(imageId, count);
+        }
+
+        // Images not in the result have 0 classifications
+        for (Long imageId : imageIds) {
+            classificationCounts.putIfAbsent(imageId, 0L);
         }
 
         // Sort by: 1) Priority (descending), 2) Classification count (ascending)

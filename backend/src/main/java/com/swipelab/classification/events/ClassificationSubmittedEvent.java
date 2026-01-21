@@ -24,4 +24,8 @@ public class ClassificationSubmittedEvent {
     private String species;
     private Long responseTimeMs;
     private Double userCredibility;
+
+    // New fields for better analytics
+    private String userRole; // USER, RESEARCHER, etc. - enables expert classification tracking
+    private String userResponse; // YES or NO - enables confusion matrix calculation
 }

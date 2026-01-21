@@ -23,6 +23,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ClassificationController {
 
+        // Constants
+        private static final int DEFAULT_BATCH_SIZE = 10;
+        private static final Long DEFAULT_TASK_ID = 1L;
+
         private final ClassificationService classificationService;
         private final ImageService imageService;
         private final UserService userService;
@@ -34,7 +38,7 @@ public class ClassificationController {
                         @RequestParam(required = false) Long taskId,
                         @AuthenticationPrincipal UserDetails userDetails) {
 
-                Long effectiveTaskId = (taskId != null) ? taskId : 1L;
+                Long effectiveTaskId = (taskId != null) ? taskId : DEFAULT_TASK_ID;
 
                 return ResponseEntity
                                 .ok(imageService.getNextBatchForApi(effectiveTaskId, userDetails.getUsername(), count));
