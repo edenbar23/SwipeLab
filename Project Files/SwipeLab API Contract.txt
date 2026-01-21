@@ -444,7 +444,7 @@ Response:
 }
 
 User Statistics
-Base Path: 
+Base Path:
 All endpoints require authentication.
 2.4.1 User Classification Statistics
 GET /api/v1/statistics/me
