@@ -14,7 +14,6 @@ export async function apiFetch(
   //   const mockResponse = await mockRouter(url, method, init)
   //   if (mockResponse) {
   //     console.log('[MOCK]', method, url)
-  //     // console.log(mockResponse)
   //     return mockResponse
   //   }
   // }

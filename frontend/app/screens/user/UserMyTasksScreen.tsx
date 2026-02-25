@@ -1,17 +1,16 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, RefreshControl } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import ScreenHeaderLayout from '../../components/layout/ScreenHeaderLayout/ScreenHeaderLayout';
 
 import TaskCard from '../../components/user/TaskCard';
 
 // Mocks
-import { statisticsMock } from '../../mocks/data/statistics.mock';
 import { dashboardUserMock } from '../../mocks/data/dashboard.user.mock';
-import { authMock } from '../../mocks/data/auth.mock'; // For logout or user info if needed
+import { statisticsMock } from '../../mocks/data/statistics.mock';
 
-import { useThemeStore } from '../../stores/themeStore';
 import { Colors } from '../../../constants/theme';
+import { useThemeStore } from '../../stores/themeStore';
 
 export default function UserMyTasksScreen() {
     const navigation = useNavigation<any>();
@@ -108,7 +107,7 @@ export default function UserMyTasksScreen() {
                 {/* ... existing content ... */}
                 {/* Section Title */}
                 <View style={[styles.sectionHeader, { marginBottom: 10 }]}>
-                    <Text style={[styles.sectionTitle, { color: themeColors.text }]}>Current Tasks</Text>
+                    <Text style={[styles.sectionTitle, { color: themeColors.text }]}>Assigned Tasks</Text>
                 </View>
 
                 {tasks.length === 0 && (

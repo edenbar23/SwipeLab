@@ -180,7 +180,7 @@ export async function mockRouter(
 
 
   // ---------- CLASSIFICATION ----------
-  if (method === 'GET' && url.endsWith('/api/v1/classifications/next-batch')) {
+  if (method === 'GET' && url.split('?')[0].endsWith('/api/v1/classifications/next-batch')) {
     return jsonResponse(classificationMock.nextBatch)
   }
 

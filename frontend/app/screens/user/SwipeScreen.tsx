@@ -1,16 +1,26 @@
+import { useRoute } from '@react-navigation/native';
 import React, { useEffect, useRef, useState } from 'react';
-import { Platform, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Platform, StyleSheet, Text, View } from 'react-native';
+import { Colors } from '../../../constants/theme';
+import { apiFetch } from '../../api/apiFetch';
 import ReferenceGallery from '../../components/user/ReferenceGallery';
 import SwipeButtons from '../../components/user/SwipeButtons';
 import SwipeCard, { SwipeCardHandle } from '../../components/user/SwipeCard';
 import useResponsive from '../../hooks/useResponsive';
-import { SwipeDirection } from '../../types';
 import { useThemeStore } from '../../stores/themeStore';
-import { Colors } from '../../../constants/theme';
+import { SwipeDirection } from '../../types';
 
 export default function SwipeScreen() {
   const [showReference, setShowReference] = useState(false);
-  const [currentQuestion] = useState('Is this a ...');
+
+  const [dataBatch, setDataBatch] = useState<any[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const route = useRoute<any>();
+  const taskId = route?.params?.taskId || 7;
+
   const { isPhone, isDesktop } = useResponsive();
   const { theme } = useThemeStore();
   const themeColors = Colors[theme as keyof typeof Colors];
@@ -18,14 +28,61 @@ export default function SwipeScreen() {
 
   const cardRef = useRef<SwipeCardHandle>(null);
 
-  const handleSwipe = (direction: SwipeDirection) => {
-    console.log(`Swiped: ${direction}`);
-    // TODO: handle swipe and load next question
+  const fetchBatch = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await apiFetch(`/api/v1/classifications/next-batch?taskId=${taskId}&count=5`);
+      if (res.ok) {
+        const json = await res.json();
+        setDataBatch(json.images || []);
+        setCurrentIndex(0);
+      } else {
+        setError('Failed to fetch batch');
+      }
+    } catch (e) {
+      setError('Error fetching batch');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // Keyboard arrow handling (Web only)
   useEffect(() => {
-    if (Platform.OS !== 'web') return;
+    fetchBatch();
+  }, [taskId]);
+
+  const handleSwipe = async (direction: SwipeDirection) => {
+    console.log(`Swiped: ${direction}`);
+
+    const currentImage = dataBatch[currentIndex];
+
+    if (currentImage) {
+      let decision = direction.toUpperCase();
+      if (direction === 'dont-know') decision = 'DONT_KNOW';
+
+      apiFetch(`/api/v1/classifications/submit`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          imageId: currentImage.imageId,
+          taskId: currentImage.taskId,
+          question: currentImage.question,
+          decision: decision,
+          responseTimeMs: 0
+        })
+      }).catch(e => console.error("Submit error:", e));
+    }
+
+    if (currentIndex + 1 < dataBatch.length) {
+      setCurrentIndex(prev => prev + 1);
+      setShowReference(false);
+    } else {
+      fetchBatch();
+    }
+  };
+
+  useEffect(() => {
+    if (Platform.OS !== 'web' || loading || dataBatch.length === 0) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
       switch (e.key) {
@@ -50,29 +107,55 @@ export default function SwipeScreen() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [loading, dataBatch, currentIndex]);
+
+  if (loading && dataBatch.length === 0) {
+    return (
+      <View style={[styles.container, styles.centerElements, { backgroundColor: themeColors.background }]}>
+        <ActivityIndicator size="large" color={themeColors.primary} />
+      </View>
+    );
+  }
+
+  if (error || dataBatch.length === 0) {
+    return (
+      <View style={[styles.container, styles.centerElements, { backgroundColor: themeColors.background }]}>
+        <Text style={{ color: themeColors.text }}>{error || 'No more images to classify.'}</Text>
+      </View>
+    );
+  }
+
+  const currentImage = dataBatch[currentIndex];
+  let imageUrl = null;
+  if (currentImage?.image?.data) {
+    if (currentImage.image.data.startsWith('http')) {
+      imageUrl = currentImage.image.data;
+    } else {
+      imageUrl = `data:${currentImage.image.contentType || 'image/jpeg'};base64,${currentImage.image.data}`;
+    }
+  }
+
+  const referenceImagesUrls = currentImage?.referenceImages?.map((ref: any) => {
+    if (ref.data?.startsWith('http')) return ref.data;
+    return `data:${ref.contentType || 'image/jpeg'};base64,${ref.data}`;
+  }) || [];
 
   return (
     <View style={[styles.container, { backgroundColor: themeColors.background }]}>
       <View style={[styles.cardSection, { maxWidth: size }]}>
         <SwipeCard
           ref={cardRef}
-          question={currentQuestion}
-          imageUrl={null}
+          question={currentImage?.question || 'Is this a ...'}
+          imageUrl={imageUrl}
           onSwipe={handleSwipe}
+          key={currentImage?.imageId}
         />
       </View>
 
       <View style={styles.buttonSection}>
         {showReference ? (
           <ReferenceGallery
-            images={['https://snworksceo.imgix.net/ids/673119a2-05dd-4329-a9cc-9cc0f4496267.sized-1000x1000.png?w=1000',
-              'https://snworksceo.imgix.net/ids/673119a2-05dd-4329-a9cc-9cc0f4496267.sized-1000x1000.png?w=1000',
-              'https://snworksceo.imgix.net/ids/673119a2-05dd-4329-a9cc-9cc0f4496267.sized-1000x1000.png?w=1000',
-              'https://snworksceo.imgix.net/ids/673119a2-05dd-4329-a9cc-9cc0f4496267.sized-1000x1000.png?w=1000',
-
-
-            ]}
+            images={referenceImagesUrls.length > 0 ? referenceImagesUrls : ['https://via.placeholder.com/300?text=No+Reference+Images']}
             onClose={() => setShowReference(false)}
           />
         ) : (
@@ -93,9 +176,11 @@ export default function SwipeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#daddffff',
     paddingTop: 0,
     alignItems: 'center',
+  },
+  centerElements: {
+    justifyContent: 'center',
   },
   cardSection: {
     width: '100%',
