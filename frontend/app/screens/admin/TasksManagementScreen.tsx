@@ -1,11 +1,11 @@
 // admin screen for managing tasks
 import React, { useEffect, useState } from "react";
 import { FlatList, View } from "react-native";
+import { Colors } from '../../../constants/theme';
 import { apiFetch } from "../../api/apiFetch";
 import TaskCard from "../../components/admin/TaskCard";
 import ScreenHeaderLayout from "../../components/layout/ScreenHeaderLayout";
 import { useThemeStore } from '../../stores/themeStore';
-import { Colors } from '../../../constants/theme';
 
 export default function TasksManagementScreen({ navigation }: any) {
   const [tasks, setTasks] = useState<any[]>([]);
@@ -13,11 +13,11 @@ export default function TasksManagementScreen({ navigation }: any) {
   const themeColors = Colors[theme as keyof typeof Colors];
 
   useEffect(() => {
-    apiFetch("/api/v1/dashboard/tasks")
+    apiFetch("/api/v1/tasks/dashboard")
       .then((res: Response) => res.json()) // parse the JSON body
       .then((data) => {
         console.log("Parsed API data:", data); // now you can see the actual tasks
-        setTasks(data.tasks); // use the correct property
+        setTasks(data); // The backend returns an array directly
       })
       .catch((err) => console.error("API fetch error:", err));
   }, []);

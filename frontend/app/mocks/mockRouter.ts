@@ -134,11 +134,15 @@ export async function mockRouter(
 
 
   // ---------- DASHBOARD (USER) ----------
-  if (method === 'GET' && url.endsWith('/api/v1/dashboard/my-tasks')) {
+  if (method === 'GET' && url.split('?')[0].endsWith('/api/v1/dashboard/my-tasks')) {
     return jsonResponse(dashboardUserMock.tasks)
   }
 
-  if (method === 'GET' && url.match(/\/api\/v1\/dashboard\/my-tasks\/\d+$/)) {
+  if (method === 'GET' && url.split('?')[0].endsWith('/api/v1/dashboard/available-tasks')) {
+    return jsonResponse(dashboardUserMock.availableTasks)
+  }
+
+  if (method === 'GET' && url.split('?')[0].match(/\/api\/v1\/dashboard\/my-tasks\/\d+$/)) {
     return jsonResponse(dashboardUserMock.taskDetails)
   }
 

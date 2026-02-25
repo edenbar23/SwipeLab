@@ -19,7 +19,7 @@ export default function SwipeScreen() {
   const [error, setError] = useState<string | null>(null);
 
   const route = useRoute<any>();
-  const taskId = route?.params?.taskId || 7;
+  const taskId = route?.params?.taskId || 1;
 
   const { isPhone, isDesktop } = useResponsive();
   const { theme } = useThemeStore();

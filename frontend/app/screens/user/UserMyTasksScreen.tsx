@@ -1,15 +1,10 @@
 import { useNavigation } from '@react-navigation/native';
 import React, { useCallback, useEffect, useState } from 'react';
 import { RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
-import ScreenHeaderLayout from '../../components/layout/ScreenHeaderLayout/ScreenHeaderLayout';
-
-import TaskCard from '../../components/user/TaskCard';
-
-// Mocks
-import { dashboardUserMock } from '../../mocks/data/dashboard.user.mock';
-import { statisticsMock } from '../../mocks/data/statistics.mock';
-
 import { Colors } from '../../../constants/theme';
+import { apiFetch } from '../../api/apiFetch';
+import ScreenHeaderLayout from '../../components/layout/ScreenHeaderLayout/ScreenHeaderLayout';
+import TaskCard from '../../components/user/TaskCard';
 import { useThemeStore } from '../../stores/themeStore';
 
 export default function UserMyTasksScreen() {
@@ -19,25 +14,33 @@ export default function UserMyTasksScreen() {
     const [refreshing, setRefreshing] = useState(false);
 
     // State for data
-    const [stats, setStats] = useState(statisticsMock.summary);
-    const [tasks, setTasks] = useState(dashboardUserMock.tasks.tasks);
-    const [availableTasks, setAvailableTasks] = useState(dashboardUserMock.availableTasks || []);
+    const [stats, setStats] = useState<any>(null);
+    const [tasks, setTasks] = useState<any[]>([]);
+    const [availableTasks, setAvailableTasks] = useState<any[]>([]);
 
-    // Simulate fetching data
-    const loadData = useCallback(() => {
+    const loadData = useCallback(async () => {
         setRefreshing(true);
-        setTimeout(() => {
-            // In a real app, you would fetch fresh data here
-            // For now, we just reset from mocks to simulate a refresh
-            setStats(statisticsMock.summary);
-            // setTasks(dashboardUserMock.tasks.tasks); // Don't reset if we want to keep added tasks for demo
-            setAvailableTasks(dashboardUserMock.availableTasks || []);
+        try {
+            const [statsRes, tasksRes, availableRes] = await Promise.all([
+                apiFetch('/api/v1/statistics/me'),
+                apiFetch('/api/v1/tasks/my-tasks'),
+                apiFetch('/api/v1/tasks/available-tasks')
+            ]);
+
+            if (statsRes.ok) setStats(await statsRes.json());
+            if (tasksRes.ok) {
+                const tasksData = await tasksRes.json();
+                setTasks(tasksData.tasks || []);
+            }
+            if (availableRes.ok) setAvailableTasks(await availableRes.json());
+        } catch (e) {
+            console.error('Failed to load tasks data:', e);
+        } finally {
             setRefreshing(false);
-        }, 1000);
+        }
     }, []);
 
     const handleAddTask = (taskId: number) => {
-        // Move from available to my tasks
         const taskToAdd = availableTasks.find(t => t.taskId === taskId);
         if (taskToAdd) {
             setTasks(prev => [...prev, taskToAdd]);
@@ -56,9 +59,6 @@ export default function UserMyTasksScreen() {
 
     const handleRemoveTask = (taskId: number) => {
         setTasks(prev => prev.filter(t => t.taskId !== taskId));
-        // Optionally add it back to availableTasks?
-        // const removedTask = tasks.find(t => t.taskId === taskId);
-        // if(removedTask) setAvailableTasks(prev => [...prev, removedTask]);
     };
 
     const handleLogout = () => {
@@ -123,7 +123,7 @@ export default function UserMyTasksScreen() {
                             key={task.taskId}
                             title={task.name}
                             description={task.description}
-                            species={task.species.map(s => s.name)}
+                            species={task.species.map((s: any) => s.name)}
                             imagesClassified={task.imagesClassified}
                             progress={progress}
                             onPlay={() => handlePlayTask(task.taskId)}
@@ -146,7 +146,7 @@ export default function UserMyTasksScreen() {
                             key={task.taskId}
                             title={task.name}
                             description={task.description}
-                            species={task.species.map(s => s.name)}
+                            species={task.species.map((s: any) => s.name)}
                             imagesClassified={task.imagesClassified}
                             progress={progress}
                             onPlay={() => handleAddTask(task.taskId)}
@@ -156,7 +156,7 @@ export default function UserMyTasksScreen() {
                     );
                 })}
                 {availableTasks.length === 0 && (
-                    <Text style={[styles.emptyState, { color: themeColors.textSecondary }]}>No new tasks available.</Text>
+                    <Text style={[styles.emptyState, { color: themeColors.textSecondary }]}>No public tasks available.</Text>
                 )}
 
             </ScrollView>
