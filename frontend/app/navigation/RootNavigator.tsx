@@ -3,6 +3,7 @@
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import React from "react";
+import { ActivityIndicator, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 // stores
@@ -17,10 +18,18 @@ import UserNavigator from "./UserNavigator";
 import LoginScreen from "../screens/shared/LoginScreen";
 
 export default function RootNavigator() {
-  const { token, role } = useAuthStore();       // "USER" | "ADMIN" | null
+  const { token, role, isLoading } = useAuthStore();       // "USER" | "ADMIN" | null
   const { mode } = useModeStore();              // "USER" | "ADMIN"
   const Stack = createNativeStackNavigator();
 
+
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
 
   if (!token) {
     return (

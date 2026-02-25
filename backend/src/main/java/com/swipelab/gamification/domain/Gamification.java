@@ -47,6 +47,11 @@ public class Gamification {
     @Column(name = "badge")
     private String badge;
 
+    // Rank (Level based on challenges)
+    @Column(name = "rank_level")
+    @Builder.Default
+    private String rank = "UNRANKED";
+
     public Long getScore() {
         return score;
     }

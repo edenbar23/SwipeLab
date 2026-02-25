@@ -1,10 +1,10 @@
+import { useNavigation } from '@react-navigation/native';
 import React, { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import ScreenHeaderLayout from '../../components/layout/ScreenHeaderLayout/ScreenHeaderLayout';
-import { apiFetch } from '../../api/apiFetch';
-import { useThemeStore } from '../../stores/themeStore';
 import { Colors } from '../../../constants/theme';
+import { apiFetch } from '../../api/apiFetch';
+import ScreenHeaderLayout from '../../components/layout/ScreenHeaderLayout/ScreenHeaderLayout';
+import { useThemeStore } from '../../stores/themeStore';
 
 interface LeaderboardEntry {
     rank: number;
@@ -113,14 +113,37 @@ export default function LeaderboardScreen() {
     const fetchLeaderboard = useCallback(async () => {
         try {
             setLoading(true);
-            const response = await apiFetch('/api/v1/leaderboard/all');
+            const response = await apiFetch('/api/v1/gamification/leaderboard');
 
             if (!response.ok) {
                 throw new Error('Failed to fetch leaderboard');
             }
 
             const leaderboardData = await response.json();
-            setData(leaderboardData);
+
+            // Transform data to match UI requirements
+            const allTime = leaderboardData.map((item: any, index: number) => ({
+                rank: index + 1,
+                username: item.username,
+                score: item.score
+            }));
+
+            // Mock monthly data for now as backend doesn't provide it yet
+            const monthly = [...allTime].sort((a, b) => b.score - a.score).slice(0, 5);
+
+            // Find current user in the list or mock it if not found
+            // In a real app, we should fetch current user rank from backend
+            const currentUser = allTime.find((item: any) => item.username === "You") || {
+                rank: 0,
+                username: "You",
+                score: 0
+            };
+
+            setData({
+                currentUser,
+                allTime,
+                monthly
+            });
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Unknown error');
         } finally {
@@ -133,12 +156,13 @@ export default function LeaderboardScreen() {
     }, [fetchLeaderboard]);
 
     const updateScore = async (newScore: number) => {
-        await apiFetch('/api/v1/leaderboard/update-score', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ score: newScore }),
-        });
-        fetchLeaderboard(); // Refresh to see new rank
+        // API endpoint for updating score is likely different too, 
+        // based on GamificationController it might not even exist yet or be different.
+        // verified GamificationController has no update-score endpoint.
+        // disabling for now to prevent errors.
+        console.warn("Update score not implemented in backend yet");
+        // await apiFetch('/api/v1/leaderboard/update-score', { ... });
+        // fetchLeaderboard(); 
     };
 
     if (loading) {

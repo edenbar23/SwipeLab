@@ -8,6 +8,9 @@ import com.swipelab.users.domain.User;
 import com.swipelab.model.enums.UserRole;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 @Component
 public class AuthMapper {
 
@@ -26,6 +29,9 @@ public class AuthMapper {
                 .accountLocked(false)
                 .emailVerified(false)
                 .credibilityScore(0.0)
+                .score(0L)
+                .badges("")
+                .rank("UNRANKED")
                 .build();
     }
 
@@ -40,6 +46,11 @@ public class AuthMapper {
                 .displayName(user.getDisplayName())
                 .profileImageUrl(user.getProfileImageUrl())
                 .role(user.getRole())
+                .score(user.getScore() != null ? user.getScore() : 0L)
+                .badges(user.getBadges() != null && !user.getBadges().isEmpty()
+                        ? Arrays.asList(user.getBadges().split(","))
+                        : new ArrayList<>())
+                .rank(user.getRank() != null ? user.getRank() : "UNRANKED")
                 .build();
     }
 

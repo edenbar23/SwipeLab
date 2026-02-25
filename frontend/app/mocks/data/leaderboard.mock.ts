@@ -1,83 +1,41 @@
-// All players with their start of month score for dynamic calculation
-const allPlayers = [
-  { username: 'GoldWolf', score: 12430, startOfMonthScore: 11000 },
-  { username: 'MoonNinja', score: 11980, startOfMonthScore: 9800 }, // Monthly: 2180
-  { username: 'LunaStar', score: 11820, startOfMonthScore: 11000 },
-  { username: 'IceBlade', score: 10905, startOfMonthScore: 10000 },
-  { username: 'FlashSoda', score: 9800, startOfMonthScore: 7320 }, // Monthly: 2480 (Top 1)
-  { username: 'AutoWiz', score: 9200, startOfMonthScore: 6890 },   // Monthly: 2310 (Top 2)
-  { username: 'EmberGuy', score: 8500, startOfMonthScore: 6250 },  // Monthly: 2250 (Top 3)
-  { username: 'BluePhoenix', score: 8000, startOfMonthScore: 7000 },
+// Mock data matching backend Gamification entity
+export interface Gamification {
+  username: string;
+  score: number;
+  currentStreak: number;
+  longestStreak: number;
+  badge: string | null;
+}
+
+const allPlayers: Gamification[] = [
+  { username: 'GoldWolf', score: 12430, currentStreak: 5, longestStreak: 12, badge: 'Gold' },
+  { username: 'MoonNinja', score: 11980, currentStreak: 3, longestStreak: 8, badge: 'Silver' },
+  { username: 'LunaStar', score: 11820, currentStreak: 7, longestStreak: 15, badge: 'Silver' },
+  { username: 'IceBlade', score: 10905, currentStreak: 2, longestStreak: 5, badge: 'Bronze' },
+  { username: 'FlashSoda', score: 9800, currentStreak: 1, longestStreak: 4, badge: null },
+  { username: 'AutoWiz', score: 9200, currentStreak: 0, longestStreak: 3, badge: null },
+  { username: 'EmberGuy', score: 8500, currentStreak: 4, longestStreak: 10, badge: 'Bronze' },
+  { username: 'BluePhoenix', score: 8000, currentStreak: 2, longestStreak: 6, badge: null },
 ];
 
-// Current user data
 export let currentUserScore = 7542;
-export let currentUserStartOfMonthScore = 7000; // Monthly: 542
 
-// Function to update user score (for testing)
 export function setUserScore(newScore: number) {
   currentUserScore = newScore;
 }
 
-// Function to get leaderboard with dynamic ranking
-export function getLeaderboardData() {
-  const currentUser = {
-    username: 'User123',
+export function getLeaderboardData(): Gamification[] {
+  const currentUser: Gamification = {
+    username: 'You',
     score: currentUserScore,
-    startOfMonthScore: currentUserStartOfMonthScore
+    currentStreak: 4,
+    longestStreak: 9,
+    badge: 'Bronze'
   };
 
-  // Combine all players with current user
-  const allPlayersWithUser = [...allPlayers, currentUser];
-
-  // 1. Calculate All Time Rankings
-  const sortedAllTime = [...allPlayersWithUser].sort((a, b) => b.score - a.score);
-  const userAllTimeRank = sortedAllTime.findIndex(p => p.username === 'User123') + 1;
-
-  const allTimeLeaderboard = sortedAllTime.slice(0, 4).map((player, index) => ({
-    rank: index + 1,
-    username: player.username,
-    score: player.score,
-  }));
-
-  // 2. Calculate Monthly Rankings (Score - StartOfMonthScore)
-  const playersWithMonthly = allPlayersWithUser.map(p => ({
-    ...p,
-    monthlyScore: p.score - p.startOfMonthScore
-  }));
-
-  const sortedMonthly = playersWithMonthly.sort((a, b) => b.monthlyScore - a.monthlyScore);
-
-  const monthlyLeaderboard = sortedMonthly.slice(0, 4).map((player, index) => ({
-    rank: index + 1,
-    username: player.username,
-    score: player.monthlyScore,
-  }));
-
-  return {
-    currentUser: {
-      rank: userAllTimeRank,
-      username: 'User123',
-      score: currentUserScore,
-    },
-    allTime: allTimeLeaderboard,
-    monthly: monthlyLeaderboard,
-    lastUpdated: new Date().toISOString(),
-  };
+  // Combine and sort
+  return [...allPlayers, currentUser].sort((a, b) => b.score - a.score);
 }
 
-// Legacy export for backward compatibility
-export const leaderboardMock = {
-  get currentUser() {
-    return getLeaderboardData().currentUser;
-  },
-  get allTime() {
-    return getLeaderboardData().allTime;
-  },
-  get monthly() {
-    return getLeaderboardData().monthly;
-  },
-  get lastUpdated() {
-    return getLeaderboardData().lastUpdated;
-  },
-};
+// Legacy export if needed, but mainly for the router
+export const leaderboardMock = getLeaderboardData();

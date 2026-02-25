@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
-import { Alert, StyleSheet, Text, View, Image, TouchableOpacity, ScrollView, ActivityIndicator, Platform, TextInput, Modal } from "react-native";
-import ScreenHeaderLayout from "../../components/layout/ScreenHeaderLayout/ScreenHeaderLayout";
 import { useNavigation } from "@react-navigation/native";
+import React, { useEffect, useState } from "react";
+import { ActivityIndicator, Alert, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { apiFetch } from "../../api/apiFetch";
+import ScreenHeaderLayout from "../../components/layout/ScreenHeaderLayout/ScreenHeaderLayout";
 import useResponsive from "../../hooks/useResponsive";
 
 interface UserProfile {
@@ -13,8 +13,8 @@ interface UserProfile {
     badges: string[];
 }
 
-import { useThemeStore } from '../../stores/themeStore';
 import { Colors } from '../../../constants/theme';
+import { useThemeStore } from '../../stores/themeStore';
 
 export default function ProfileScreen() {
     const navigation = useNavigation<any>();
@@ -37,7 +37,7 @@ export default function ProfileScreen() {
 
     const fetchProfile = async () => {
         try {
-            const response = await apiFetch("/api/v1/auth/profile");
+            const response = await apiFetch("/api/v1/users/me");
             if (!response.ok) throw new Error("Failed to fetch");
             const data = await response.json();
             setUser(data);

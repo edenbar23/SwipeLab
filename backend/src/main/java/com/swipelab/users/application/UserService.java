@@ -12,6 +12,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -72,5 +75,29 @@ public class UserService {
         // Fallback for string principal
         return userRepository.findByUsername(authentication.getName())
                 .orElseThrow(() -> new RuntimeException("Authenticated user not found"));
+    }
+
+    public List<UserProfileResponse> getAllUsers() {
+        return userRepository.findAll().stream()
+                .map(authMapper::toUserProfileResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public UserProfileResponse banUser(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + username));
+        user.setActive(false);
+        User updatedUser = userRepository.save(user);
+        return authMapper.toUserProfileResponse(updatedUser);
+    }
+
+    @Transactional
+    public UserProfileResponse unbanUser(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + username));
+        user.setActive(true);
+        User updatedUser = userRepository.save(user);
+        return authMapper.toUserProfileResponse(updatedUser);
     }
 }

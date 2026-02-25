@@ -1,0 +1,23 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/swipelab_mock
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+  
+  jpa:
+    hibernate:
+      ddl-auto: create-drop # Automatically drops and recreates schema, useful for mock data
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+  flyway:
+    enabled: false # Disable flyway in mock to let Hibernate generate tables from entities
+
+# Mock specific logging
+logging:
+  level:
+    com.swipelab: DEBUG

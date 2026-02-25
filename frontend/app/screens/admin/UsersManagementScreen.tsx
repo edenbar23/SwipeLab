@@ -1,17 +1,17 @@
-import React from 'react';
-import { StyleSheet, Text, View, FlatList, Image, TouchableOpacity, Dimensions } from 'react-native';
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { AdminStackParamList } from "../../navigation/adminStack.types";
-import ScreenHeaderLayout from "../../components/layout/ScreenHeaderLayout/ScreenHeaderLayout";
-import { apiFetch } from "../../api/apiFetch";
-import { useThemeStore } from '../../stores/themeStore';
+import React from 'react';
+import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Colors } from '../../../constants/theme';
+import { apiFetch } from "../../api/apiFetch";
+import ScreenHeaderLayout from "../../components/layout/ScreenHeaderLayout/ScreenHeaderLayout";
+import { AdminStackParamList } from "../../navigation/adminStack.types";
+import { useThemeStore } from '../../stores/themeStore';
 
 // Images
-import usersImg from "../../../assets/images/users.png";
 import addTaskImg from "../../../assets/images/add_task.png";
 import profileImg from "../../../assets/images/profile.png";
+import usersImg from "../../../assets/images/users.png";
 
 type UsersManagementScreenNavigationProp = NativeStackNavigationProp<AdminStackParamList, 'UsersManagement'>;
 
@@ -35,7 +35,7 @@ export default function UsersManagementScreen() {
     const loadUsers = async () => {
         try {
             setLoading(true);
-            const res = await apiFetch('/api/v1/manager/users');
+            const res = await apiFetch('/api/v1/users/get-all');
             if (res.ok) {
                 const data = await res.json();
                 setUsers(data);

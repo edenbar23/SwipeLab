@@ -138,7 +138,18 @@ public class User {
         @Builder.Default
         private Integer totalGoldClassifications = 0;
 
-        // Gamification fields removed
+        // ========== GAMIFICATION CACHE ==========
+
+        @Column(name = "score")
+        @Builder.Default
+        private Long score = 0L;
+
+        @Column(name = "badges")
+        private String badges;
+
+        @Column(name = "rank_level")
+        @Builder.Default
+        private String rank = "UNRANKED";
 
         // ========================================
 
@@ -212,5 +223,29 @@ public class User {
 
         public void setTotalGoldClassifications(Integer totalGoldClassifications) {
                 this.totalGoldClassifications = totalGoldClassifications;
+        }
+
+        public Long getScore() {
+                return score;
+        }
+
+        public void setScore(Long score) {
+                this.score = score;
+        }
+
+        public String getBadges() {
+                return badges;
+        }
+
+        public void setBadges(String badges) {
+                this.badges = badges;
+        }
+
+        public String getRank() {
+                return rank;
+        }
+
+        public void setRank(String rank) {
+                this.rank = rank;
         }
 }

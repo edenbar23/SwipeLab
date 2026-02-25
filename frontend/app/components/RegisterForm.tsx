@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { apiFetch } from "../api/apiFetch";
 import { useAuthStore } from "../stores/authStore";
 import { useModeStore } from "../stores/modeStore";
 
@@ -20,6 +21,8 @@ export default function RegisterForm({ onClose }: Props) {
   const setMode = useModeStore((s) => s.setMode);
 
   const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [displayName, setDisplayName] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -37,12 +40,38 @@ export default function RegisterForm({ onClose }: Props) {
 
     try {
       // TODO: replace with real API call
-      const token = "mock-jwt-token";
+      // const token = "mock-jwt-token";
       const role = "USER";
 
-      setAuth(token, role);
+      const response = await apiFetch("/api/v1/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username,
+          email,
+          password,
+          displayName,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Registration failed");
+      }
+
+      const data = await response.json();
+      const { accessToken, user } = data;
+
+      // Ensure we treat the user object correctly
+      // Assuming user object has username, email, displayName, and possibly role
+      const userRole = user.role || "USER";
+
+      setAuth(accessToken, userRole, user.username, user.email, user.displayName);
+
       // Set default mode based on role
-      if (role === "ADMIN") {
+      if (userRole === "ADMIN") {
         setMode("admin");
       } else {
         setMode("user");
@@ -64,6 +93,22 @@ export default function RegisterForm({ onClose }: Props) {
           placeholder="Username"
           value={username}
           onChangeText={setUsername}
+          style={styles.input}
+          placeholderTextColor="#888"
+        />
+        <TextInput
+          placeholder="Email"
+          value={email}
+          onChangeText={setEmail}
+          style={styles.input}
+          keyboardType="email-address"
+          autoCapitalize="none"
+          placeholderTextColor="#888"
+        />
+        <TextInput
+          placeholder="Display Name"
+          value={displayName}
+          onChangeText={setDisplayName}
           style={styles.input}
           placeholderTextColor="#888"
         />

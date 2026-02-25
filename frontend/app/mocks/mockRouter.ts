@@ -1,22 +1,21 @@
 import { authMock } from './data/auth.mock'
 import { classificationMock } from './data/classification.mock'
+import { addToCollection, getCollection, getCollectionStats } from './data/collection.mock'
 import { dashboardAdminMock } from './data/dashboard.admin.mock'
 import { dashboardUserMock } from './data/dashboard.user.mock'
-import { getCollection, getCollectionStats, addToCollection } from './data/collection.mock'
 
-import { leaderboardMock } from './data/leaderboard.mock'
+import { getTaskAnalytics, getUserPerformance } from './data/analytics.mock'
 import { refinedChallengesMock } from './data/challenges.mock'
-import { statisticsMock, setUserAccuracy } from './data/statistics.mock'
-import { analyticsMock, getTaskAnalytics, getUserPerformance } from './data/analytics.mock'
+import { setUserAccuracy, statisticsMock } from './data/statistics.mock'
 
 import { getLeaderboardData, setUserScore } from './data/leaderboard.mock'
-import { usersMock } from './data/users.mock'
 import {
   addRecipientGroup,
   addUserToGroup,
-  removeUserFromGroup,
-  getRecipientGroups
+  getRecipientGroups,
+  removeUserFromGroup
 } from './data/recipients.mock'
+import { usersMock } from './data/users.mock'
 
 type Method = 'GET' | 'POST' | 'PUT' | 'DELETE'
 
@@ -194,7 +193,7 @@ export async function mockRouter(
   }
 
   // ---------- LEADERBOARD ----------
-  if (method === 'GET' && url.includes('/api/v1/leaderboard/')) {
+  if (method === 'GET' && url.includes('/api/v1/gamification/leaderboard')) {
     return jsonResponse(getLeaderboardData())
   }
 
