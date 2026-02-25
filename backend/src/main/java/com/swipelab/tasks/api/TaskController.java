@@ -56,6 +56,13 @@ public class TaskController {
         return ResponseEntity.ok(taskService.getAdminDashboard());
     }
 
+    @GetMapping("/dashboard/{taskId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    // get task details admin view
+    public ResponseEntity<TaskResponse> getTaskDetailsAdmin(@PathVariable Long taskId) {
+        return ResponseEntity.ok(taskService.getTaskDetailsAdmin(taskId));
+    }
+
     @PostMapping("/create")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<TaskResponse> createTask(@Valid @RequestBody CreateTaskRequest request) {

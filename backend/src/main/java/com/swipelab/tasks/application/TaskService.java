@@ -114,6 +114,11 @@ public class TaskService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
+    public TaskResponse getTaskDetailsAdmin(Long taskId) {
+        return mapToResponse(getTask(taskId));
+    }
+
     @Transactional
     public TaskResponse createTask(CreateTaskRequest request) {
         // TODO: Validate author (admin)
