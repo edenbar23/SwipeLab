@@ -1,8 +1,9 @@
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useEffect, useState } from 'react';
 import {
     ActivityIndicator,
     Alert,
-    Image,
     Modal,
     RefreshControl,
     ScrollView,
@@ -10,20 +11,17 @@ import {
     Text,
     TextInput,
     TouchableOpacity,
-    View,
-    FlatList,
     TouchableWithoutFeedback,
+    View
 } from 'react-native';
-import ScreenHeaderLayout from '../../components/layout/ScreenHeaderLayout/ScreenHeaderLayout';
-import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { apiFetch } from '../../api/apiFetch';
-import { AdminStackParamList } from '../../navigation/adminStack.types';
-import { RecipientGroup } from '../../mocks/data/recipients.mock';
-import useResponsive from '../../hooks/useResponsive';
-import { User } from '../../mocks/data/users.mock';
-import { useThemeStore } from '../../stores/themeStore';
 import { Colors } from '../../../constants/theme';
+import { apiFetch } from '../../api/apiFetch';
+import ScreenHeaderLayout from '../../components/layout/ScreenHeaderLayout/ScreenHeaderLayout';
+import useResponsive from '../../hooks/useResponsive';
+import { RecipientGroup } from '../../mocks/data/recipients.mock';
+import { User } from '../../mocks/data/users.mock';
+import { AdminStackParamList } from '../../navigation/adminStack.types';
+import { useThemeStore } from '../../stores/themeStore';
 
 type NavigationProp = NativeStackNavigationProp<AdminStackParamList, 'RecipientsList'>;
 
@@ -61,7 +59,7 @@ export default function RecipientsListScreen() {
 
     const fetchUsers = async () => {
         try {
-            const res = await apiFetch('/api/v1/manager/users');
+            const res = await apiFetch('/api/v1/users/get-all');
             if (res.ok) {
                 const data = await res.json();
                 setAllUsers(data);
@@ -73,10 +71,29 @@ export default function RecipientsListScreen() {
 
     const fetchGroups = async () => {
         try {
-            const res = await apiFetch('/api/v1/manager/recipient-groups');
-            if (res.ok) {
-                const data = await res.json();
-                setGroups(data);
+            const [usersRes, groupsRes] = await Promise.all([
+                apiFetch('/api/v1/users/get-all').catch(() => null),
+                apiFetch('/api/v1/dashboard/recipients').catch(() => null)
+            ]);
+
+            let fetchedUsers: User[] = [];
+            if (usersRes && usersRes.ok) {
+                fetchedUsers = await usersRes.json();
+                setAllUsers(fetchedUsers);
+            }
+
+            if (groupsRes && groupsRes.ok) {
+                const rawGroups = await groupsRes.json();
+                const mappedGroups: RecipientGroup[] = rawGroups.map((g: any) => ({
+                    id: g.groupId,
+                    name: g.name,
+                    usersCount: g.userCount || g.usernames?.length || 0,
+                    users: (g.usernames || []).map((uname: string) => {
+                        const u = fetchedUsers.find(user => (user.username || user.id) === uname);
+                        return u || { id: uname, username: uname, description: 'User' };
+                    })
+                }));
+                setGroups(mappedGroups);
             }
         } catch (error) {
             console.error('Failed to fetch recipient groups', error);

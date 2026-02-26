@@ -22,17 +22,22 @@ export default function UserMyTasksScreen() {
         setRefreshing(true);
         try {
             const [statsRes, tasksRes, availableRes] = await Promise.all([
-                apiFetch('/api/v1/statistics/me'),
-                apiFetch('/api/v1/tasks/my-tasks'),
-                apiFetch('/api/v1/tasks/available-tasks')
+                apiFetch('/api/v1/statistics/me').catch(() => null),
+                apiFetch('/api/v1/tasks/my-tasks').catch(() => null),
+                apiFetch('/api/v1/tasks/available-tasks').catch(() => null)
             ]);
 
-            if (statsRes.ok) setStats(await statsRes.json());
-            if (tasksRes.ok) {
+            if (statsRes && statsRes.ok) setStats(await statsRes.json());
+            if (tasksRes && tasksRes.ok) {
                 const tasksData = await tasksRes.json();
                 setTasks(tasksData.tasks || []);
             }
-            if (availableRes.ok) setAvailableTasks(await availableRes.json());
+
+            if (availableRes && availableRes.ok) {
+                setAvailableTasks(await availableRes.json());
+            } else {
+                console.log('available tasks not implemented yet');
+            }
         } catch (e) {
             console.error('Failed to load tasks data:', e);
         } finally {
@@ -116,14 +121,14 @@ export default function UserMyTasksScreen() {
 
                 {tasks.map((task) => {
                     // Calculate progress
-                    const progress = Math.round((task.imagesClassified / task.totalImages) * 100);
+                    const progress = task.totalImages ? Math.round((task.imagesClassified / task.totalImages) * 100) : 0;
 
                     return (
                         <TaskCard
                             key={task.taskId}
                             title={task.name}
                             description={task.description}
-                            species={task.species.map((s: any) => s.name)}
+                            species={task.species ? task.species.map((s: any) => s.name) : []}
                             imagesClassified={task.imagesClassified}
                             progress={progress}
                             onPlay={() => handlePlayTask(task.taskId)}
@@ -139,14 +144,14 @@ export default function UserMyTasksScreen() {
 
                 {availableTasks.map((task) => {
                     // Calculate progress
-                    const progress = Math.round((task.imagesClassified / task.totalImages) * 100);
+                    const progress = task.totalImages ? Math.round((task.imagesClassified / task.totalImages) * 100) : 0;
 
                     return (
                         <TaskCard
                             key={task.taskId}
                             title={task.name}
                             description={task.description}
-                            species={task.species.map((s: any) => s.name)}
+                            species={task.species ? task.species.map((s: any) => s.name) : []}
                             imagesClassified={task.imagesClassified}
                             progress={progress}
                             onPlay={() => handleAddTask(task.taskId)}

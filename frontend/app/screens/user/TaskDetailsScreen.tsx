@@ -1,12 +1,10 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation, useRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import UserTopBar from '../../components/user/UserTopBar';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import React from 'react';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-import { useThemeStore } from '../../stores/themeStore';
 import { Colors } from '../../../constants/theme';
+import { useThemeStore } from '../../stores/themeStore';
 
 export default function TaskDetailsScreen() {
     const navigation = useNavigation<any>();
@@ -45,7 +43,7 @@ export default function TaskDetailsScreen() {
                         <Text style={[styles.statLabel, { color: themeColors.textSecondary }]}>Pending</Text>
                     </View>
                     <View style={styles.statItem}>
-                        <Text style={styles.statValue}>{Math.round((task.imagesClassified / task.totalImages) * 100)}%</Text>
+                        <Text style={styles.statValue}>{task.totalImages ? Math.round((task.imagesClassified / task.totalImages) * 100) : 0}%</Text>
                         <Text style={[styles.statLabel, { color: themeColors.textSecondary }]}>Progress</Text>
                     </View>
                 </View>
@@ -62,7 +60,7 @@ export default function TaskDetailsScreen() {
                 <View style={styles.section}>
                     <Text style={[styles.sectionTitle, { color: themeColors.text }]}>Target Species</Text>
                     <View style={styles.speciesList}>
-                        {task.species.map((s: any, index: number) => (
+                        {(task.species || []).map((s: any, index: number) => (
                             <View key={index} style={[styles.speciesCard, { backgroundColor: themeColors.card }]}>
                                 {/* Placeholder image for species */}
                                 <View style={[styles.speciesImagePlaceholder, { backgroundColor: themeColors.background }]}>

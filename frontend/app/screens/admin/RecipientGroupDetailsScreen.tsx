@@ -1,6 +1,6 @@
+import { useNavigation, useRoute } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
     Alert,
     Image,
     Modal,
@@ -8,14 +8,13 @@ import {
     StyleSheet,
     Text,
     TouchableOpacity,
-    View,
+    View
 } from 'react-native';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { Colors } from '../../../constants/theme';
 import { apiFetch } from '../../api/apiFetch';
 import { RecipientGroup } from '../../mocks/data/recipients.mock';
-import { User, usersMock } from '../../mocks/data/users.mock';
+import { User } from '../../mocks/data/users.mock';
 import { useThemeStore } from '../../stores/themeStore';
-import { Colors } from '../../../constants/theme';
 
 // Utility for colors
 function getColorForType(type: string) {
@@ -46,31 +45,49 @@ export default function RecipientGroupDetailsScreen() {
     const [selectedGroupIds, setSelectedGroupIds] = useState<number[]>([]);
 
     // Data Sources
-    const [allUsers, setAllUsers] = useState<User[]>(usersMock);
+    const [allUsers, setAllUsers] = useState<User[]>([]);
     const [allGroups, setAllGroups] = useState<RecipientGroup[]>([]);
 
-    useEffect(() => {
-        // Fetch all groups for the "Add Group" tab
-        const fetchGroups = async () => {
-            try {
-                const res = await apiFetch('/api/v1/manager/recipient-groups');
-                if (res.ok) {
-                    setAllGroups(await res.json());
-                }
-            } catch (e) {
-                console.error(e);
+    const loadAllData = async () => {
+        try {
+            const [usersRes, groupsRes] = await Promise.all([
+                apiFetch('/api/v1/users/get-all').catch(() => null),
+                apiFetch('/api/v1/dashboard/recipients').catch(() => null)
+            ]);
+
+            let fetchedUsers: User[] = allUsers;
+            if (usersRes && usersRes.ok) {
+                fetchedUsers = await usersRes.json();
+                setAllUsers(fetchedUsers);
             }
-        };
-        fetchGroups();
+
+            if (groupsRes && groupsRes.ok) {
+                const rawGroups = await groupsRes.json();
+                const mappedGroups: RecipientGroup[] = rawGroups.map((g: any) => ({
+                    id: g.groupId,
+                    name: g.name,
+                    usersCount: g.userCount || g.usernames?.length || 0,
+                    users: (g.usernames || []).map((uname: string) => {
+                        const u = fetchedUsers.find((user: any) => (user.username || user.id) === uname);
+                        return u || { id: uname, username: uname, description: 'User' };
+                    })
+                }));
+                setAllGroups(mappedGroups);
+
+                const updated = mappedGroups.find(g => g.id === currentGroup.id);
+                if (updated) setCurrentGroup(updated);
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
+    useEffect(() => {
+        loadAllData();
     }, []);
 
     const refreshGroup = async () => {
-        const res = await apiFetch('/api/v1/manager/recipient-groups');
-        if (res.ok) {
-            const groups: RecipientGroup[] = await res.json();
-            const updated = groups.find(g => g.id === currentGroup.id);
-            if (updated) setCurrentGroup(updated);
-        }
+        await loadAllData();
     };
 
     const handleAddSelected = async () => {
