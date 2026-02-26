@@ -6,16 +6,25 @@ import com.swipelab.classification.domain.GoldImageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
+@PreAuthorize("hasRole('ADMIN')")
 @RequestMapping("/api/admin/gold-images")
 @RequiredArgsConstructor
 public class GoldImageController {
 
     private final GoldImageService goldImageService;
+
+    //get all tasks 
+    @GetMapping("/get-all")
+    public ResponseEntity<List<GoldImageResponse>> getAllGoldImages() {
+        List<GoldImageResponse> responses = goldImageService.getAllGoldImages();
+        return ResponseEntity.ok(responses);
+    }
 
     @PostMapping
     public ResponseEntity<GoldImageResponse> createGoldImage(@RequestBody GoldImageRequest request) {

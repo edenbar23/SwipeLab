@@ -75,4 +75,11 @@ public class GoldImageService {
                 .correctAnswer(goldImage.getCorrectAnswer())
                 .build();
     }
+
+    @Transactional(readOnly = true)
+    public List<GoldImageResponse> getAllGoldImages() {
+        return goldImageRepository.findAll().stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
 }

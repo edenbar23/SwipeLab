@@ -8,6 +8,7 @@ import { getTaskAnalytics, getUserPerformance } from './data/analytics.mock'
 import { refinedChallengesMock } from './data/challenges.mock'
 import { setUserAccuracy, statisticsMock } from './data/statistics.mock'
 
+import { MOCK_GOLD_IMAGES } from './data/goldImages.mock'
 import { getLeaderboardData, setUserScore } from './data/leaderboard.mock'
 import {
   addRecipientGroup,
@@ -365,6 +366,25 @@ export async function mockRouter(
     };
     const newItem = addToCollection(imageUrl, label as any, taskId, taskName, question);
     return jsonResponse(newItem, 201);
+  }
+
+  // ---------- GOLD IMAGES ----------
+  if (method === 'GET' && url.split('?')[0].endsWith('/api/admin/gold-images/get-all')) {
+    return jsonResponse(MOCK_GOLD_IMAGES)
+  }
+
+  if (method === 'GET' && url.split('?')[0].endsWith('/api/admin/gold-images')) {
+    const urlObj = new URL(url, 'http://localhost');
+    const taskIdParam = urlObj.searchParams.get('taskId');
+    if (taskIdParam) {
+      const taskId = parseInt(taskIdParam, 10);
+      return jsonResponse(MOCK_GOLD_IMAGES.filter(g => g.taskId === taskId));
+    }
+    return jsonResponse(MOCK_GOLD_IMAGES);
+  }
+
+  if (method === 'DELETE' && url.includes('/api/admin/gold-images/')) {
+    return jsonResponse({ message: 'Gold image deleted' });
   }
 
   // ---------- FALLBACK ----------

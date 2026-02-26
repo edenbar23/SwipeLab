@@ -7,14 +7,14 @@ import {
     TouchableOpacity,
     View
 } from "react-native";
-import { useThemeStore } from '../../stores/themeStore';
 import { Colors } from '../../../constants/theme';
+import { useThemeStore } from '../../stores/themeStore';
 
 type GoldImageData = {
     id: number;
-    imageUrl: string;
-    correctLabelName: string;
-    difficultyLevel?: string;
+    imageUrl?: string;
+    species?: string;
+    correctAnswer?: string;
 };
 
 type Props = {
@@ -31,7 +31,7 @@ export default function GoldImageCard({ goldImage, onDelete }: Props) {
             {/* Image Thumbnail */}
             <View style={styles.imageContainer}>
                 <Image
-                    source={{ uri: goldImage.imageUrl }}
+                    source={{ uri: goldImage.imageUrl || `https://via.placeholder.com/300/E2E8F0/64748B?text=${goldImage.species || 'Image'}` }}
                     style={styles.thumbnail}
                     resizeMode="cover"
                 />
@@ -40,11 +40,11 @@ export default function GoldImageCard({ goldImage, onDelete }: Props) {
             {/* Content */}
             <View style={styles.content}>
                 <Text style={[styles.species, { color: themeColors.text }]} numberOfLines={1}>
-                    {goldImage.correctLabelName}
+                    {goldImage.species || "Unknown Species"}
                 </Text>
-                {goldImage.difficultyLevel && (
+                {goldImage.correctAnswer && (
                     <Text style={[styles.difficulty, { color: themeColors.textSecondary }]}>
-                        Level: {goldImage.difficultyLevel}
+                        Answer: {goldImage.correctAnswer}
                     </Text>
                 )}
             </View>

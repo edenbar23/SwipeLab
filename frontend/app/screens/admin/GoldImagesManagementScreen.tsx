@@ -1,91 +1,22 @@
 // admin screen for managing gold images
 import React, { useEffect, useState } from "react";
 import { Alert, FlatList, StyleSheet, Text, View } from "react-native";
+import { Colors } from '../../../constants/theme';
 import { apiFetch } from "../../api/apiFetch";
 import GoldImageCard from "../../components/admin/GoldImageCard";
 import ScreenHeaderLayout from "../../components/layout/ScreenHeaderLayout";
 import { useThemeStore } from '../../stores/themeStore';
-import { Colors } from '../../../constants/theme';
 
 type GoldImageResponse = {
     id: number;
     imageId: number;
-    imageUrl: string;
-    caption: string;
-    taskId: number;
-    correctLabelId: number;
-    correctLabelName: string;
-    difficultyLevel: string;
-    explanation: string;
-    createdAt: string;
+    species: string;
+    correctAnswer: string;
+    imageUrl?: string;
 };
 
-// Mock data for visualization
-const MOCK_GOLD_IMAGES: GoldImageResponse[] = [
-    {
-        id: 1,
-        imageId: 101,
-        imageUrl: "https://via.placeholder.com/300/FFB6C1/000000?text=Bee",
-        caption: "Insecta - Hymenoptera - Apidae - Apis - mellifera",
-        taskId: 1,
-        correctLabelId: 1,
-        correctLabelName: "Honey Bee (Apis mellifera)",
-        difficultyLevel: "EASY",
-        explanation: "Common honey bee",
-        createdAt: "2026-01-06T10:00:00",
-    },
-    {
-        id: 2,
-        imageId: 102,
-        imageUrl: "https://via.placeholder.com/300/98FB98/000000?text=Wasp",
-        caption: "Insecta - Hymenoptera - Vespidae - Vespa - crabro",
-        taskId: 1,
-        correctLabelId: 2,
-        correctLabelName: "European Hornet (Vespa crabro)",
-        difficultyLevel: "MEDIUM",
-        explanation: "Large wasp species",
-        createdAt: "2026-01-06T10:15:00",
-    },
-    {
-        id: 3,
-        imageId: 103,
-        imageUrl: "https://via.placeholder.com/300/87CEEB/000000?text=Butterfly",
-        caption: "Insecta - Lepidoptera - Nymphalidae - Danaus - plexippus",
-        taskId: 1,
-        correctLabelId: 3,
-        correctLabelName: "Monarch Butterfly (Danaus plexippus)",
-        difficultyLevel: "EASY",
-        explanation: "Orange and black butterfly",
-        createdAt: "2026-01-06T10:30:00",
-    },
-    {
-        id: 4,
-        imageId: 104,
-        imageUrl: "https://via.placeholder.com/300/DDA0DD/000000?text=Beetle",
-        caption: "Insecta - Coleoptera - Coccinellidae - Coccinella - septempunctata",
-        taskId: 1,
-        correctLabelId: 4,
-        correctLabelName: "Ladybug (Coccinella septempunctata)",
-        difficultyLevel: "EASY",
-        explanation: "Seven-spotted ladybug",
-        createdAt: "2026-01-06T10:45:00",
-    },
-    {
-        id: 5,
-        imageId: 105,
-        imageUrl: "https://via.placeholder.com/300/F0E68C/000000?text=Ant",
-        caption: "Insecta - Hymenoptera - Formicidae - Camponotus - pennsylvanicus",
-        taskId: 1,
-        correctLabelId: 5,
-        correctLabelName: "Carpenter Ant (Camponotus pennsylvanicus)",
-        difficultyLevel: "HARD",
-        explanation: "Large black ant",
-        createdAt: "2026-01-06T11:00:00",
-    },
-];
-
 export default function GoldImagesManagementScreen({ navigation }: any) {
-    const [goldImages, setGoldImages] = useState<GoldImageResponse[]>(MOCK_GOLD_IMAGES);
+    const [goldImages, setGoldImages] = useState<GoldImageResponse[]>([]);
     const [loading, setLoading] = useState(false);
     const { theme } = useThemeStore();
     const themeColors = Colors[theme as keyof typeof Colors];
@@ -94,14 +25,14 @@ export default function GoldImagesManagementScreen({ navigation }: any) {
     const taskId = 1;
 
     useEffect(() => {
-        // Using mock data for now. Uncomment below to fetch real data from API
-        // fetchGoldImages();
+        // Fetch real data from API
+        fetchGoldImages();
     }, []);
 
     const fetchGoldImages = async () => {
         try {
             setLoading(true);
-            const res = await apiFetch(`/api/admin/gold-images?taskId=${taskId}`);
+            const res = await apiFetch(`/api/admin/gold-images/get-all`);
             const data = await res.json();
             console.log("Gold Images data:", data);
             setGoldImages(data);
