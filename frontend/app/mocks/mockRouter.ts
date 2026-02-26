@@ -259,13 +259,36 @@ export async function mockRouter(
   }
 
   // User Performance Analytics
-  if (method === 'GET' && url.includes('/api/v1/dashboard/analytics/users')) {
+  if (method === 'GET' && url.includes('/api/v1/analytics/users')) {
     // Extract taskId from query params if present
     const urlObj = new URL(url, 'http://localhost');
     const taskIdParam = urlObj.searchParams.get('taskId');
     const taskId = taskIdParam ? parseInt(taskIdParam, 10) : undefined;
 
     return jsonResponse(getUserPerformance(taskId));
+  }
+
+  // Top Performers
+  if (method === 'GET' && url.includes('/api/v1/analytics/top-performers')) {
+    const urlObj = new URL(url, 'http://localhost');
+    const limitParam = urlObj.searchParams.get('limit');
+    let limit = limitParam ? parseInt(limitParam, 10) : 10;
+    if (isNaN(limit)) limit = 10;
+
+    // Sort logic isn't strictly necessary for a mock, but sorting by score or current values is nice.
+    // For now we slice the user performance mock logic.
+    const performers = getUserPerformance().slice(0, limit);
+    return jsonResponse(performers);
+  }
+
+  // Exports
+  if (method === 'POST' && url.includes('/api/v1/analytics/exports')) {
+    return jsonResponse({
+      exportId: "exp_" + Date.now().toString(),
+      status: "QUEUED",
+      createdAt: new Date().toISOString(),
+      estimatedCompletion: new Date(Date.now() + 10 * 60000).toISOString()
+    }, 202);
   }
 
   // CHALLENGES

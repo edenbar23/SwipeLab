@@ -9,11 +9,11 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
+import { Colors } from '../../../constants/theme';
 import { apiFetch } from "../../api/apiFetch";
 import MetricCard from "../../components/admin/MetricCard";
 import ScreenHeaderLayout from "../../components/layout/ScreenHeaderLayout";
 import { useThemeStore } from '../../stores/themeStore';
-import { Colors } from '../../../constants/theme';
 
 type TaskAnalytics = {
     taskId: number;
@@ -45,6 +45,7 @@ type UserPerformance = {
 export default function AnalyticsScreen({ navigation }: any) {
     const [analytics, setAnalytics] = useState<TaskAnalytics | null>(null);
     const [users, setUsers] = useState<UserPerformance[]>([]);
+    const [topPerformers, setTopPerformers] = useState<UserPerformance[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const selectedTaskId = 1;
@@ -58,16 +59,19 @@ export default function AnalyticsScreen({ navigation }: any) {
     const fetchAnalytics = async (taskId: number) => {
         try {
             setLoading(true);
-            const [analyticsRes, usersRes] = await Promise.all([
-                apiFetch(`/api/v1/dashboard/tasks/${taskId}/analytics`),
-                apiFetch(`/api/v1/dashboard/analytics/users?taskId=${taskId}`),
+            const [analyticsRes, usersRes, topPerformersRes] = await Promise.all([
+                apiFetch(`/api/v1/analytics/tasks/${taskId}`),
+                apiFetch(`/api/v1/analytics/users?taskId=${taskId}`),
+                apiFetch(`/api/v1/analytics/top-performers?limit=5`),
             ]);
 
             const analyticsData = await analyticsRes.json();
             const usersData = await usersRes.json();
+            const topPerformersData = await topPerformersRes.json();
 
             setAnalytics(analyticsData);
             setUsers(usersData);
+            setTopPerformers(topPerformersData);
         } catch (err) {
             console.error("Analytics fetch error:", err);
             Alert.alert("Error", "Failed to fetch analytics data");
@@ -117,11 +121,21 @@ export default function AnalyticsScreen({ navigation }: any) {
         );
     };
 
-    const handleExport = () => {
-        Alert.alert("Export", "Export functionality coming soon!");
+    const handleExport = async () => {
+        try {
+            const res = await apiFetch(`/api/v1/analytics/exports`, {
+                method: "POST",
+                body: JSON.stringify({ taskId: selectedTaskId })
+            });
+            const data = await res.json();
+            Alert.alert("Export Started", `Status: ${data.status}\nEstimated completion: ${new Date(data.estimatedCompletion).toLocaleTimeString()}`);
+        } catch (error) {
+            console.error("Export error:", error);
+            Alert.alert("Error", "Failed to start export");
+        }
     };
 
-    const topPerformers = users.slice(0, 5);
+
 
     return (
         <ScreenHeaderLayout
@@ -152,18 +166,18 @@ export default function AnalyticsScreen({ navigation }: any) {
                         <View style={styles.section}>
                             <Text style={[styles.sectionTitle, { color: themeColors.text }]}>Task</Text>
                             <View style={[styles.taskInfo, { backgroundColor: themeColors.card, borderColor: themeColors.border }]}>
-                                <Text style={[styles.taskName, { color: themeColors.text }]}>{analytics.taskName}</Text>
+                                <Text style={[styles.taskName, { color: themeColors.text }]}>{analytics?.taskName ?? "Unknown Task"}</Text>
                                 <View
                                     style={[
                                         styles.statusBadge,
-                                        analytics.status === "ACTIVE"
+                                        analytics?.status === "ACTIVE"
                                             ? styles.statusActive
-                                            : analytics.status === "PAUSED"
+                                            : analytics?.status === "PAUSED"
                                                 ? styles.statusPaused
                                                 : styles.statusArchived,
                                     ]}
                                 >
-                                    <Text style={styles.statusText}>{analytics.status}</Text>
+                                    <Text style={styles.statusText}>{analytics?.status ?? "UNKNOWN"}</Text>
                                 </View>
                             </View>
                         </View>
@@ -175,22 +189,22 @@ export default function AnalyticsScreen({ navigation }: any) {
                                 <View style={styles.halfWidth}>
                                     <MetricCard
                                         label="Completion"
-                                        value={`${analytics.completionPercentage.toFixed(1)}%`}
+                                        value={`${(analytics?.completionPercentage ?? 0).toFixed(1)}%`}
                                         variant="primary"
                                     />
                                 </View>
                                 <View style={styles.halfWidth}>
                                     <MetricCard
                                         label="Total Images"
-                                        value={analytics.totalImages}
+                                        value={analytics?.totalImages ?? 0}
                                         variant="primary"
                                     />
                                 </View>
                             </View>
                             <MetricCard
                                 label="Classified Images"
-                                value={analytics.classifiedImages}
-                                subtitle={`${analytics.totalImages - analytics.classifiedImages} remaining`}
+                                value={analytics?.classifiedImages ?? 0}
+                                subtitle={`${(analytics?.totalImages ?? 0) - (analytics?.classifiedImages ?? 0)} remaining`}
                                 variant="success"
                             />
                         </View>
@@ -200,14 +214,14 @@ export default function AnalyticsScreen({ navigation }: any) {
                             <Text style={[styles.sectionTitle, { color: themeColors.text }]}>✨ Data Quality</Text>
                             <MetricCard
                                 label="Average Consensus"
-                                value={`${analytics.averageConsensus.toFixed(1)}%`}
+                                value={`${(analytics?.averageConsensus ?? 0).toFixed(1)}%`}
                                 variant="success"
                             />
                             <View style={styles.row}>
                                 <View style={styles.halfWidth}>
                                     <MetricCard
                                         label="High Consensus"
-                                        value={analytics.highConsensusCount}
+                                        value={analytics?.highConsensusCount ?? 0}
                                         subtitle="≥80% agreement"
                                         variant="success"
                                     />
@@ -215,7 +229,7 @@ export default function AnalyticsScreen({ navigation }: any) {
                                 <View style={styles.halfWidth}>
                                     <MetricCard
                                         label="Low Consensus"
-                                        value={analytics.lowConsensusCount}
+                                        value={analytics?.lowConsensusCount ?? 0}
                                         subtitle="<60% agreement"
                                         variant="warning"
                                     />
@@ -228,27 +242,27 @@ export default function AnalyticsScreen({ navigation }: any) {
                             <Text style={[styles.sectionTitle, { color: themeColors.text }]}>👥 Users</Text>
                             <MetricCard
                                 label="Active Users"
-                                value={analytics.uniqueClassifiers}
-                                subtitle={`${analytics.totalClassifications} total classifications`}
+                                value={analytics?.uniqueClassifiers ?? 0}
+                                subtitle={`${analytics?.totalClassifications ?? 0} total classifications`}
                                 variant="primary"
                             />
 
                             <Text style={[styles.subsectionTitle, { color: themeColors.textSecondary }]}>Top Performers</Text>
-                            {topPerformers.map((user, index) => (
+                            {topPerformers?.map((user, index) => (
                                 <View key={user.username} style={[styles.userCard, { backgroundColor: themeColors.card, borderColor: themeColors.border }]}>
                                     <View style={styles.userRank}>
                                         <Text style={styles.rankText}>#{index + 1}</Text>
                                     </View>
                                     <View style={styles.userInfo}>
-                                        <Text style={[styles.userName, { color: themeColors.text }]}>{user.displayName}</Text>
+                                        <Text style={[styles.userName, { color: themeColors.text }]}>{user.displayName ?? user.username ?? "Unknown User"}</Text>
                                         <Text style={styles.userStats}>
-                                            {user.totalClassifications} classifications •{" "}
-                                            {user.goldAccuracy.toFixed(1)}% accuracy
+                                            {user.totalClassifications ?? 0} classifications •{" "}
+                                            {(user.goldAccuracy ?? 0).toFixed(1)}% accuracy
                                         </Text>
                                     </View>
                                     <View style={styles.userScore}>
                                         <Text style={styles.credibilityScore}>
-                                            {(user.credibilityScore * 100).toFixed(0)}
+                                            {((user.credibilityScore ?? 0) * 100).toFixed(0)}
                                         </Text>
                                         <Text style={styles.credibilityLabel}>score</Text>
                                     </View>
@@ -269,7 +283,7 @@ export default function AnalyticsScreen({ navigation }: any) {
 
                             <Text style={[styles.subsectionTitle, { color: themeColors.textSecondary }]}>Task Controls</Text>
                             <View style={styles.controlButtons}>
-                                {analytics.status !== "ACTIVE" && (
+                                {analytics?.status !== "ACTIVE" && (
                                     <TouchableOpacity
                                         style={[styles.controlButton, styles.activateButton]}
                                         onPress={() => handleStateChange("activate")}
@@ -277,7 +291,7 @@ export default function AnalyticsScreen({ navigation }: any) {
                                         <Text style={styles.controlButtonText}>▶️ Activate</Text>
                                     </TouchableOpacity>
                                 )}
-                                {analytics.status === "ACTIVE" && (
+                                {analytics?.status === "ACTIVE" && (
                                     <TouchableOpacity
                                         style={[styles.controlButton, styles.pauseButton]}
                                         onPress={() => handleStateChange("pause")}

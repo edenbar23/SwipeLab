@@ -1,10 +1,10 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View, RefreshControl } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Colors } from '../../../constants/theme';
 import { apiFetch } from '../../api/apiFetch';
 import ScreenHeaderLayout from '../../components/layout/ScreenHeaderLayout/ScreenHeaderLayout';
 import { useThemeStore } from '../../stores/themeStore';
-import { Colors } from '../../../constants/theme';
 
 const DEBUG_MODE = false; // Set to true for testing controls
 
@@ -159,18 +159,18 @@ export default function StatsScreen() {
 
                 {/* User Profile Summary */}
                 <View style={styles.grid}>
-                    <SummaryCard title="Global Rank" value={`#${data.summary.rankGlobal}`} subtext="Top 1%" />
-                    <SummaryCard title="Score" value={data.summary.score.toLocaleString()} />
-                    <SummaryCard title="Tasks Done" value={data.summary.completedTasks} />
-                    <SummaryCard title="Accuracy" value={`${(data.summary.accuracy * 100).toFixed(1)}%`} subtext="Overall" />
+                    <SummaryCard title="Global Rank" value={`#${data.summary?.rankGlobal ?? '-'}`} subtext="Top 1%" />
+                    <SummaryCard title="Score" value={data.summary?.score?.toLocaleString() ?? '0'} />
+                    <SummaryCard title="Tasks Done" value={data.summary?.completedTasks ?? 0} />
+                    <SummaryCard title="Accuracy" value={`${((data.summary?.accuracy ?? 0) * 100).toFixed(1)}%`} subtext="Overall" />
                 </View>
 
                 {/* Streak */}
                 <View style={styles.section}>
                     <Text style={[styles.sectionTitle, { color: themeColors.text }]}>🔥 Streak</Text>
                     <View style={[styles.streakContainer, { backgroundColor: themeColors.card }]}>
-                        <Text style={[styles.streakText, { color: themeColors.text }]}>Current: <Text style={styles.streakBold}>{data.summary.currentStreakDays} days</Text></Text>
-                        <Text style={[styles.streakText, { color: themeColors.text }]}>Longest: <Text style={styles.streakBold}>{data.summary.longestStreakDays} days</Text></Text>
+                        <Text style={[styles.streakText, { color: themeColors.text }]}>Current: <Text style={styles.streakBold}>{data.summary?.currentStreakDays ?? 0} days</Text></Text>
+                        <Text style={[styles.streakText, { color: themeColors.text }]}>Longest: <Text style={styles.streakBold}>{data.summary?.longestStreakDays ?? 0} days</Text></Text>
                     </View>
                 </View>
 
@@ -181,17 +181,17 @@ export default function StatsScreen() {
                         <Text style={[styles.chartTitle, { color: themeColors.text }]}>Vs Experts</Text>
                         <ProgressBar
                             label="Your Accuracy"
-                            value={data.vsExperts.userAccuracy}
+                            value={data.vsExperts?.userAccuracy ?? 0}
                             color="#4B7BE5"
                         />
                         <ProgressBar
                             label="Expert Benchmark"
-                            value={data.vsExperts.expertAccuracy}
+                            value={data.vsExperts?.expertAccuracy ?? 0}
                             color="#8B008B"
                         />
                         <Text style={[styles.insightText, { color: themeColors.textSecondary }]}>
-                            You are {Math.abs(data.vsExperts.difference * 100).toFixed(1)}%
-                            {data.vsExperts.difference >= 0 ? ' above ' : ' below '}
+                            You are {Math.abs((data.vsExperts?.difference ?? 0) * 100).toFixed(1)}%
+                            {(data.vsExperts?.difference ?? 0) >= 0 ? ' above ' : ' below '}
                             expert level.
                         </Text>
 
@@ -200,11 +200,11 @@ export default function StatsScreen() {
                         <Text style={[styles.chartTitle, { color: themeColors.text }]}>Vs Community</Text>
                         <ProgressBar
                             label="Average User"
-                            value={data.vsUsers.averageUserAccuracy}
+                            value={data.vsUsers?.averageUserAccuracy ?? 0}
                             color="#FFA500"
                         />
                         <Text style={[styles.insightText, { color: themeColors.textSecondary }]}>
-                            You're in the top {100 - data.vsUsers.percentile}% of contributors!
+                            You're in the top {100 - (data.vsUsers?.percentile ?? 0)}% of contributors!
                         </Text>
                     </View>
                 </View>
@@ -212,14 +212,14 @@ export default function StatsScreen() {
                 {/* Breakdown */}
                 <View style={styles.section}>
                     <Text style={[styles.sectionTitle, { color: themeColors.text }]}>📝 Task Breakdown</Text>
-                    {data.breakdown.byTask.map((task) => (
+                    {data.breakdown?.byTask?.map((task) => (
                         <View key={task.taskId} style={[styles.taskRow, { backgroundColor: themeColors.card }]}>
                             <View style={styles.taskInfo}>
                                 <Text style={[styles.taskName, { color: themeColors.text }]}>{task.taskName}</Text>
                                 <Text style={styles.taskCount}>{task.classifications} classifications</Text>
                             </View>
                             <View style={styles.taskStat}>
-                                <Text style={styles.taskAccuracy}>{(task.accuracy * 100).toFixed(1)}%</Text>
+                                <Text style={styles.taskAccuracy}>{((task.accuracy ?? 0) * 100).toFixed(1)}%</Text>
                             </View>
                         </View>
                     ))}
