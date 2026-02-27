@@ -15,6 +15,7 @@ public class UserDashboardController {
     private final UserDashboardService userDashboardService;
 
     @GetMapping("/my-tasks")
+    @ResponseBody
     public MyTasksPageResponse getMyTasks(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int pageSize) {
@@ -22,11 +23,13 @@ public class UserDashboardController {
     }
 
     @GetMapping("/my-tasks/{taskId}")
+    @ResponseBody
     public MyTaskDetailsResponse getTaskDetails(@PathVariable Long taskId) {
         return userDashboardService.getTaskDetails(taskId);
     }
 
     @GetMapping("/my-tasks/{taskId}/play")
+    @ResponseBody
     public PlayTaskResponse playTask(
             @PathVariable Long taskId,
             @RequestParam(defaultValue = "10") int count) {
