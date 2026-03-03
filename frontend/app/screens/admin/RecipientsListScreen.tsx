@@ -3,7 +3,6 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useEffect, useState } from 'react';
 import {
     ActivityIndicator,
-    Alert,
     Modal,
     RefreshControl,
     ScrollView,
@@ -15,6 +14,7 @@ import {
     View
 } from 'react-native';
 import { Colors } from '../../../constants/theme';
+import { API_ENDPOINTS } from '../../api/apiEndpoints';
 import { apiFetch } from '../../api/apiFetch';
 import ScreenHeaderLayout from '../../components/layout/ScreenHeaderLayout/ScreenHeaderLayout';
 import useResponsive from '../../hooks/useResponsive';
@@ -22,7 +22,6 @@ import { RecipientGroup } from '../../mocks/data/recipients.mock';
 import { User } from '../../mocks/data/users.mock';
 import { AdminStackParamList } from '../../navigation/adminStack.types';
 import { useThemeStore } from '../../stores/themeStore';
-import { API_ENDPOINTS } from '../../api/apiEndpoints';
 
 
 type NavigationProp = NativeStackNavigationProp<AdminStackParamList, 'RecipientsList'>;
@@ -44,6 +43,7 @@ export default function RecipientsListScreen() {
     // Create Modal
     const [createModalVisible, setCreateModalVisible] = useState(false);
     const [newGroupName, setNewGroupName] = useState('');
+    const [createErrorMsg, setCreateErrorMsg] = useState('');
 
     // User Selection for New Group
     const [allUsers, setAllUsers] = useState<User[]>([]);
@@ -64,7 +64,8 @@ export default function RecipientsListScreen() {
             const res = await apiFetch(API_ENDPOINTS.USERS.GET_ALL);
             if (res.ok) {
                 const data = await res.json();
-                setAllUsers(data);
+                const normalized = data.map((u: any) => ({ ...u, id: u.username || u.id }));
+                setAllUsers(normalized);
             }
         } catch (error) {
             console.error('Failed to fetch users', error);
@@ -80,7 +81,8 @@ export default function RecipientsListScreen() {
 
             let fetchedUsers: User[] = [];
             if (usersRes && usersRes.ok) {
-                fetchedUsers = await usersRes.json();
+                const rawUsers = await usersRes.json();
+                fetchedUsers = rawUsers.map((u: any) => ({ ...u, id: u.username || u.id }));
                 setAllUsers(fetchedUsers);
             }
 
@@ -119,8 +121,9 @@ export default function RecipientsListScreen() {
     };
 
     const handleCreateGroup = async () => {
+        setCreateErrorMsg('');
         if (!newGroupName.trim()) {
-            Alert.alert("Error", "Please enter a group name");
+            setCreateErrorMsg("Please enter a group name");
             return;
         }
 
@@ -140,6 +143,9 @@ export default function RecipientsListScreen() {
             // Payload: { name, usernames: [...] }
             const res = await apiFetch(API_ENDPOINTS.ADMIN.RECIPIENTS_CREATE, {
                 method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
                 body: JSON.stringify({
                     name: newGroupName,
                     usernames: finalUsernames
@@ -152,12 +158,27 @@ export default function RecipientsListScreen() {
                 setSearchQuery('');
                 setSelectedUserIds([]);
                 setSelectedGroupIds([]);
+                setCreateErrorMsg('');
                 fetchGroups();
             } else {
-                Alert.alert("Error", "Failed to create group");
+                let errorMsg = "Failed to create group";
+                try {
+                    const errorText = await res.text();
+                    try {
+                        const errorData = JSON.parse(errorText);
+                        errorMsg = errorData.message || errorMsg;
+                    } catch (e) {
+                        errorMsg = errorText || errorMsg;
+                    }
+                } catch (e) {
+                    console.error("Failed to read error response", e);
+                }
+
+                setCreateErrorMsg(errorMsg);
             }
         } catch (error) {
             console.error(error);
+            setCreateErrorMsg("Network error occurred");
         }
     };
 
@@ -175,7 +196,10 @@ export default function RecipientsListScreen() {
             leftTitle="Recipients List"
             rightIcon={require('../../../assets/images/add_list.png')}
             rightTitle="New List"
-            onRightPress={() => setCreateModalVisible(true)}
+            onRightPress={() => {
+                setCreateErrorMsg('');
+                setCreateModalVisible(true);
+            }}
             contentContainerStyle={{ padding: 0 }}
         >
             <ScrollView
@@ -238,6 +262,11 @@ export default function RecipientsListScreen() {
                             <TouchableWithoutFeedback onPress={() => { }}>
                                 <View style={[styles.modalContent, { width: modalWidth, maxHeight: '80%', backgroundColor: themeColors.card }]}>
                                     <Text style={[styles.modalTitle, { color: themeColors.text }]}>Create New List</Text>
+
+                                    {!!createErrorMsg && (
+                                        <Text style={{ color: '#FF6B6B', marginBottom: 12, textAlign: 'center', fontWeight: '500' }}>{createErrorMsg}</Text>
+                                    )}
+
                                     <TextInput
                                         style={[styles.input, { color: themeColors.text, borderColor: themeColors.border, backgroundColor: themeColors.background }]}
                                         placeholder="Group Name"

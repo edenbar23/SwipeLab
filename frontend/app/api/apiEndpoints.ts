@@ -52,7 +52,7 @@ export const API_ENDPOINTS = {
         GOLD_IMAGE_DETAILS: (goldImageId: string | number) => `/api/admin/gold-images/${goldImageId}`,
         //RECIPIENTS
         RECIPIENTS: '/api/v1/dashboard/recipients',
-        RECIPIENTS_CREATE: '/api/v1/dashboard/recipients/create',
+        RECIPIENTS_CREATE: '/api/v1/dashboard/recipients',
         RECIPIENTS_UPDATE: (groupId: string | number) => `/api/v1/dashboard/recipients/${groupId}/update`,
     },
 };
