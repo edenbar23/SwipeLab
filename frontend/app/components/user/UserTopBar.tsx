@@ -1,15 +1,15 @@
+import { Ionicons as VectorIcons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { API_ENDPOINTS } from '../../api/apiEndpoints';
+import { apiFetch } from "../../api/apiFetch";
 import { useAuthStore } from "../../stores/authStore";
 import { useModeStore } from "../../stores/modeStore";
 import { useThemeStore } from "../../stores/themeStore";
-import { Ionicons as VectorIcons } from '@expo/vector-icons';
 
 // Cast to any to accept strict React 19 types
 const Ionicons = VectorIcons as any;
-import { statisticsMock } from '../../mocks/data/statistics.mock';
-import { useNavigation, CommonActions } from '@react-navigation/native';
-
 
 interface UserTopBarProps {
   username?: string;
@@ -33,16 +33,31 @@ export default function UserTopBar({
 
   const isDarkMode = theme === 'dark';
 
-  const [stats, setStats] = useState(statisticsMock.summary);
+  const [stats, setStats] = useState<any>(null);
 
   useEffect(() => {
-    setStats(statisticsMock.summary);
+    let isMounted = true;
+    const fetchStats = async () => {
+      try {
+        const res = await apiFetch(API_ENDPOINTS.USERS.ME);
+        if (res.ok) {
+          const data = await res.json();
+          if (isMounted) setStats(data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch user top bar stats", err);
+      }
+    };
+    fetchStats();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
-  const displayUsername = propUsername || authUsername || stats.username || "Player";
-  const displayScore = propScore !== undefined ? propScore : stats.score;
-  const displayRank = propRank || `#${stats.rankGlobal}`;
-  const displayStreak = propStreak !== undefined ? propStreak : stats.currentStreakDays;
+  const displayUsername = stats?.displayName || stats?.username || propUsername || authUsername || "Player";
+  const displayScore = propScore !== undefined ? propScore : (stats?.score || 0);
+  const displayRank = propRank || (stats?.rank ? `${stats.rank}` : `#${stats?.rankGlobal || '--'}`);
+  const displayStreak = propStreak !== undefined ? propStreak : (stats?.currentStreakDays || 0);
   const handleLogout = onLogout || logout;
   const formattedScore = typeof displayScore === 'number' ? displayScore.toLocaleString() : displayScore;
 
