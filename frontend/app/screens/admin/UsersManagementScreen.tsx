@@ -12,6 +12,8 @@ import { useThemeStore } from '../../stores/themeStore';
 import addTaskImg from "../../../assets/images/add_task.png";
 import profileImg from "../../../assets/images/profile.png";
 import usersImg from "../../../assets/images/users.png";
+import { API_ENDPOINTS } from '../../api/apiEndpoints';
+
 
 type UsersManagementScreenNavigationProp = NativeStackNavigationProp<AdminStackParamList, 'UsersManagement'>;
 
@@ -35,7 +37,7 @@ export default function UsersManagementScreen() {
     const loadUsers = async () => {
         try {
             setLoading(true);
-            const res = await apiFetch('/api/v1/users/get-all');
+            const res = await apiFetch(API_ENDPOINTS.USERS.GET_ALL);
             if (res.ok) {
                 const data = await res.json();
                 setUsers(data);

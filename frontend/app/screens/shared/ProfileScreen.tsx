@@ -15,6 +15,8 @@ interface UserProfile {
 
 import { Colors } from '../../../constants/theme';
 import { useThemeStore } from '../../stores/themeStore';
+import { API_ENDPOINTS } from '../../api/apiEndpoints';
+
 
 export default function ProfileScreen() {
     const navigation = useNavigation<any>();
@@ -37,7 +39,7 @@ export default function ProfileScreen() {
 
     const fetchProfile = async () => {
         try {
-            const response = await apiFetch("/api/v1/users/me");
+            const response = await apiFetch(API_ENDPOINTS.USERS.ME);
             if (!response.ok) throw new Error("Failed to fetch");
             const data = await response.json();
             setUser(data);
@@ -84,7 +86,7 @@ export default function ProfileScreen() {
         setIsSavingPassword(true);
 
         try {
-            const response = await apiFetch("/api/v1/auth/password/change", {
+            const response = await apiFetch(API_ENDPOINTS.AUTH.CHANGE_PASSWORD, {
                 method: "POST",
                 body: JSON.stringify({ newPassword }),
             });

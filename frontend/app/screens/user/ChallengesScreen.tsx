@@ -14,6 +14,8 @@ import ScreenHeaderLayout from '../../components/layout/ScreenHeaderLayout/Scree
 import { useThemeStore } from '../../stores/themeStore';
 import { Colors } from '../../../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
+import { API_ENDPOINTS } from '../../api/apiEndpoints';
+
 
 interface Challenge {
     id: number;
@@ -77,7 +79,7 @@ export default function ChallengesScreen() {
 
     const fetchChallenges = async () => {
         try {
-            const res = await apiFetch('/api/v1/challenges');
+            const res = await apiFetch(API_ENDPOINTS.GAMIFICATION.CHALLENGES);
             if (res.ok) {
                 const data = await res.json();
                 setChallenges(data);

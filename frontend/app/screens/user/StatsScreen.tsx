@@ -1,10 +1,12 @@
 import { useNavigation } from '@react-navigation/native';
 import React, { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Colors } from '../../../constants/theme';
+import { API_ENDPOINTS } from '../../api/apiEndpoints';
 import { apiFetch } from '../../api/apiFetch';
 import ScreenHeaderLayout from '../../components/layout/ScreenHeaderLayout/ScreenHeaderLayout';
 import { useThemeStore } from '../../stores/themeStore';
+
 
 const DEBUG_MODE = false; // Set to true for testing controls
 
@@ -87,10 +89,10 @@ export default function StatsScreen() {
         try {
             // Fetch all stats in parallel
             const [summaryRes, expertsRes, usersRes, breakdownRes] = await Promise.all([
-                apiFetch('/api/v1/statistics/me'),
-                apiFetch('/api/v1/statistics/me/vs-experts'),
-                apiFetch('/api/v1/statistics/me/vs-users'),
-                apiFetch('/api/v1/statistics/me/breakdown'),
+                apiFetch(API_ENDPOINTS.STATISTICS.ME),
+                apiFetch(API_ENDPOINTS.STATISTICS.VS_EXPERTS),
+                apiFetch(API_ENDPOINTS.STATISTICS.VS_USERS),
+                apiFetch(API_ENDPOINTS.STATISTICS.BREAKDOWN),
             ]);
 
             if (summaryRes.ok && expertsRes.ok && usersRes.ok && breakdownRes.ok) {
@@ -118,14 +120,14 @@ export default function StatsScreen() {
         fetchStats();
     }, [fetchStats]);
 
-    const updateAccuracy = async (newAcc: number) => {
-        setLoading(true);
-        await apiFetch('/api/v1/statistics/update-accuracy', {
-            method: 'POST',
-            body: JSON.stringify({ accuracy: newAcc }),
-        });
-        fetchStats();
-    };
+    // const updateAccuracy = async (newAcc: number) => {
+    //     setLoading(true);
+    //     await apiFetch(API_ENDPOINTS.STATISTICS.UPDATE_ACCURACY, {
+    //         method: 'POST',
+    //         body: JSON.stringify({ accuracy: newAcc }),
+    //     });
+    //     fetchStats();
+    // };
 
     if (loading && !refreshing && !data) {
         return (
@@ -226,7 +228,7 @@ export default function StatsScreen() {
                 </View>
 
                 {/* Debug Controls */}
-                {DEBUG_MODE && (
+                {/* {DEBUG_MODE && (
                     <View style={styles.debugControls}>
                         <Text style={styles.debugTitle}>⚡ Debug: Adjust Accuracy</Text>
                         <View style={styles.debugButtons}>
@@ -241,7 +243,7 @@ export default function StatsScreen() {
                             </TouchableOpacity>
                         </View>
                     </View>
-                )}
+                )} */}
 
                 <View style={{ height: 40 }} />
             </ScrollView>

@@ -13,6 +13,8 @@ import { apiFetch } from "../../api/apiFetch";
 import ScreenHeaderLayout from "../../components/layout/ScreenHeaderLayout";
 import { useThemeStore } from '../../stores/themeStore';
 import { Colors } from '../../../constants/theme';
+import { API_ENDPOINTS } from '../../api/apiEndpoints';
+
 
 export default function AddGoldImageScreen({ navigation }: any) {
     const [imageUrl, setImageUrl] = useState("");
@@ -62,7 +64,7 @@ export default function AddGoldImageScreen({ navigation }: any) {
 
         try {
             setLoading(true);
-            const res = await apiFetch("/api/admin/gold-images", {
+            const res = await apiFetch(API_ENDPOINTS.ADMIN.GOLD_IMAGES, {
                 method: "POST",
                 body: JSON.stringify(payload),
                 headers: { "Content-Type": "application/json" },

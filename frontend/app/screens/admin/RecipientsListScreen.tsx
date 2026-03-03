@@ -22,6 +22,8 @@ import { RecipientGroup } from '../../mocks/data/recipients.mock';
 import { User } from '../../mocks/data/users.mock';
 import { AdminStackParamList } from '../../navigation/adminStack.types';
 import { useThemeStore } from '../../stores/themeStore';
+import { API_ENDPOINTS } from '../../api/apiEndpoints';
+
 
 type NavigationProp = NativeStackNavigationProp<AdminStackParamList, 'RecipientsList'>;
 
@@ -59,7 +61,7 @@ export default function RecipientsListScreen() {
 
     const fetchUsers = async () => {
         try {
-            const res = await apiFetch('/api/v1/users/get-all');
+            const res = await apiFetch(API_ENDPOINTS.USERS.GET_ALL);
             if (res.ok) {
                 const data = await res.json();
                 setAllUsers(data);
@@ -72,8 +74,8 @@ export default function RecipientsListScreen() {
     const fetchGroups = async () => {
         try {
             const [usersRes, groupsRes] = await Promise.all([
-                apiFetch('/api/v1/users/get-all').catch(() => null),
-                apiFetch('/api/v1/dashboard/recipients').catch(() => null)
+                apiFetch(API_ENDPOINTS.USERS.GET_ALL).catch(() => null),
+                apiFetch(API_ENDPOINTS.ADMIN.RECIPIENTS).catch(() => null)
             ]);
 
             let fetchedUsers: User[] = [];
@@ -136,7 +138,7 @@ export default function RecipientsListScreen() {
         try {
             // New Endpoint: /api/v1/dashboard/recipients/create
             // Payload: { name, usernames: [...] }
-            const res = await apiFetch('/api/v1/dashboard/recipients/create', {
+            const res = await apiFetch(API_ENDPOINTS.ADMIN.RECIPIENTS_CREATE, {
                 method: 'POST',
                 body: JSON.stringify({
                     name: newGroupName,

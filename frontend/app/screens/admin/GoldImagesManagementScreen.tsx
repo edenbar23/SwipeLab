@@ -6,6 +6,8 @@ import { apiFetch } from "../../api/apiFetch";
 import GoldImageCard from "../../components/admin/GoldImageCard";
 import ScreenHeaderLayout from "../../components/layout/ScreenHeaderLayout";
 import { useThemeStore } from '../../stores/themeStore';
+import { API_ENDPOINTS } from '../../api/apiEndpoints';
+
 
 type GoldImageResponse = {
     id: number;
@@ -55,7 +57,7 @@ export default function GoldImagesManagementScreen({ navigation }: any) {
                     style: "destructive",
                     onPress: async () => {
                         try {
-                            await apiFetch(`/api/admin/gold-images/${goldImageId}`, {
+                            await apiFetch(API_ENDPOINTS.ADMIN.GOLD_IMAGE_DETAILS(goldImageId), {
                                 method: "DELETE",
                             });
                             // Refresh the list

@@ -11,6 +11,8 @@ import {
 import { apiFetch } from "../api/apiFetch";
 import { useAuthStore } from "../stores/authStore";
 import { useModeStore } from "../stores/modeStore";
+import { API_ENDPOINTS } from '../api/apiEndpoints';
+
 
 interface Props {
   onClose: () => void;
@@ -43,7 +45,7 @@ export default function RegisterForm({ onClose }: Props) {
       // const token = "mock-jwt-token";
       const role = "USER";
 
-      const response = await apiFetch("/api/v1/auth/register", {
+      const response = await apiFetch(API_ENDPOINTS.AUTH.REGISTER, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

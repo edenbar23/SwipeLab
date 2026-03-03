@@ -14,6 +14,8 @@ import ScreenHeaderLayout from "../../components/layout/ScreenHeaderLayout";
 import { AdminStackParamList } from "../../navigation/adminStack.types";
 import { useThemeStore } from '../../stores/themeStore';
 import { Colors } from '../../../constants/theme';
+import { API_ENDPOINTS } from '../../api/apiEndpoints';
+
 
 type Props = NativeStackScreenProps<
   AdminStackParamList,
@@ -33,7 +35,7 @@ export default function EditTaskScreen({ route, navigation }: Props) {
 
   // 🔹 Load task details
   useEffect(() => {
-    apiFetch(`/api/v1/dashboard/tasks/${taskId}`)
+    apiFetch(API_ENDPOINTS.TASKS.DASHBOARD_DETAILS(taskId))
       .then((res) => res.json())
       .then((data) => {
         setName(data.name);

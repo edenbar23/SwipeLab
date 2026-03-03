@@ -5,6 +5,8 @@ import { ActivityIndicator, Image, StyleSheet, Text, TextInput, TouchableOpacity
 import { apiFetch } from "../../api/apiFetch";
 import RegisterForm from "../../components/RegisterForm";
 import { useAuthStore } from "../../stores/authStore";
+import { API_ENDPOINTS } from '../../api/apiEndpoints';
+
 
 
 WebBrowser.maybeCompleteAuthSession();
@@ -35,7 +37,7 @@ export default function LoginScreen() {
     setError("");
 
     try {
-      const res = await apiFetch("/api/v1/auth/login", {
+      const res = await apiFetch(API_ENDPOINTS.AUTH.LOGIN, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

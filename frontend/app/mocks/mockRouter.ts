@@ -17,6 +17,8 @@ import {
   removeUserFromGroup
 } from './data/recipients.mock'
 import { usersMock } from './data/users.mock'
+import { API_ENDPOINTS } from '../api/apiEndpoints';
+
 
 type Method = 'GET' | 'POST' | 'PUT' | 'DELETE'
 
@@ -49,7 +51,7 @@ export async function mockRouter(
   const body = init?.body ? JSON.parse(init.body as string) : {}
 
   // ---------- AUTH ----------
-  if (url.endsWith('/api/v1/auth/login') && method === 'POST') {
+  if (url.endsWith(API_ENDPOINTS.AUTH.LOGIN) && method === 'POST') {
     const loginBody = body as LoginBody
 
     const user = authMock.users.find(
@@ -74,7 +76,7 @@ export async function mockRouter(
     })
   }
 
-  if (url.endsWith('/api/v1/auth/register') && method === 'POST') {
+  if (url.endsWith(API_ENDPOINTS.AUTH.REGISTER) && method === 'POST') {
     const registerBody = body as RegisterBody
 
     const exists = authMock.users.some(
@@ -125,7 +127,7 @@ export async function mockRouter(
     return jsonResponse(authMock.profile)
   }
 
-  if (url.endsWith('/api/v1/auth/password/change') && method === 'POST') {
+  if (url.endsWith(API_ENDPOINTS.AUTH.CHANGE_PASSWORD) && method === 'POST') {
     // Validate that newPassword exists in body
     if (!body.newPassword) {
       return jsonResponse({ message: 'New password is required' }, 400);
@@ -198,7 +200,7 @@ export async function mockRouter(
   }
 
   // ---------- LEADERBOARD ----------
-  if (method === 'GET' && url.includes('/api/v1/gamification/leaderboard')) {
+  if (method === 'GET' && url.includes(API_ENDPOINTS.GAMIFICATION.LEADERBOARD)) {
     return jsonResponse(getLeaderboardData())
   }
 
@@ -213,7 +215,7 @@ export async function mockRouter(
   }
 
   // ---------- STATISTICS ----------
-  if (method === 'GET' && url.endsWith('/api/v1/statistics/me')) {
+  if (method === 'GET' && url.endsWith(API_ENDPOINTS.STATISTICS.ME)) {
     return jsonResponse(statisticsMock.summary)
   }
 
@@ -234,11 +236,11 @@ export async function mockRouter(
   }
 
   // CHALLENGES
-  if (method === 'GET' && url.endsWith('/api/v1/challenges')) {
+  if (method === 'GET' && url.endsWith(API_ENDPOINTS.GAMIFICATION.CHALLENGES)) {
     return jsonResponse(refinedChallengesMock)
   }
 
-  if (method === 'POST' && url.endsWith('/api/v1/statistics/update-accuracy')) {
+  if (method === 'POST' && url.endsWith(API_ENDPOINTS.STATISTICS.UPDATE_ACCURACY)) {
     const { accuracy } = body;
     if (typeof accuracy === 'number') {
       setUserAccuracy(accuracy);
@@ -282,7 +284,7 @@ export async function mockRouter(
   }
 
   // Exports
-  if (method === 'POST' && url.includes('/api/v1/analytics/exports')) {
+  if (method === 'POST' && url.includes(API_ENDPOINTS.ADMIN.ANALYTICS_EXPORTS)) {
     return jsonResponse({
       exportId: "exp_" + Date.now().toString(),
       status: "QUEUED",
@@ -292,16 +294,16 @@ export async function mockRouter(
   }
 
   // CHALLENGES
-  if (method === 'GET' && url.endsWith('/api/v1/challenges')) {
+  if (method === 'GET' && url.endsWith(API_ENDPOINTS.GAMIFICATION.CHALLENGES)) {
     return jsonResponse(refinedChallengesMock)
   }
 
   // ---------- MANAGER / RECIPIENTS ----------
-  if (method === 'GET' && url.endsWith('/api/v1/dashboard/recipients')) {
+  if (method === 'GET' && url.endsWith(API_ENDPOINTS.ADMIN.RECIPIENTS)) {
     // Note: User provided API used 'dashboard/recipients/*' but list endpoint wasn't explicitly changed. 
     // Assuming standard REST pattern or keeping existing GET but moving to dashboard/recipients if consistent.
     // For now, let's support both or just the existing GET if not specified. 
-    // Wait, let's align with the new path '/api/v1/dashboard/recipients' for consistency.
+    // Wait, let's align with the new path API_ENDPOINTS.ADMIN.RECIPIENTS for consistency.
     return jsonResponse(getRecipientGroups())
   }
 
@@ -311,7 +313,7 @@ export async function mockRouter(
   }
 
   // 4.3 Create Recipients List
-  if (method === 'POST' && url.endsWith('/api/v1/dashboard/recipients/create')) {
+  if (method === 'POST' && url.endsWith(API_ENDPOINTS.ADMIN.RECIPIENTS_CREATE)) {
     const { name, usernames } = body as { name: string, usernames: string[] };
     const newGroup = addRecipientGroup(name);
 
@@ -371,15 +373,15 @@ export async function mockRouter(
   }
 
   // ---------- COLLECTION ----------
-  if (method === 'GET' && url.endsWith('/api/v1/collection')) {
+  if (method === 'GET' && url.endsWith(API_ENDPOINTS.COLLECTION.BASE)) {
     return jsonResponse(getCollection());
   }
 
-  if (method === 'GET' && url.endsWith('/api/v1/collection/stats')) {
+  if (method === 'GET' && url.endsWith(API_ENDPOINTS.COLLECTION.STATS)) {
     return jsonResponse(getCollectionStats());
   }
 
-  if (method === 'POST' && url.endsWith('/api/v1/collection/add')) {
+  if (method === 'POST' && url.endsWith(API_ENDPOINTS.COLLECTION.ADD)) {
     const { imageUrl, label, taskId, taskName, question } = body as {
       imageUrl: string;
       label: string;
@@ -392,11 +394,11 @@ export async function mockRouter(
   }
 
   // ---------- GOLD IMAGES ----------
-  if (method === 'GET' && url.split('?')[0].endsWith('/api/admin/gold-images/get-all')) {
+  if (method === 'GET' && url.split('?')[0].endsWith(API_ENDPOINTS.ADMIN.GOLD_IMAGES_GET_ALL)) {
     return jsonResponse(MOCK_GOLD_IMAGES)
   }
 
-  if (method === 'GET' && url.split('?')[0].endsWith('/api/admin/gold-images')) {
+  if (method === 'GET' && url.split('?')[0].endsWith(API_ENDPOINTS.ADMIN.GOLD_IMAGES)) {
     const urlObj = new URL(url, 'http://localhost');
     const taskIdParam = urlObj.searchParams.get('taskId');
     if (taskIdParam) {

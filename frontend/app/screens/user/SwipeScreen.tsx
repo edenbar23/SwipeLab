@@ -9,6 +9,8 @@ import SwipeCard, { SwipeCardHandle } from '../../components/user/SwipeCard';
 import useResponsive from '../../hooks/useResponsive';
 import { useThemeStore } from '../../stores/themeStore';
 import { SwipeDirection } from '../../types';
+import { API_ENDPOINTS } from '../../api/apiEndpoints';
+
 
 export default function SwipeScreen() {
   const [showReference, setShowReference] = useState(false);
@@ -32,7 +34,7 @@ export default function SwipeScreen() {
     setLoading(true);
     setError(null);
     try {
-      const res = await apiFetch(`/api/v1/classifications/next-batch?taskId=${taskId}&count=5`);
+      const res = await apiFetch(API_ENDPOINTS.CLASSIFICATIONS.NEXT_BATCH(taskId, 5));
       if (res.ok) {
         const json = await res.json();
         setDataBatch(json.images || []);

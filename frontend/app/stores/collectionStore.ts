@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { apiFetch } from '../api/apiFetch';
 import { CollectionItem, CollectionStats, SwipeDirection } from '../types';
+import { API_ENDPOINTS } from '../api/apiEndpoints';
+
 
 interface CollectionStore {
     items: CollectionItem[];
@@ -39,8 +41,8 @@ export const useCollectionStore = create<CollectionStore>((set, get) => ({
         set({ isLoading: true });
         try {
             const [itemsRes, statsRes] = await Promise.all([
-                apiFetch('/api/v1/collection'),
-                apiFetch('/api/v1/collection/stats'),
+                apiFetch(API_ENDPOINTS.COLLECTION.BASE),
+                apiFetch(API_ENDPOINTS.COLLECTION.STATS),
             ]);
 
             if (itemsRes.ok && statsRes.ok) {
@@ -57,7 +59,7 @@ export const useCollectionStore = create<CollectionStore>((set, get) => ({
 
     addItem: async (imageUrl, label, taskId, taskName, question) => {
         try {
-            const response = await apiFetch('/api/v1/collection/add', {
+            const response = await apiFetch(API_ENDPOINTS.COLLECTION.ADD, {
                 method: 'POST',
                 body: JSON.stringify({ imageUrl, label, taskId, taskName, question }),
             });

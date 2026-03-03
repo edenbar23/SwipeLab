@@ -14,6 +14,8 @@ import { apiFetch } from "../../api/apiFetch";
 import MetricCard from "../../components/admin/MetricCard";
 import ScreenHeaderLayout from "../../components/layout/ScreenHeaderLayout";
 import { useThemeStore } from '../../stores/themeStore';
+import { API_ENDPOINTS } from '../../api/apiEndpoints';
+
 
 type TaskAnalytics = {
     taskId: number;
@@ -60,9 +62,9 @@ export default function AnalyticsScreen({ navigation }: any) {
         try {
             setLoading(true);
             const [analyticsRes, usersRes, topPerformersRes] = await Promise.all([
-                apiFetch(`/api/v1/analytics/tasks/${taskId}`),
-                apiFetch(`/api/v1/analytics/users?taskId=${taskId}`),
-                apiFetch(`/api/v1/analytics/top-performers?limit=5`),
+                apiFetch(API_ENDPOINTS.ADMIN.ANALYTICS_TASKS(taskId)),
+                apiFetch(API_ENDPOINTS.ADMIN.ANALYTICS_USERS(taskId)),
+                apiFetch(API_ENDPOINTS.ADMIN.ANALYTICS_TOP(5)),
             ]);
 
             const analyticsData = await analyticsRes.json();

@@ -6,6 +6,8 @@ import { apiFetch } from '../../api/apiFetch';
 import ScreenHeaderLayout from '../../components/layout/ScreenHeaderLayout/ScreenHeaderLayout';
 import TaskCard from '../../components/user/TaskCard';
 import { useThemeStore } from '../../stores/themeStore';
+import { API_ENDPOINTS } from '../../api/apiEndpoints';
+
 
 export default function UserMyTasksScreen() {
     const navigation = useNavigation<any>();
@@ -22,9 +24,9 @@ export default function UserMyTasksScreen() {
         setRefreshing(true);
         try {
             const [statsRes, tasksRes, availableRes] = await Promise.all([
-                apiFetch('/api/v1/statistics/me').catch(() => null),
-                apiFetch('/api/v1/tasks/my-tasks').catch(() => null),
-                apiFetch('/api/v1/tasks/available-tasks').catch(() => null)
+                apiFetch(API_ENDPOINTS.STATISTICS.ME).catch(() => null),
+                apiFetch(API_ENDPOINTS.TASKS.MY_TASKS).catch(() => null),
+                apiFetch(API_ENDPOINTS.TASKS.AVAILABLE_TASKS).catch(() => null)
             ]);
 
             if (statsRes && statsRes.ok) setStats(await statsRes.json());

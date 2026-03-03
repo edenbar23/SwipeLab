@@ -4,6 +4,8 @@ import { Platform } from 'react-native';
 import { create } from "zustand";
 import { apiFetch } from "../api/apiFetch";
 import { useModeStore } from "./modeStore";
+import { API_ENDPOINTS } from '../api/apiEndpoints';
+
 
 type Role = "USER" | "ADMIN" | null;
 
@@ -48,7 +50,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       await SecureStore.deleteItemAsync("token");
       await SecureStore.deleteItemAsync("role");
     }
-    apiFetch("/api/v1/auth/logout", {
+    apiFetch(API_ENDPOINTS.AUTH.LOGOUT, {
       method: "POST",
     });
     // Clear mode on logout

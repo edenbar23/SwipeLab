@@ -7,6 +7,8 @@ import { Colors } from '../../../constants/theme';
 import { apiFetch } from "../../api/apiFetch";
 import { AdminStackParamList } from "../../navigation/adminStack.types";
 import { useThemeStore } from '../../stores/themeStore';
+import { API_ENDPOINTS } from '../../api/apiEndpoints';
+
 
 type Props = NativeStackScreenProps<AdminStackParamList, "TaskDetails">;
 
@@ -38,7 +40,7 @@ export default function TaskDetailsScreen({ route, navigation }: Props) {
   useEffect(() => {
     async function fetchTask() {
       try {
-        const res = await apiFetch(`/api/v1/tasks/dashboard/${taskId}`, { method: "GET" });
+        const res = await apiFetch(API_ENDPOINTS.TASKS.DASHBOARD_TASK(taskId), { method: "GET" });
         const data: TaskDetails = await res.json();
         setTask(data);
       } catch (err: any) {

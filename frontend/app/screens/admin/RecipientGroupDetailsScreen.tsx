@@ -15,6 +15,8 @@ import { apiFetch } from '../../api/apiFetch';
 import { RecipientGroup } from '../../mocks/data/recipients.mock';
 import { User } from '../../mocks/data/users.mock';
 import { useThemeStore } from '../../stores/themeStore';
+import { API_ENDPOINTS } from '../../api/apiEndpoints';
+
 
 // Utility for colors
 function getColorForType(type: string) {
@@ -51,8 +53,8 @@ export default function RecipientGroupDetailsScreen() {
     const loadAllData = async () => {
         try {
             const [usersRes, groupsRes] = await Promise.all([
-                apiFetch('/api/v1/users/get-all').catch(() => null),
-                apiFetch('/api/v1/dashboard/recipients').catch(() => null)
+                apiFetch(API_ENDPOINTS.USERS.GET_ALL).catch(() => null),
+                apiFetch(API_ENDPOINTS.ADMIN.RECIPIENTS).catch(() => null)
             ]);
 
             let fetchedUsers: User[] = allUsers;
@@ -117,7 +119,7 @@ export default function RecipientGroupDetailsScreen() {
         try {
             // New Endpoint: /api/v1/dashboard/recipients/{id}/update
             // Payload: { addUsernames: [...] }
-            const res = await apiFetch(`/api/v1/dashboard/recipients/${currentGroup.id}/update`, {
+            const res = await apiFetch(API_ENDPOINTS.ADMIN.RECIPIENTS_UPDATE(currentGroup.id), {
                 method: 'PUT',
                 body: JSON.stringify({ addUsernames: finalUsernamesToAdd })
             });
@@ -164,7 +166,7 @@ export default function RecipientGroupDetailsScreen() {
                         try {
                             // New Endpoint: /api/v1/dashboard/recipients/{id}/update
                             // Payload: { removeUsernames: [userId] }
-                            const res = await apiFetch(`/api/v1/dashboard/recipients/${currentGroup.id}/update`, {
+                            const res = await apiFetch(API_ENDPOINTS.ADMIN.RECIPIENTS_UPDATE(currentGroup.id), {
                                 method: 'PUT',
                                 body: JSON.stringify({ removeUsernames: [userId] })
                             });

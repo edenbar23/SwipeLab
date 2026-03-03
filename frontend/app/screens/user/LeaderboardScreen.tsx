@@ -5,6 +5,8 @@ import { Colors } from '../../../constants/theme';
 import { apiFetch } from '../../api/apiFetch';
 import ScreenHeaderLayout from '../../components/layout/ScreenHeaderLayout/ScreenHeaderLayout';
 import { useThemeStore } from '../../stores/themeStore';
+import { API_ENDPOINTS } from '../../api/apiEndpoints';
+
 
 interface LeaderboardEntry {
     rank: number;
@@ -113,7 +115,7 @@ export default function LeaderboardScreen() {
     const fetchLeaderboard = useCallback(async () => {
         try {
             setLoading(true);
-            const response = await apiFetch('/api/v1/gamification/leaderboard');
+            const response = await apiFetch(API_ENDPOINTS.GAMIFICATION.LEADERBOARD);
 
             if (!response.ok) {
                 throw new Error('Failed to fetch leaderboard');

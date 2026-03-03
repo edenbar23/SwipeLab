@@ -16,6 +16,8 @@ import { useNavigation } from '@react-navigation/native';
 import { apiFetch } from '../../api/apiFetch';
 import { AdminStackParamList } from '../../navigation/adminStack.types';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { API_ENDPOINTS } from '../../api/apiEndpoints';
+
 
 type NavigationProp = NativeStackNavigationProp<AdminStackParamList, 'AddUser'>;
 
@@ -44,7 +46,7 @@ export default function AddUserScreen() {
 
         try {
             setLoading(true);
-            const res = await apiFetch('/api/v1/manager/users/invite', {
+            const res = await apiFetch(API_ENDPOINTS.USERS.INVITE, {
                 method: 'POST',
                 body: JSON.stringify({
                     username,
