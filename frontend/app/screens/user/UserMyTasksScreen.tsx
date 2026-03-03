@@ -2,11 +2,11 @@ import { useNavigation } from '@react-navigation/native';
 import React, { useCallback, useEffect, useState } from 'react';
 import { RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Colors } from '../../../constants/theme';
+import { API_ENDPOINTS } from '../../api/apiEndpoints';
 import { apiFetch } from '../../api/apiFetch';
 import ScreenHeaderLayout from '../../components/layout/ScreenHeaderLayout/ScreenHeaderLayout';
 import TaskCard from '../../components/user/TaskCard';
 import { useThemeStore } from '../../stores/themeStore';
-import { API_ENDPOINTS } from '../../api/apiEndpoints';
 
 
 export default function UserMyTasksScreen() {
@@ -92,7 +92,7 @@ export default function UserMyTasksScreen() {
     const handlePlayTask = (taskId: number) => {
         console.log(`Playing task ${taskId}`);
         // Navigate to the swipe screen (gameplay)
-        navigation.navigate('SwipeLab');
+        navigation.navigate('SwipeLab', { taskId });
     };
 
     return (

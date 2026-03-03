@@ -2,6 +2,7 @@ import { useRoute } from '@react-navigation/native';
 import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Platform, StyleSheet, Text, View } from 'react-native';
 import { Colors } from '../../../constants/theme';
+import { API_ENDPOINTS } from '../../api/apiEndpoints';
 import { apiFetch } from '../../api/apiFetch';
 import ReferenceGallery from '../../components/user/ReferenceGallery';
 import SwipeButtons from '../../components/user/SwipeButtons';
@@ -9,7 +10,6 @@ import SwipeCard, { SwipeCardHandle } from '../../components/user/SwipeCard';
 import useResponsive from '../../hooks/useResponsive';
 import { useThemeStore } from '../../stores/themeStore';
 import { SwipeDirection } from '../../types';
-import { API_ENDPOINTS } from '../../api/apiEndpoints';
 
 
 export default function SwipeScreen() {
@@ -30,27 +30,35 @@ export default function SwipeScreen() {
 
   const cardRef = useRef<SwipeCardHandle>(null);
 
-  const fetchBatch = async () => {
+  const fetchBatch = async (isInitial = false) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await apiFetch(API_ENDPOINTS.CLASSIFICATIONS.NEXT_BATCH(taskId, 5));
+      const endpoint = isInitial
+        ? API_ENDPOINTS.TASKS.PLAY_TASK(taskId)
+        : API_ENDPOINTS.CLASSIFICATIONS.NEXT_BATCH(taskId, 5);
+
+      const method = isInitial ? 'POST' : 'GET';
+      const res = await apiFetch(endpoint, { method });
       if (res.ok) {
         const json = await res.json();
         setDataBatch(json.images || []);
         setCurrentIndex(0);
       } else {
-        setError('Failed to fetch batch');
+        const errText = await res.text().catch(() => '');
+        console.error(`Fetch batch failed. Status: ${res.status}. Body:`, errText);
+        setError(`Failed to fetch batch (Status: ${res.status})`);
       }
-    } catch (e) {
-      setError('Error fetching batch');
+    } catch (e: any) {
+      console.error("Fetch batch exception:", e);
+      setError(`Error fetching batch: ${e.message}`);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchBatch();
+    fetchBatch(true);
   }, [taskId]);
 
   const handleSwipe = async (direction: SwipeDirection) => {

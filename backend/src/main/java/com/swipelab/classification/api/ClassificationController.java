@@ -61,6 +61,18 @@ public class ClassificationController {
                 return ResponseEntity.ok(response);
         }
 
+        // 2.3 Play Task (Initialize Session)
+        @PostMapping("/tasks/{taskId}/play")
+        public ResponseEntity<NextBatchResponse> playTask(
+                        @PathVariable Long taskId,
+                        @RequestParam(defaultValue = "10") int count,
+                        @AuthenticationPrincipal UserDetails userDetails) {
+                // For now, this is stateless and directly returns the first batch.
+                // In the future, this can be expanded to initialize a user session for tracking.
+                return ResponseEntity
+                                .ok(imageService.getNextBatchForApi(taskId, userDetails.getUsername(), count));
+        }
+
         @PostMapping("/tasks/{taskId}/batch")
         public ResponseEntity<Void> submitBatchClassificationsLegacy(
                         @PathVariable Long taskId,
