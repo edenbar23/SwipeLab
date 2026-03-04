@@ -10,26 +10,34 @@ import {
     View,
 } from "react-native";
 import { Colors } from '../../../constants/theme';
+import { API_ENDPOINTS } from '../../api/apiEndpoints';
 import { apiFetch } from "../../api/apiFetch";
 import MetricCard from "../../components/admin/MetricCard";
 import ScreenHeaderLayout from "../../components/layout/ScreenHeaderLayout";
 import { useThemeStore } from '../../stores/themeStore';
-import { API_ENDPOINTS } from '../../api/apiEndpoints';
 
 
 type TaskAnalytics = {
     taskId: number;
-    taskName: string;
+    taskName?: string;
     status: string;
-    totalImages: number;
-    classifiedImages: number;
-    completionPercentage: number;
-    averageConsensus: number;
-    lowConsensusCount: number;
-    highConsensusCount: number;
-    labelDistribution: Record<string, number>;
-    totalClassifications: number;
-    uniqueClassifiers: number;
+    progress?: {
+        totalImages: number;
+        imagesClassified: number;
+        percentComplete: number;
+        completedImages: number;
+    };
+    consensus?: {
+        overallAverage: number | null;
+        lowConsensusImages: number | null;
+        threshold: number | null;
+    };
+    participation?: {
+        activeUsers: number | null;
+        totalClassifications: number | null;
+        averageClassificationsPerUser: number | null;
+        medianResponseTimeMs: number | null;
+    };
 };
 
 type UserPerformance = {
@@ -168,7 +176,7 @@ export default function AnalyticsScreen({ navigation }: any) {
                         <View style={styles.section}>
                             <Text style={[styles.sectionTitle, { color: themeColors.text }]}>Task</Text>
                             <View style={[styles.taskInfo, { backgroundColor: themeColors.card, borderColor: themeColors.border }]}>
-                                <Text style={[styles.taskName, { color: themeColors.text }]}>{analytics?.taskName ?? "Unknown Task"}</Text>
+                                <Text style={[styles.taskName, { color: themeColors.text }]}>{analytics?.taskName ?? `Task #${analytics?.taskId ?? ''}`}</Text>
                                 <View
                                     style={[
                                         styles.statusBadge,
@@ -191,22 +199,22 @@ export default function AnalyticsScreen({ navigation }: any) {
                                 <View style={styles.halfWidth}>
                                     <MetricCard
                                         label="Completion"
-                                        value={`${(analytics?.completionPercentage ?? 0).toFixed(1)}%`}
+                                        value={`${(analytics?.progress?.percentComplete ?? 0).toFixed(1)}%`}
                                         variant="primary"
                                     />
                                 </View>
                                 <View style={styles.halfWidth}>
                                     <MetricCard
                                         label="Total Images"
-                                        value={analytics?.totalImages ?? 0}
+                                        value={analytics?.progress?.totalImages ?? 0}
                                         variant="primary"
                                     />
                                 </View>
                             </View>
                             <MetricCard
                                 label="Classified Images"
-                                value={analytics?.classifiedImages ?? 0}
-                                subtitle={`${(analytics?.totalImages ?? 0) - (analytics?.classifiedImages ?? 0)} remaining`}
+                                value={analytics?.progress?.imagesClassified ?? 0}
+                                subtitle={`${(analytics?.progress?.totalImages ?? 0) - (analytics?.progress?.imagesClassified ?? 0)} remaining`}
                                 variant="success"
                             />
                         </View>
@@ -216,23 +224,23 @@ export default function AnalyticsScreen({ navigation }: any) {
                             <Text style={[styles.sectionTitle, { color: themeColors.text }]}>✨ Data Quality</Text>
                             <MetricCard
                                 label="Average Consensus"
-                                value={`${(analytics?.averageConsensus ?? 0).toFixed(1)}%`}
+                                value={`${(analytics?.consensus?.overallAverage ?? 0).toFixed(1)}%`}
                                 variant="success"
                             />
                             <View style={styles.row}>
                                 <View style={styles.halfWidth}>
                                     <MetricCard
-                                        label="High Consensus"
-                                        value={analytics?.highConsensusCount ?? 0}
-                                        subtitle="≥80% agreement"
+                                        label="Completed Images"
+                                        value={analytics?.progress?.completedImages ?? 0}
+                                        subtitle="Reached consensus"
                                         variant="success"
                                     />
                                 </View>
                                 <View style={styles.halfWidth}>
                                     <MetricCard
                                         label="Low Consensus"
-                                        value={analytics?.lowConsensusCount ?? 0}
-                                        subtitle="<60% agreement"
+                                        value={analytics?.consensus?.lowConsensusImages ?? 0}
+                                        subtitle="Below threshold"
                                         variant="warning"
                                     />
                                 </View>
@@ -244,8 +252,8 @@ export default function AnalyticsScreen({ navigation }: any) {
                             <Text style={[styles.sectionTitle, { color: themeColors.text }]}>👥 Users</Text>
                             <MetricCard
                                 label="Active Users"
-                                value={analytics?.uniqueClassifiers ?? 0}
-                                subtitle={`${analytics?.totalClassifications ?? 0} total classifications`}
+                                value={analytics?.participation?.activeUsers ?? 0}
+                                subtitle={`${analytics?.participation?.totalClassifications ?? 0} total classifications`}
                                 variant="primary"
                             />
 
