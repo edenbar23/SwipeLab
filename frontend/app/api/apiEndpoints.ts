@@ -14,9 +14,10 @@ export const API_ENDPOINTS = {
         MY_TASKS: '/api/v1/tasks/my-tasks',
         AVAILABLE_TASKS: '/api/v1/tasks/available-tasks',
         DASHBOARD: '/api/v1/tasks/dashboard',
-        DASHBOARD_DETAILS: (taskId: string | number) => `/api/v1/dashboard/tasks/${taskId}`,
+        DASHBOARD_DETAILS: (taskId: string | number) => `/api/v1/tasks/dashboard/${taskId}`,
         DASHBOARD_TASK: (taskId: string | number) => `/api/v1/tasks/dashboard/${taskId}`,
         PLAY_TASK: (taskId: string | number) => `/api/v1/classifications/tasks/${taskId}/play`,
+        UPDATE_TASK: (taskId: string | number) => `/api/v1/tasks/${taskId}`,
     },
     CLASSIFICATIONS: {
         NEXT_BATCH: (taskId: string | number, count: number = 5) =>
