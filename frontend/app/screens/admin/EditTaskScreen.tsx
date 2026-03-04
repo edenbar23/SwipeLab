@@ -81,7 +81,11 @@ export default function EditTaskScreen({ route, navigation }: Props) {
             .join(", ")
         );
 
-        setSelectedRecipients(data.recipientGroups?.map((id: number) => `G-${id}`) || []);
+        setIsPublic(data.isPublic || false);
+
+        const loadedGroups = data.recipientGroups?.map((id: number) => `G-${id}`) || [];
+        const loadedUsers = data.assignedUsernames?.map((un: string) => `U-${un}`) || [];
+        setSelectedRecipients([...loadedGroups, ...loadedUsers]);
       })
       .catch(() => {
         Alert.alert("Error", "Failed to load task data");

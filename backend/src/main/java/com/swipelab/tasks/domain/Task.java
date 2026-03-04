@@ -77,6 +77,17 @@ public class Task {
     private List<Long> recipientGroups = new ArrayList<>();
 
     @BatchSize(size = 20)
+    @ElementCollection
+    @CollectionTable(name = "task_assigned_users", joinColumns = @JoinColumn(name = "task_id"))
+    @Column(name = "username")
+    @Builder.Default
+    private List<String> assignedUsernames = new ArrayList<>();
+
+    @Column(name = "is_public", nullable = false)
+    @Builder.Default
+    private Boolean isPublic = false;
+
+    @BatchSize(size = 20)
     @ManyToMany
     @JoinTable(name = "task_target_species", joinColumns = @JoinColumn(name = "task_id"), inverseJoinColumns = @JoinColumn(name = "label_id"))
     @Builder.Default

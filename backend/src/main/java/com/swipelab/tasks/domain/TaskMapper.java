@@ -39,6 +39,11 @@ public class TaskMapper {
                         request.getRecipientGroups() != null
                                 ? request.getRecipientGroups()
                                 : Collections.emptyList())
+                .assignedUsernames(
+                        request.getAssignedUsernames() != null
+                                ? request.getAssignedUsernames()
+                                : Collections.emptyList())
+                .isPublic(request.getIsPublic() != null ? request.getIsPublic() : false)
                 // targetSpecies resolved in service
                 .build();
     }
@@ -63,6 +68,14 @@ public class TaskMapper {
         if (request.getRecipientGroups() != null) {
             task.setRecipientGroups(request.getRecipientGroups());
         }
+
+        if (request.getAssignedUsernames() != null) {
+            task.setAssignedUsernames(request.getAssignedUsernames());
+        }
+
+        if (request.getIsPublic() != null) {
+            task.setIsPublic(request.getIsPublic());
+        }
         // targetSpecies handled in service
     }
 
@@ -86,6 +99,8 @@ public class TaskMapper {
                 .description(task.getDescription())
                 .experiments(task.getExperiments())
                 .recipientGroups(task.getRecipientGroups())
+                .assignedUsernames(task.getAssignedUsernames())
+                .isPublic(task.getIsPublic())
                 .targetSpecies(
                         task.getTargetSpecies() != null
                                 ? task.getTargetSpecies()

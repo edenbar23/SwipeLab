@@ -81,7 +81,7 @@ class TaskServiceTest {
         Pageable pageable = PageRequest.of(0, 20);
         Page<Task> taskPage = new PageImpl<>(Collections.singletonList(task), pageable, 1);
         
-        when(taskRepository.findByStatusAndRecipientGroupsIn(eq(TaskStatus.ACTIVE), anySet(), eq(pageable))).thenReturn(taskPage);
+        when(taskRepository.findAccessibleTasksForUser(eq(TaskStatus.ACTIVE), eq("testuser"), anySet(), eq(pageable))).thenReturn(taskPage);
         when(taskMapper.toResponse(any(Task.class), eq(true))).thenReturn(taskResponse);
 
         TaskPageResponse response = taskService.getTasksForUser("testuser", pageable);
@@ -96,12 +96,14 @@ class TaskServiceTest {
         when(recipientGroupRepository.findByUsers_Username("testuser")).thenReturn(Collections.emptyList());
         
         Pageable pageable = PageRequest.of(0, 20);
+        Page<Task> emptyPage = new PageImpl<>(Collections.emptyList(), pageable, 0);
+        when(taskRepository.findAccessibleTasksForUser(eq(TaskStatus.ACTIVE), eq("testuser"), eq(Set.of(-1L)), eq(pageable))).thenReturn(emptyPage);
 
         TaskPageResponse response = taskService.getTasksForUser("testuser", pageable);
 
         assertNotNull(response);
         assertEquals(0, response.getTotalTasks());
-        verify(taskRepository, never()).findByStatusAndRecipientGroupsIn(any(), any(), any());
+        verify(taskRepository).findAccessibleTasksForUser(eq(TaskStatus.ACTIVE), eq("testuser"), eq(Set.of(-1L)), eq(pageable));
     }
 
     @Test

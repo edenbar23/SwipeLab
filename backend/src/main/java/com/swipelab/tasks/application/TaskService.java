@@ -42,17 +42,12 @@ public class TaskService {
                 .collect(Collectors.toSet());
 
         if (groupIds.isEmpty()) {
-            return TaskPageResponse.builder()
-                    .page(pageable.getPageNumber() + 1) // 1-indexed for response
-                    .pageSize(pageable.getPageSize())
-                    .totalPages(0)
-                    .totalTasks(0)
-                    .tasks(Collections.emptyList())
-                    .build();
+            groupIds = Set.of(-1L);
         }
 
-        Page<Task> taskPage = taskRepository.findByStatusAndRecipientGroupsIn(
+        Page<Task> taskPage = taskRepository.findAccessibleTasksForUser(
                 TaskStatus.ACTIVE,
+                username,
                 groupIds,
                 pageable);
 
@@ -85,7 +80,12 @@ public class TaskService {
                 .collect(Collectors.toSet());
 
         boolean isAssigned = false;
-        if (task.getRecipientGroups() != null) {
+        
+        if (Boolean.TRUE.equals(task.getIsPublic())) {
+            isAssigned = true;
+        } else if (task.getAssignedUsernames() != null && task.getAssignedUsernames().contains(username)) {
+            isAssigned = true;
+        } else if (task.getRecipientGroups() != null) {
             for (Long taskGroupId : task.getRecipientGroups()) {
                 if (userGroupIds.contains(taskGroupId)) {
                     isAssigned = true;

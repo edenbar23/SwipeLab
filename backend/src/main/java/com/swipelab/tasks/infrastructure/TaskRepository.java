@@ -15,9 +15,17 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 
     List<Task> findByCreatedBy_Username(String username);
 
-    org.springframework.data.domain.Page<Task> findByStatusAndRecipientGroupsIn(
-            TaskStatus status,
-            java.util.Collection<Long> recipientGroups,
+    @org.springframework.data.jpa.repository.Query(
+        "SELECT DISTINCT t FROM Task t " +
+        "LEFT JOIN t.recipientGroups rg " +
+        "LEFT JOIN t.assignedUsernames au " +
+        "WHERE t.status = :status AND " +
+        "(t.isPublic = true OR au = :username OR rg IN :groupIds)"
+    )
+    org.springframework.data.domain.Page<Task> findAccessibleTasksForUser(
+            @org.springframework.data.repository.query.Param("status") TaskStatus status,
+            @org.springframework.data.repository.query.Param("username") String username,
+            @org.springframework.data.repository.query.Param("groupIds") java.util.Collection<Long> groupIds,
             org.springframework.data.domain.Pageable pageable);
 
 }

@@ -23,4 +23,6 @@ public class TaskResponse {
     private Integer minClassificationsPerImage;
     private Double consensusThreshold;
 
+    private Boolean isPublic;
+    private List<String> assignedUsernames;
 }
