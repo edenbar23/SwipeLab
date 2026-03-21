@@ -47,6 +47,14 @@ public class Task {
     private LocalDateTime deadline;
 
     // =========================
+    // External Integration Metadata
+    // =========================
+
+    @Column(name = "source_system")
+    @Builder.Default
+    private String sourceSystem = "INTERNAL";
+
+    // =========================
     // Task Configuration
     // =========================
 
