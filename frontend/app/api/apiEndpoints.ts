@@ -50,6 +50,7 @@ export const API_ENDPOINTS = {
         //GOLD IMAGES
         GOLD_IMAGES: '/api/admin/gold-images',
         GOLD_IMAGES_GET_ALL: '/api/admin/gold-images/get-all',
+        GOLD_IMAGES_UPLOAD: '/api/admin/gold-images/upload',
         GOLD_IMAGE_DETAILS: (goldImageId: string | number) => `/api/admin/gold-images/${goldImageId}`,
         //RECIPIENTS
         RECIPIENTS: '/api/v1/dashboard/recipients',
