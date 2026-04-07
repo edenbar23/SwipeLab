@@ -13,6 +13,7 @@ WebBrowser.maybeCompleteAuthSession();
 
 export default function LoginScreen() {
   const setAuth = useAuthStore((s) => s.setAuth);
+  const setExternalAuth = useAuthStore((s) => s.setExternalAuth);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -56,7 +57,57 @@ export default function LoginScreen() {
       const data = await res.json();
 
       // data comes from auth.mock.ts
-      setAuth(data.accessToken, data.user.role);
+      setAuth(data.accessToken, data.user.role, data.refreshToken);
+    } catch (e) {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleExternalLogin = async () => {
+    setLoading(true);
+    setError("");
+
+    try {
+      // 1. Call Stardbi directly
+      const stardbiRes = await fetch(API_ENDPOINTS.STARDBI.LOGIN, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username,
+          password,
+        }),
+      });
+
+      if (!stardbiRes.ok) {
+        setError("Invalid username or password for Researcher login");
+        return;
+      }
+
+      const stardbiData = await stardbiRes.json();
+
+      // 2. Map through backend
+      const backendRes = await apiFetch("/api/v1/auth/external/stardbi/loginExternal", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          accessToken: stardbiData.access,
+          username: stardbiData.username || username,
+        }),
+      });
+
+      if (!backendRes.ok) {
+        setError("Backend failed to validate Researcher credentials");
+        return;
+      }
+
+      // 3. Store authentication context locally
+      setExternalAuth(stardbiData.access, stardbiData.refresh, stardbiData.lifetime || 0, stardbiData.username || username);
     } catch (e) {
       setError("Something went wrong. Please try again.");
     } finally {
@@ -95,6 +146,10 @@ export default function LoginScreen() {
           {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.loginButtonText}>Login</Text>}
         </TouchableOpacity>
 
+        <TouchableOpacity style={[styles.loginButton, styles.researcherButton]} onPress={handleExternalLogin} disabled={loading}>
+          {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.loginButtonText}>Login as Researcher</Text>}
+        </TouchableOpacity>
+
         <Text style={styles.orText}>OR</Text>
 
         <TouchableOpacity style={styles.googleButton} onPress={() => promptAsync()} disabled={!request}>
@@ -130,6 +185,7 @@ const styles = StyleSheet.create({
   subtitle: { fontSize: 16, color: "#777", marginBottom: 20 },
   input: { width: "85%", borderWidth: 1, borderColor: "#ccc", padding: 10, borderRadius: 8, color: "#000", marginBottom: 12 },
   loginButton: { width: "85%", backgroundColor: "#4B7BE5", padding: 12, borderRadius: 8, alignItems: "center", marginBottom: 12 },
+  researcherButton: { backgroundColor: "#2E8B57" }, // Distinct color for Researcher
   loginButtonText: { color: "#fff", fontSize: 16, fontWeight: "600" },
   orText: { marginVertical: 10, fontSize: 14, color: "#555" },
   googleButton: { width: "85%", backgroundColor: "white", padding: 12, flexDirection: "row", alignItems: "center", borderRadius: 8, borderWidth: 1, borderColor: "#ccc", justifyContent: "center" },

@@ -1,5 +1,6 @@
 import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
+import { API_ENDPOINTS } from './apiEndpoints';
 
 const USE_MOCKS = __DEV__
 
@@ -33,11 +34,110 @@ export async function apiFetch(
     token = await SecureStore.getItemAsync("token");
   }
 
-  return fetch(backendUrl + input, {
+  const response = await fetch(backendUrl + input, {
     ...init,
     headers: {
       ...(init?.headers ?? {}),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
-  })
+  });
+
+  if (response.status === 401) {
+    let refreshToken;
+    let authProvider;
+    if (Platform.OS === 'web') {
+      refreshToken = localStorage.getItem("refreshToken");
+      authProvider = localStorage.getItem("authProvider");
+    } else {
+      refreshToken = await SecureStore.getItemAsync("refreshToken");
+      authProvider = await SecureStore.getItemAsync("authProvider");
+    }
+
+    if (refreshToken) {
+      try {
+        if (authProvider === "STARDBI") {
+          const refreshResponse = await fetch(API_ENDPOINTS.STARDBI.REFRESH, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ refresh: refreshToken }),
+          });
+
+          if (refreshResponse.ok) {
+            const data = await refreshResponse.json();
+            const newAccess = data.access;
+            if (newAccess) {
+               if (Platform.OS === 'web') {
+                 localStorage.setItem("token", newAccess);
+               } else {
+                 await SecureStore.setItemAsync("token", newAccess);
+               }
+               // Require useAuthStore without top level static import to avoid circular dependency
+               const { useAuthStore } = require("../stores/authStore");
+               useAuthStore.getState().setAuth(newAccess, "ADMIN", refreshToken);
+
+               return fetch(backendUrl + input, {
+                  ...init,
+                  headers: {
+                    ...(init?.headers ?? {}),
+                    Authorization: `Bearer ${newAccess}`,
+                  },
+               });
+            }
+          }
+        } else {
+          // SwipeLab backend refresh
+          const refreshResponse = await fetch(backendUrl + API_ENDPOINTS.AUTH.REFRESH, {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${refreshToken}`,
+            },
+          });
+
+          if (refreshResponse.ok) {
+            const data = await refreshResponse.json();
+            const newAccess = data.accessToken;
+            const newRefresh = data.refreshToken || refreshToken;
+
+            if (newAccess) {
+               if (Platform.OS === 'web') {
+                 localStorage.setItem("token", newAccess);
+                 localStorage.setItem("refreshToken", newRefresh);
+               } else {
+                 await SecureStore.setItemAsync("token", newAccess);
+                 await SecureStore.setItemAsync("refreshToken", newRefresh);
+               }
+               
+               const { useAuthStore } = require("../stores/authStore");
+               const currentRole = useAuthStore.getState().role;
+               useAuthStore.getState().setAuth(newAccess, currentRole, newRefresh);
+
+               return fetch(backendUrl + input, {
+                  ...init,
+                  headers: {
+                    ...(init?.headers ?? {}),
+                    Authorization: `Bearer ${newAccess}`,
+                  },
+               });
+            }
+          }
+        }
+      } catch (e) {
+        console.error("Refresh failed", e);
+      }
+    }
+    
+    // If no refresh token or refresh failed, we must logout
+    const { useAuthStore } = require("../stores/authStore");
+    useAuthStore.getState().logout();
+    // Optional: show "Session expired" message via an event dispatcher or local alert
+    try {
+      if (Platform.OS === 'web') {
+        alert("Session expired. Please log in again.");
+      }
+    } catch(e) {}
+  }
+
+  return response;
 }

@@ -29,7 +29,7 @@ public class StardbiClient {
     }
 
     // ======================================
-    // AUTHENTICATION (Per-User)
+    // AUTHENTICATION (Per-User with role Researcher (ADMIN))
     // ======================================
 
     public StardbiAuthResponseDto login(StardbiAuthRequestDto request) {

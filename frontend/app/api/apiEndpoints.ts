@@ -3,6 +3,7 @@ export const API_ENDPOINTS = {
         LOGIN: '/api/v1/auth/login',
         REGISTER: '/api/v1/auth/register',
         LOGOUT: '/api/v1/auth/logout',
+        REFRESH: '/api/v1/auth/refresh',
         CHANGE_PASSWORD: '/api/v1/auth/password/change',
     },
     USERS: {
@@ -55,5 +56,9 @@ export const API_ENDPOINTS = {
         RECIPIENTS: '/api/v1/dashboard/recipients',
         RECIPIENTS_CREATE: '/api/v1/dashboard/recipients',
         RECIPIENTS_UPDATE: (groupId: string | number) => `/api/v1/dashboard/recipients/${groupId}/update`,
+    },
+    STARDBI: {
+        LOGIN: 'https://stardbi.cs.bgu.ac.il/auth/get_token/',
+        REFRESH: 'https://stardbi.cs.bgu.ac.il/auth/token_refresh/',
     },
 };
