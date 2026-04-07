@@ -26,7 +26,7 @@ export default function UserTopBar({
   streak: propStreak,
   onLogout
 }: UserTopBarProps) {
-  const { logout, role, username: authUsername } = useAuthStore();
+  const { logout, role } = useAuthStore();
   const { setMode } = useModeStore();
   const { theme } = useThemeStore();
   const navigation = useNavigation<any>();
@@ -54,7 +54,7 @@ export default function UserTopBar({
     };
   }, []);
 
-  const displayUsername = stats?.displayName || stats?.username || propUsername || authUsername || "Player";
+  const displayUsername = stats?.displayName || stats?.username || propUsername || "Player";
   const displayScore = propScore !== undefined ? propScore : (stats?.score || 0);
   const displayRank = propRank || (stats?.rank ? `${stats.rank}` : `#${stats?.rankGlobal || '--'}`);
   const displayStreak = propStreak !== undefined ? propStreak : (stats?.currentStreakDays || 0);

@@ -109,6 +109,7 @@ export default function LoginScreen() {
       // 3. Store authentication context locally
       setExternalAuth(stardbiData.access, stardbiData.refresh, stardbiData.lifetime || 0, stardbiData.username || username);
     } catch (e) {
+      console.error("[LoginScreen] Network/Fetch Exception Caught:", e);
       setError("Something went wrong. Please try again.");
     } finally {
       setLoading(false);

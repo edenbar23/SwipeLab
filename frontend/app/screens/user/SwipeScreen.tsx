@@ -122,7 +122,7 @@ export default function SwipeScreen() {
   if (loading && dataBatch.length === 0) {
     return (
       <View style={[styles.container, styles.centerElements, { backgroundColor: themeColors.background }]}>
-        <ActivityIndicator size="large" color={themeColors.primary} />
+        <ActivityIndicator size="large" color={themeColors.tint} />
       </View>
     );
   }

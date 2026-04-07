@@ -73,8 +73,10 @@ public class SecurityConfig {
                                                                 "/login/**",
                                                                 "/v3/api-docs/**",
                                                                 "/swagger-ui/**",
-                                                                "/swagger-ui.html")
+                                                                "/swagger-ui.html",
+                                                                "/uploads/**")
                                                 .permitAll()
+                                                .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
                                                 .anyRequest().authenticated())
                                 .oauth2Login(oauth2 -> oauth2
                                                 .userInfoEndpoint(userInfo -> userInfo
@@ -102,7 +104,7 @@ public class SecurityConfig {
                 }
                 configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                 configuration.setAllowedHeaders(List.of("*"));
-                configuration.setAllowCredentials(true);
+                configuration.setAllowCredentials(false);
                 configuration.setMaxAge(3600L);
 
                 UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

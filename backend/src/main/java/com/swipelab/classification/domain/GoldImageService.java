@@ -11,6 +11,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.web.multipart.MultipartFile;
+import com.swipelab.infrastructure.FileStorageService;
+import com.swipelab.tasks.infrastructure.TaskRepository;
+import com.swipelab.tasks.domain.Task;
 
 @Service
 @RequiredArgsConstructor
@@ -18,6 +22,8 @@ public class GoldImageService {
 
     private final GoldImageRepository goldImageRepository;
     private final ImageRepository imageRepository;
+    private final FileStorageService fileStorageService;
+    private final TaskRepository taskRepository;
 
     @Transactional
     public GoldImageResponse createGoldImage(GoldImageRequest request) {
@@ -32,6 +38,43 @@ public class GoldImageService {
 
         GoldImage saved = goldImageRepository.save(goldImage);
         return mapToResponse(saved);
+    }
+
+    @Transactional
+    public GoldImageResponse uploadGoldImage(MultipartFile file, String imageUrl, Long taskId, String species, String correctAnswerStr) {
+        String srcPath;
+        if (file != null && !file.isEmpty()) {
+            srcPath = fileStorageService.storeFile(file);
+        } else if (imageUrl != null && !imageUrl.isEmpty()) {
+            srcPath = imageUrl;
+        } else {
+            throw new IllegalArgumentException("Either file or imageUrl must be provided");
+        }
+
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new ResourceNotFoundException("Task not found: " + taskId));
+
+        Image image = Image.builder()
+                .srcPath(srcPath)
+                .task(task)
+                .build();
+        Image savedImage = imageRepository.save(image);
+
+        GoldImage.UserResponse correctAnswer;
+        try {
+            correctAnswer = GoldImage.UserResponse.valueOf(correctAnswerStr.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            correctAnswer = GoldImage.UserResponse.YES;
+        }
+
+        GoldImage goldImage = GoldImage.builder()
+                .image(savedImage)
+                .species(species)
+                .correctAnswer(correctAnswer)
+                .build();
+
+        GoldImage savedGoldImage = goldImageRepository.save(goldImage);
+        return mapToResponse(savedGoldImage);
     }
 
     @Transactional(readOnly = true)

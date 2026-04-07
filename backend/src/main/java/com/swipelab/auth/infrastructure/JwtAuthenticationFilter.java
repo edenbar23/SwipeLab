@@ -30,17 +30,24 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             String jwt = getJwtFromRequest(request);
 
-            if (StringUtils.hasText(jwt) && tokenProvider.isTokenValid(jwt)) {
-                String username = tokenProvider.extractUsername(jwt);
+            if (StringUtils.hasText(jwt)) {
+                if (tokenProvider.isTokenValid(jwt)) {
+                    String username = tokenProvider.extractUsername(jwt);
+                    logger.info("VALID Token for user: " + username);
 
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                        userDetails,
-                        null,
-                        userDetails.getAuthorities());
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                            userDetails,
+                            null,
+                            userDetails.getAuthorities());
+                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                } else {
+                    logger.warn("INVALID or EXPIRED JWT Token: " + jwt);
+                }
+            } else {
+                logger.debug("No JWT Token found in the request headers");
             }
         } catch (Exception ex) {
             logger.error("Could not set user authentication in security context", ex);

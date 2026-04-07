@@ -209,7 +209,8 @@ export async function mockRouter(
     const { score } = body as { score: number }
     if (typeof score === 'number') {
       setUserScore(score)
-      return jsonResponse({ success: true, newRank: getLeaderboardData().currentUser.rank })
+      const rank = getLeaderboardData().findIndex(p => p.username === 'You') + 1;
+      return jsonResponse({ success: true, newRank: rank })
     }
     return jsonResponse({ message: 'Invalid score' }, 400)
   }
@@ -240,7 +241,7 @@ export async function mockRouter(
     return jsonResponse(refinedChallengesMock)
   }
 
-  if (method === 'POST' && url.endsWith(API_ENDPOINTS.STATISTICS.UPDATE_ACCURACY)) {
+  if (method === 'POST' && url.endsWith('/api/v1/statistics/update-accuracy')) {
     const { accuracy } = body;
     if (typeof accuracy === 'number') {
       setUserAccuracy(accuracy);
@@ -403,7 +404,7 @@ export async function mockRouter(
     const taskIdParam = urlObj.searchParams.get('taskId');
     if (taskIdParam) {
       const taskId = parseInt(taskIdParam, 10);
-      return jsonResponse(MOCK_GOLD_IMAGES.filter(g => g.taskId === taskId));
+      return jsonResponse(MOCK_GOLD_IMAGES.filter(g => (g as any).taskId === taskId));
     }
     return jsonResponse(MOCK_GOLD_IMAGES);
   }

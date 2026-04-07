@@ -38,7 +38,9 @@ spring:
 # JWT Configuration
 jwt:
   secret: ${JWT_SECRET:dGhpcy1pcy1hLXRlbXBvcmFyeS1zZWNyZXQta2V5LWNoYW5nZS1pbi1wcm9kdWN0aW9u}
-  expiration: 2592000000  # 30 days in milliseconds
+  access-token-expiration-minutes: 1440
+  refresh-token-expiration-days: 30
+  issuer: swipelab
 
 # CORS Configuration
 cors:

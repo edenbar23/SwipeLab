@@ -1,33 +1,37 @@
-// admin screen for adding tasks
 import React, { useEffect, useState } from "react";
-import {
-  Alert,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View
-} from "react-native";
+import { Alert, KeyboardAvoidingView, Platform, StyleSheet, View } from "react-native";
 import { Colors } from '../../../constants/theme';
 import { API_ENDPOINTS } from "../../api/apiEndpoints";
 import { apiFetch } from "../../api/apiFetch";
 import ScreenHeaderLayout from "../../components/layout/ScreenHeaderLayout";
-import MultiSelect from "../../components/ui/MultiSelect";
+import StepIndicator from "../../components/ui/StepIndicator";
 import { useThemeStore } from '../../stores/themeStore';
 
+import { AddTaskFormData } from "../../components/admin/addTask/addTaskTypes";
+import StepConfirm from "../../components/admin/addTask/StepConfirm";
+import StepDescription from "../../components/admin/addTask/StepDescription";
+import StepName from "../../components/admin/addTask/StepName";
+import StepRecipients from "../../components/admin/addTask/StepRecipients";
+import StepSpecies from "../../components/admin/addTask/StepSpecies";
+
+const STEPS = ["Name", "Description", "Species", "Recipients", "Confirm"];
 
 export default function AddTaskScreen({ navigation }: any) {
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [targetSpecies, setTargetSpecies] = useState(""); // comma-separated
-  const [selectedRecipients, setSelectedRecipients] = useState<string[]>([]);
+  const { theme } = useThemeStore();
+  const themeColors = Colors[theme as keyof typeof Colors];
+
+  const [currentStep, setCurrentStep] = useState(0);
+  const [formData, setFormData] = useState<AddTaskFormData>({
+    name: "",
+    description: "",
+    speciesList: [],
+    isPublic: false,
+    selectedRecipients: [],
+  });
+
   const [availableOptions, setAvailableOptions] = useState<{ id: string; label: string }[]>([]);
   const [optionsLoading, setOptionsLoading] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [isPublic, setIsPublic] = useState(false);
-  const { theme } = useThemeStore();
-  const themeColors = Colors[theme as keyof typeof Colors];
 
   useEffect(() => {
     const fetchOptions = async () => {
@@ -57,21 +61,35 @@ export default function AddTaskScreen({ navigation }: any) {
     fetchOptions();
   }, []);
 
+  const updateFormData = (updates: Partial<AddTaskFormData>) => {
+    setFormData((prev) => ({ ...prev, ...updates }));
+  };
+
+  const nextStep = () => {
+    if (currentStep < STEPS.length - 1) {
+      setCurrentStep((prev) => prev + 1);
+    }
+  };
+
+  const prevStep = () => {
+    if (currentStep > 0) {
+      setCurrentStep((prev) => prev - 1);
+    }
+  };
+
   const handleSubmit = async () => {
-    if (!name || !description) {
+    if (!formData.name || !formData.description) {
       Alert.alert("Validation Error", "Task name and description are required");
       return;
     }
 
     const payload = {
-      name,
-      description,
-      targetSpecies: targetSpecies
-        .split(",")
-        .map((s) => ({ commonName: s.trim() })),
-      isPublic,
-      recipientGroups: selectedRecipients.filter(id => id.startsWith("G-")).map(id => Number(id.replace("G-", ""))),
-      assignedUsernames: selectedRecipients.filter(id => id.startsWith("U-")).map(id => id.replace("U-", "")),
+      name: formData.name,
+      description: formData.description,
+      targetSpecies: formData.speciesList.map((s) => ({ commonName: s.trim() })),
+      isPublic: formData.isPublic,
+      recipientGroups: formData.selectedRecipients.filter(id => id.startsWith("G-")).map(id => Number(id.replace("G-", ""))),
+      assignedUsernames: formData.selectedRecipients.filter(id => id.startsWith("U-")).map(id => id.replace("U-", "")),
     };
 
     try {
@@ -82,16 +100,53 @@ export default function AddTaskScreen({ navigation }: any) {
         headers: { "Content-Type": "application/json" },
       });
 
-      const data = await res.json();
-      console.log("AddTask response:", data);
+      if (!res.ok) {
+        throw new Error("Failed response");
+      }
 
-      Alert.alert("Success", "Task created successfully");
+      Alert.alert("Success", "Task created successfully!");
       navigation.navigate("Tasks Management"); // go back to tasks list
     } catch (err) {
       console.error("Error creating task:", err);
       Alert.alert("Error", "Failed to create task");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const renderStepContent = () => {
+    switch (currentStep) {
+      case 0:
+        return <StepName formData={formData} onUpdate={updateFormData} onNext={nextStep} />;
+      case 1:
+        return <StepDescription formData={formData} onUpdate={updateFormData} onNext={nextStep} onBack={prevStep} />;
+      case 2:
+        return <StepSpecies formData={formData} onUpdate={updateFormData} onNext={nextStep} onBack={prevStep} />;
+      case 3:
+        return (
+          <StepRecipients
+            formData={formData}
+            onUpdate={updateFormData}
+            onNext={nextStep}
+            onBack={prevStep}
+            availableOptions={availableOptions}
+            optionsLoading={optionsLoading}
+          />
+        );
+      case 4:
+        return (
+          <StepConfirm
+            formData={formData}
+            onUpdate={updateFormData}
+            onNext={nextStep}
+            onBack={prevStep}
+            onSubmit={handleSubmit}
+            loading={loading}
+            availableOptions={availableOptions}
+          />
+        );
+      default:
+        return null;
     }
   };
 
@@ -103,128 +158,29 @@ export default function AddTaskScreen({ navigation }: any) {
       rightTitle="Tasks"
       onRightPress={() => navigation.navigate("TasksManagement")}
     >
-      <ScrollView contentContainerStyle={[styles.container, { backgroundColor: themeColors.background }]} showsVerticalScrollIndicator={false}>
-        <Text style={[styles.label, { color: themeColors.text }]}>Task Name</Text>
-        <TextInput
-          style={[styles.input, { backgroundColor: themeColors.background, borderColor: themeColors.border, color: themeColors.text }]}
-          value={name}
-          onChangeText={setName}
-          placeholder="Enter task name"
-        />
+      <KeyboardAvoidingView 
+        style={[styles.container, { backgroundColor: themeColors.background }]} 
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        {/* Step Progress Indicator */}
+        <StepIndicator steps={STEPS} currentStep={currentStep} />
 
-        <Text style={[styles.label, { color: themeColors.text }]}>Description</Text>
-        <TextInput
-          style={[styles.input, { backgroundColor: themeColors.background, borderColor: themeColors.border, color: themeColors.text }]}
-          value={description}
-          onChangeText={setDescription}
-          placeholder="Enter description"
-          placeholderTextColor={themeColors.textSecondary}
-        />
-
-        <Text style={[styles.label, { color: themeColors.text }]}>Target Species (comma-separated)</Text>
-        <TextInput
-          style={[styles.input, { backgroundColor: themeColors.background, borderColor: themeColors.border, color: themeColors.text }]}
-          value={targetSpecies}
-          onChangeText={setTargetSpecies}
-          placeholder="e.g., Asian Giant Hornet, Honey Bee"
-          placeholderTextColor={themeColors.textSecondary}
-        />
-
-        <Text style={[styles.label, { color: themeColors.text }]}>Task Visibility</Text>
-        <View style={{ flexDirection: 'row', marginBottom: 12, marginTop: 4 }}>
-          <TouchableOpacity
-            style={[styles.toggleBtn, isPublic && styles.toggleActive]}
-            onPress={() => setIsPublic(true)}
-          >
-            <Text style={[styles.toggleText, isPublic && styles.toggleTextActive]}>Public (All)</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.toggleBtn, !isPublic && styles.toggleActive]}
-            onPress={() => setIsPublic(false)}
-          >
-            <Text style={[styles.toggleText, !isPublic && styles.toggleTextActive]}>Restricted</Text>
-          </TouchableOpacity>
+        {/* Current Step Content */}
+        <View style={styles.contentContainer}>
+          {renderStepContent()}
         </View>
-
-        {!isPublic && (
-          <>
-            <Text style={[styles.label, { color: themeColors.text }]}>Assign Recipients</Text>
-            <MultiSelect
-              options={availableOptions}
-              selectedIds={selectedRecipients}
-              onToggle={(id) => {
-                setSelectedRecipients((prev) =>
-                  prev.includes(id as string) ? prev.filter((gid) => gid !== id) : [...prev, id as string]
-                );
-              }}
-              placeholder="Search users or groups..."
-              loading={optionsLoading}
-            />
-          </>
-        )}
-
-        <TouchableOpacity
-          style={[styles.button, loading && styles.buttonDisabled]}
-          onPress={handleSubmit}
-          disabled={loading}
-        >
-          <Text style={styles.buttonText}>{loading ? "Creating..." : "Create Task"}</Text>
-        </TouchableOpacity>
-      </ScrollView>
+      </KeyboardAvoidingView>
     </ScreenHeaderLayout>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
-  },
-  label: {
-    fontWeight: "600",
-    marginTop: 12,
-    marginBottom: 4,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 10,
-    padding: 10,
-    backgroundColor: "#fff",
-  },
-  button: {
-    marginTop: 24,
-    backgroundColor: "#10B981",
-    paddingVertical: 14,
-    borderRadius: 12,
-    alignItems: "center",
-  },
-  buttonDisabled: {
-    backgroundColor: "#94D3B3",
-  },
-  buttonText: {
-    color: "#fff",
-    fontWeight: "700",
-    fontSize: 16,
-  },
-  toggleBtn: {
     flex: 1,
-    paddingVertical: 10,
-    backgroundColor: "#f3f4f6",
-    alignItems: "center",
-    borderRadius: 8,
-    marginHorizontal: 4,
-    borderWidth: 1,
-    borderColor: "#e5e7eb",
   },
-  toggleActive: {
-    backgroundColor: "#d1fae5",
-    borderColor: "#10B981",
-  },
-  toggleText: {
-    fontWeight: "600",
-    color: "#6b7280",
-  },
-  toggleTextActive: {
-    color: "#065f46",
+  contentContainer: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingBottom: 16,
   },
 });

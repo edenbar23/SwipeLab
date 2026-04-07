@@ -39,4 +39,6 @@ server:
 # Security settings for production
 jwt:
   secret: ${JWT_SECRET}               # Must be set in environment
-  expiration: 2592000000              # 30 days
+  access-token-expiration-minutes: 1440
+  refresh-token-expiration-days: 30
+  issuer: swipelab
