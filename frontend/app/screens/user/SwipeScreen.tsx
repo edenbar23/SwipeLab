@@ -98,19 +98,15 @@ export default function SwipeScreen() {
       switch (e.key) {
         case 'ArrowUp':
           cardRef.current?.swipeCard('dont-know');
-          handleSwipe('dont-know');
           break;
         case 'ArrowDown':
           cardRef.current?.swipeCard('trash');
-          handleSwipe('trash');
           break;
         case 'ArrowLeft':
           cardRef.current?.swipeCard('no');
-          handleSwipe('no');
           break;
         case 'ArrowRight':
           cardRef.current?.swipeCard('yes');
-          handleSwipe('yes');
           break;
       }
     };
@@ -172,7 +168,6 @@ export default function SwipeScreen() {
           <SwipeButtons
             onSwipe={(direction) => {
               cardRef.current?.swipeCard(direction);
-              handleSwipe(direction);
             }}
             onToggleReference={() => setShowReference(!showReference)}
             showReference={showReference}
