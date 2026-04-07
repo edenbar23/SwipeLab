@@ -73,6 +73,7 @@ public class SecurityConfig {
                                                                 "/login/**",
                                                                 "/v3/api-docs/**",
                                                                 "/swagger-ui/**",
+                                                                "/swipelab/**",
                                                                 "/swagger-ui.html",
                                                                 "/uploads/**")
                                                 .permitAll()

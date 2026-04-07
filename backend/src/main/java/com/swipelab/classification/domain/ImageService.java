@@ -72,20 +72,39 @@ public class ImageService {
         }
 
         private BatchImageDto mapToBatchDto(Image image, Task task) {
+                String src = getProvidedImagePath(image.getSrcPath());
+                String contentType = (image.getSrcPath() != null && image.getSrcPath().startsWith("http")) ? "url" : "image/jpeg";
+                
                 return BatchImageDto.builder()
                                 .imageId(image.getId())
                                 .taskId(task.getId())
                                 .question(task.getQuestion() != null ? task.getQuestion() : "Classify this image")
                                 .image(ImageDataDto.builder()
-                                                .contentType("image/jpeg")
-                                                .data(mockBase64(image.getSrcPath()))
+                                                .contentType(contentType)
+                                                .data(src)
                                                 .build())
                                 .referenceImages(List.of()) // Placeholder
                                 .build();
         }
 
-        private String mockBase64(String path) {
-                return "base64_mock_data_for_" + path;
+        private String getProvidedImagePath(String path) {
+                if (path != null && path.startsWith("http")) {
+                        return path;
+                }
+                
+                // Real test of the mock server!
+                try {
+                        org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
+                        org.springframework.http.ResponseEntity<byte[]> response = restTemplate.getForEntity("http://localhost:8080/swipelab/bounding_boxes/" + path + "/", byte[].class);
+                        if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                                return java.util.Base64.getEncoder().encodeToString(response.getBody());
+                        }
+                } catch (Exception e) {
+                        // ignore and use fallback
+                }
+
+                // Fallback to a 1x1 white jpeg
+                return "/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=";
         }
 
         @Transactional
