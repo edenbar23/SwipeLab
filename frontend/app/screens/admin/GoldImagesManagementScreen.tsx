@@ -7,6 +7,7 @@ import GoldImageCard from "../../components/admin/GoldImageCard";
 import ScreenHeaderLayout from "../../components/layout/ScreenHeaderLayout";
 import { useThemeStore } from '../../stores/themeStore';
 import { API_ENDPOINTS } from '../../api/apiEndpoints';
+import { useGoldImages } from '../../api/queries';
 
 
 type GoldImageResponse = {
@@ -18,33 +19,9 @@ type GoldImageResponse = {
 };
 
 export default function GoldImagesManagementScreen({ navigation }: any) {
-    const [goldImages, setGoldImages] = useState<GoldImageResponse[]>([]);
-    const [loading, setLoading] = useState(false);
     const { theme } = useThemeStore();
     const themeColors = Colors[theme as keyof typeof Colors];
-
-    // For demo purposes, using taskId = 1. In production, this would come from navigation params or context
-    const taskId = 1;
-
-    useEffect(() => {
-        // Fetch real data from API
-        fetchGoldImages();
-    }, []);
-
-    const fetchGoldImages = async () => {
-        try {
-            setLoading(true);
-            const res = await apiFetch(`/api/admin/gold-images/get-all`);
-            const data = await res.json();
-            console.log("Gold Images data:", data);
-            setGoldImages(data);
-        } catch (err) {
-            console.error("API fetch error:", err);
-            Alert.alert("Error", "Failed to fetch gold images");
-        } finally {
-            setLoading(false);
-        }
-    };
+    const { data: goldImages = [], isLoading: loading, refetch: fetchGoldImages } = useGoldImages();
 
     const handleDelete = (goldImageId: number) => {
         Alert.alert(

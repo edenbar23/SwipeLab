@@ -4,6 +4,8 @@ import { ActivityIndicator, Platform, StyleSheet, Text, View } from 'react-nativ
 import { Colors } from '../../../constants/theme';
 import { API_ENDPOINTS } from '../../api/apiEndpoints';
 import { apiFetch } from '../../api/apiFetch';
+import { useSwipeBatch, QUERY_KEYS } from '../../api/queries';
+import { useQueryClient } from '@tanstack/react-query';
 import ReferenceGallery from '../../components/user/ReferenceGallery';
 import SwipeButtons from '../../components/user/SwipeButtons';
 import SwipeCard, { SwipeCardHandle } from '../../components/user/SwipeCard';
@@ -30,36 +32,38 @@ export default function SwipeScreen() {
 
   const cardRef = useRef<SwipeCardHandle>(null);
 
-  const fetchBatch = async (isInitial = false) => {
+  const queryClient = useQueryClient();
+  const { data: initialBatch, isLoading: isQueryLoading, error: queryError } = useSwipeBatch(taskId);
+
+  useEffect(() => {
+    if (initialBatch && initialBatch.images) {
+      setDataBatch(initialBatch.images);
+    } else if (initialBatch && Array.isArray(initialBatch)) {
+      setDataBatch(initialBatch); // fallback
+    }
+  }, [initialBatch]);
+
+  const fetchNextBatch = async () => {
     setLoading(true);
     setError(null);
     try {
-      const endpoint = isInitial
-        ? API_ENDPOINTS.TASKS.PLAY_TASK(taskId)
-        : API_ENDPOINTS.CLASSIFICATIONS.NEXT_BATCH(taskId, 5);
-
-      const method = isInitial ? 'POST' : 'GET';
-      const res = await apiFetch(endpoint, { method });
+      const res = await apiFetch(API_ENDPOINTS.CLASSIFICATIONS.NEXT_BATCH(taskId, 5), { method: 'GET' });
       if (res.ok) {
         const json = await res.json();
-        setDataBatch(json.images || []);
+        const newImages = json.images || [];
+        setDataBatch(newImages);
         setCurrentIndex(0);
+        // Cache the new batch 
+        queryClient.setQueryData(QUERY_KEYS.swipeBatch(taskId), { images: newImages });
       } else {
-        const errText = await res.text().catch(() => '');
-        console.error(`Fetch batch failed. Status: ${res.status}. Body:`, errText);
         setError(`Failed to fetch batch (Status: ${res.status})`);
       }
     } catch (e: any) {
-      console.error("Fetch batch exception:", e);
       setError(`Error fetching batch: ${e.message}`);
     } finally {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    fetchBatch(true);
-  }, [taskId]);
 
   const handleSwipe = async (direction: SwipeDirection) => {
     console.log(`Swiped: ${direction}`);
@@ -87,7 +91,7 @@ export default function SwipeScreen() {
       setCurrentIndex(prev => prev + 1);
       setShowReference(false);
     } else {
-      fetchBatch();
+      fetchNextBatch();
     }
   };
 
@@ -115,7 +119,7 @@ export default function SwipeScreen() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [loading, dataBatch, currentIndex]);
 
-  if (loading && dataBatch.length === 0) {
+  if ((loading && dataBatch.length === 0) || isQueryLoading) {
     return (
       <View style={[styles.container, styles.centerElements, { backgroundColor: themeColors.background }]}>
         <ActivityIndicator size="large" color={themeColors.tint} />
@@ -123,7 +127,7 @@ export default function SwipeScreen() {
     );
   }
 
-  if (error || dataBatch.length === 0) {
+  if (error || queryError || dataBatch.length === 0) {
     return (
       <View style={[styles.container, styles.centerElements, { backgroundColor: themeColors.background }]}>
         <Text style={{ color: themeColors.text }}>{error || 'No more images to classify.'}</Text>

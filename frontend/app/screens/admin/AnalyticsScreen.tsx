@@ -14,7 +14,9 @@ import { API_ENDPOINTS } from '../../api/apiEndpoints';
 import { apiFetch } from "../../api/apiFetch";
 import MetricCard from "../../components/admin/MetricCard";
 import ScreenHeaderLayout from "../../components/layout/ScreenHeaderLayout";
+import { useQueryClient } from "@tanstack/react-query";
 import { useThemeStore } from '../../stores/themeStore';
+import { useAnalyticsTask, useAnalyticsUsers, useAnalyticsTop, QUERY_KEYS } from "../../api/queries";
 
 
 type TaskAnalytics = {
@@ -40,7 +42,7 @@ type TaskAnalytics = {
     };
 };
 
-type UserPerformance = {
+export type UserPerformance = {
     username: string;
     displayName: string;
     totalClassifications: number;
@@ -53,47 +55,26 @@ type UserPerformance = {
 };
 
 export default function AnalyticsScreen({ navigation }: any) {
-    const [analytics, setAnalytics] = useState<TaskAnalytics | null>(null);
-    const [users, setUsers] = useState<UserPerformance[]>([]);
-    const [topPerformers, setTopPerformers] = useState<UserPerformance[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [refreshing, setRefreshing] = useState(false);
     const selectedTaskId = 1;
     const { theme } = useThemeStore();
     const themeColors = Colors[theme as keyof typeof Colors];
+    const queryClient = useQueryClient();
 
-    useEffect(() => {
-        fetchAnalytics(selectedTaskId);
-    }, []);
+    const { data: analytics, isLoading: analyticsLoading, refetch: refetchAnalytics } = useAnalyticsTask(selectedTaskId);
+    const { data: users, isLoading: usersLoading, refetch: refetchUsers } = useAnalyticsUsers(selectedTaskId);
+    const { data: topPerformers, isLoading: topLoading, refetch: refetchTop } = useAnalyticsTop(5);
 
-    const fetchAnalytics = async (taskId: number) => {
-        try {
-            setLoading(true);
-            const [analyticsRes, usersRes, topPerformersRes] = await Promise.all([
-                apiFetch(API_ENDPOINTS.ADMIN.ANALYTICS_TASKS(taskId)),
-                apiFetch(API_ENDPOINTS.ADMIN.ANALYTICS_USERS(taskId)),
-                apiFetch(API_ENDPOINTS.ADMIN.ANALYTICS_TOP(5)),
-            ]);
+    const loading = analyticsLoading || usersLoading || topLoading;
+    const [refreshing, setRefreshing] = useState(false);
 
-            const analyticsData = await analyticsRes.json();
-            const usersData = await usersRes.json();
-            const topPerformersData = await topPerformersRes.json();
-
-            setAnalytics(analyticsData);
-            setUsers(usersData);
-            setTopPerformers(topPerformersData);
-        } catch (err) {
-            console.error("Analytics fetch error:", err);
-            Alert.alert("Error", "Failed to fetch analytics data");
-        } finally {
-            setLoading(false);
-            setRefreshing(false);
-        }
-    };
-
-    const handleRefresh = () => {
+    const handleRefresh = async () => {
         setRefreshing(true);
-        fetchAnalytics(selectedTaskId);
+        await Promise.all([
+            refetchAnalytics(),
+            refetchUsers(),
+            refetchTop(),
+        ]).catch(() => Alert.alert("Error", "Failed to reach server"));
+        setRefreshing(false);
     };
 
     const handleStateChange = async (action: "pause" | "activate" | "archive") => {
@@ -120,6 +101,8 @@ export default function AnalyticsScreen({ navigation }: any) {
 
                             await apiFetch(endpoint, { method: "POST" });
                             Alert.alert("Success", `Task ${action}d successfully`);
+                            queryClient.invalidateQueries({ queryKey: ['tasks'] });
+                            queryClient.invalidateQueries({ queryKey: ['analytics'] });
                             handleRefresh();
                         } catch (err) {
                             console.error(`${action} error:`, err);
@@ -258,7 +241,7 @@ export default function AnalyticsScreen({ navigation }: any) {
                             />
 
                             <Text style={[styles.subsectionTitle, { color: themeColors.textSecondary }]}>Top Performers</Text>
-                            {topPerformers?.map((user, index) => (
+                            {topPerformers?.map((user: UserPerformance, index: number) => (
                                 <View key={user.username} style={[styles.userCard, { backgroundColor: themeColors.card, borderColor: themeColors.border }]}>
                                     <View style={styles.userRank}>
                                         <Text style={styles.rankText}>#{index + 1}</Text>

@@ -16,6 +16,8 @@ import { RecipientGroup } from '../../mocks/data/recipients.mock';
 import { User } from '../../mocks/data/users.mock';
 import { useThemeStore } from '../../stores/themeStore';
 import { API_ENDPOINTS } from '../../api/apiEndpoints';
+import { useAdminUsers, useRecipients } from '../../api/queries';
+import { useQueryClient } from '@tanstack/react-query';
 
 
 // Utility for colors
@@ -36,7 +38,10 @@ export default function RecipientGroupDetailsScreen() {
     const { theme } = useThemeStore();
     const themeColors = Colors[theme as keyof typeof Colors];
 
-    const [currentGroup, setCurrentGroup] = useState<RecipientGroup>(group);
+    const queryClient = useQueryClient();
+
+    const { data: rawUsers = [] } = useAdminUsers();
+    const { data: rawGroups = [], refetch: refetchGroups } = useRecipients();
 
     // Add Member Modal State
     const [addMemberModalVisible, setAddMemberModalVisible] = useState(false);
@@ -46,50 +51,24 @@ export default function RecipientGroupDetailsScreen() {
     const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
     const [selectedGroupIds, setSelectedGroupIds] = useState<number[]>([]);
 
-    // Data Sources
-    const [allUsers, setAllUsers] = useState<User[]>([]);
-    const [allGroups, setAllGroups] = useState<RecipientGroup[]>([]);
+    const allUsers = React.useMemo(() => rawUsers.map((u: any) => ({ ...u, id: u.username || u.id })), [rawUsers]);
 
-    const loadAllData = async () => {
-        try {
-            const [usersRes, groupsRes] = await Promise.all([
-                apiFetch(API_ENDPOINTS.USERS.GET_ALL).catch(() => null),
-                apiFetch(API_ENDPOINTS.ADMIN.RECIPIENTS).catch(() => null)
-            ]);
+    const allGroups = React.useMemo(() => {
+        return rawGroups.map((g: any) => ({
+            id: g.groupId,
+            name: g.name,
+            usersCount: g.userCount || g.usernames?.length || 0,
+            users: (g.usernames || []).map((uname: string) => {
+                const u = allUsers.find((user: any) => (user.username || user.id) === uname);
+                return u || { id: uname, username: uname, description: 'User' };
+            })
+        }));
+    }, [rawGroups, allUsers]);
 
-            let fetchedUsers: User[] = allUsers;
-            if (usersRes && usersRes.ok) {
-                fetchedUsers = await usersRes.json();
-                setAllUsers(fetchedUsers);
-            }
-
-            if (groupsRes && groupsRes.ok) {
-                const rawGroups = await groupsRes.json();
-                const mappedGroups: RecipientGroup[] = rawGroups.map((g: any) => ({
-                    id: g.groupId,
-                    name: g.name,
-                    usersCount: g.userCount || g.usernames?.length || 0,
-                    users: (g.usernames || []).map((uname: string) => {
-                        const u = fetchedUsers.find((user: any) => (user.username || user.id) === uname);
-                        return u || { id: uname, username: uname, description: 'User' };
-                    })
-                }));
-                setAllGroups(mappedGroups);
-
-                const updated = mappedGroups.find(g => g.id === currentGroup.id);
-                if (updated) setCurrentGroup(updated);
-            }
-        } catch (e) {
-            console.error(e);
-        }
-    };
-
-    useEffect(() => {
-        loadAllData();
-    }, []);
+    const currentGroup = allGroups.find((g: any) => g.id === group.id) || group;
 
     const refreshGroup = async () => {
-        await loadAllData();
+        await refetchGroups();
     };
 
     const handleAddSelected = async () => {
@@ -99,10 +78,10 @@ export default function RecipientGroupDetailsScreen() {
             finalUsernamesToAdd = selectedUserIds;
         } else {
             // Merge users from selected groups
-            const groupsToAdd = allGroups.filter(g => selectedGroupIds.includes(g.id));
-            groupsToAdd.forEach(g => {
-                g.users.forEach(u => {
-                    if (!currentGroup.users.some(existing => existing.id === u.id)) {
+            const groupsToAdd = allGroups.filter((g: any) => selectedGroupIds.includes(g.id));
+            groupsToAdd.forEach((g: any) => {
+                g.users.forEach((u: any) => {
+                    if (!currentGroup.users.some((existing: any) => existing.id === u.id)) {
                         finalUsernamesToAdd.push(u.id);
                     }
                 });
@@ -186,10 +165,11 @@ export default function RecipientGroupDetailsScreen() {
 
     // --- Composition Logic ---
     const getComposition = () => {
+        if (!currentGroup || !currentGroup.users) return [];
         const total = currentGroup.users.length;
         if (total === 0) return [];
         const counts: Record<string, number> = {};
-        currentGroup.users.forEach(u => {
+        currentGroup.users.forEach((u: any) => {
             const type = u.description || 'Other';
             counts[type] = (counts[type] || 0) + 1;
         });
@@ -240,10 +220,10 @@ export default function RecipientGroupDetailsScreen() {
             )}
 
             <ScrollView contentContainerStyle={styles.list} showsVerticalScrollIndicator={false}>
-                {currentGroup.users.length === 0 ? (
+                {!currentGroup || !currentGroup.users || currentGroup.users.length === 0 ? (
                     <Text style={[styles.emptyText, { color: themeColors.textSecondary }]}>No users in this group.</Text>
                 ) : (
-                    currentGroup.users.map(user => (
+                    currentGroup.users.map((user: any) => (
                         <View key={user.id} style={[styles.userRow, { backgroundColor: themeColors.card }]}>
                             <View>
                                 <Text style={[styles.username, { color: themeColors.text }]}>{user.username}</Text>
@@ -282,8 +262,8 @@ export default function RecipientGroupDetailsScreen() {
                         <ScrollView style={{ maxHeight: 300 }} showsVerticalScrollIndicator={false}>
                             {activeTab === 'USERS' ? (
                                 // Users List
-                                allUsers.map(u => {
-                                    const isAlreadyIn = currentGroup.users.some(existing => existing.id === u.id);
+                                allUsers.map((u: any) => {
+                                    const isAlreadyIn = currentGroup && currentGroup.users ? currentGroup.users.some((existing: any) => existing.id === u.id) : false;
                                     if (isAlreadyIn) return null;
                                     const isSelected = selectedUserIds.includes(u.id);
                                     return (
@@ -295,8 +275,8 @@ export default function RecipientGroupDetailsScreen() {
                                 })
                             ) : (
                                 // Groups List
-                                allGroups.map(g => {
-                                    if (g.id === currentGroup.id) return null; // Don't add self
+                                allGroups.map((g: any) => {
+                                    if (currentGroup && g.id === currentGroup.id) return null; // Don't add self
                                     const isSelected = selectedGroupIds.includes(g.id);
                                     return (
                                         <TouchableOpacity key={g.id} style={[styles.selectRow, isSelected && styles.selectedRow, { borderBottomColor: themeColors.border }]} onPress={() => toggleGroupSelection(g.id)}>

@@ -15,6 +15,7 @@ import { useThemeStore } from '../../stores/themeStore';
 import { Colors } from '../../../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { API_ENDPOINTS } from '../../api/apiEndpoints';
+import { useChallenges } from '../../api/queries';
 
 
 interface Challenge {
@@ -70,35 +71,15 @@ function ChallengeCard({ challenge }: { challenge: Challenge }) {
 }
 
 export default function ChallengesScreen() {
-    const [challenges, setChallenges] = useState<Challenge[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [refreshing, setRefreshing] = useState(false);
     const navigation = useNavigation<any>();
     const { theme } = useThemeStore();
     const themeColors = Colors[theme as keyof typeof Colors];
 
-    const fetchChallenges = async () => {
-        try {
-            const res = await apiFetch(API_ENDPOINTS.GAMIFICATION.CHALLENGES);
-            if (res.ok) {
-                const data = await res.json();
-                setChallenges(data);
-            }
-        } catch (error) {
-            console.error('Failed to fetch challenges', error);
-        } finally {
-            setLoading(false);
-            setRefreshing(false);
-        }
-    };
-
-    useEffect(() => {
-        fetchChallenges();
-    }, []);
+    const { data: challenges = [], isLoading: loading, refetch, isRefetching } = useChallenges();
+    const refreshing = isRefetching;
 
     const onRefresh = () => {
-        setRefreshing(true);
-        fetchChallenges();
+        refetch();
     };
 
     if (loading) {
@@ -131,13 +112,13 @@ export default function ChallengesScreen() {
 
                 {/* In Progress Section */}
                 <Text style={[styles.sectionHeader, { color: themeColors.text }]}>In Progress</Text>
-                {challenges.filter(c => c.progress < c.total).map(challenge => (
+                {challenges.filter((c: any) => c.progress < c.total).map((challenge: any) => (
                     <ChallengeCard key={challenge.id} challenge={challenge} />
                 ))}
 
                 {/* Completed Section */}
                 <Text style={[styles.sectionHeader, { color: themeColors.text }]}>Completed</Text>
-                {challenges.filter(c => c.progress >= c.total).map(challenge => (
+                {challenges.filter((c: any) => c.progress >= c.total).map((challenge: any) => (
                     <ChallengeCard key={challenge.id} challenge={challenge} />
                 ))}
 

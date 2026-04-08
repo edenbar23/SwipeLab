@@ -3,6 +3,7 @@ import * as WebBrowser from "expo-web-browser";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { apiFetch } from "../../api/apiFetch";
+import { preloadAfterLogin } from "../../api/queries";
 import RegisterForm from "../../components/RegisterForm";
 import { useAuthStore } from "../../stores/authStore";
 import { API_ENDPOINTS } from '../../api/apiEndpoints';
@@ -29,7 +30,15 @@ export default function LoginScreen() {
       const { authentication } = response;
       const token = "mock-jwt-token";
       const role = "ADMIN";
-      setAuth(token, role);
+      
+      // Needs async wrapper
+      (async () => {
+        setLoading(true);
+        await setAuth(token, role);
+        // Preload cache
+        await preloadAfterLogin(role);
+        setLoading(false);
+      })();
     }
   }, [response]);
 
@@ -55,9 +64,13 @@ export default function LoginScreen() {
       }
 
       const data = await res.json();
+      const role = data.user.role;
 
       // data comes from auth.mock.ts
-      setAuth(data.accessToken, data.user.role, data.refreshToken);
+      await setAuth(data.accessToken, role, data.refreshToken);
+
+      // Blocking prefetch before navigate
+      await preloadAfterLogin(role);
     } catch (e) {
       setError("Something went wrong. Please try again.");
     } finally {
@@ -107,7 +120,11 @@ export default function LoginScreen() {
       }
 
       // 3. Store authentication context locally
-      setExternalAuth(stardbiData.access, stardbiData.refresh, stardbiData.lifetime || 0, stardbiData.username || username);
+      await setExternalAuth(stardbiData.access, stardbiData.refresh, stardbiData.lifetime || 0, stardbiData.username || username);
+
+      // Blocking prefetch before navigate
+      // Role can be assumed RESEARCHER or ADMIN for external
+      await preloadAfterLogin("ADMIN");
     } catch (e) {
       console.error("[LoginScreen] Network/Fetch Exception Caught:", e);
       setError("Something went wrong. Please try again.");

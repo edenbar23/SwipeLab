@@ -4,6 +4,7 @@ import { Colors } from '../../../constants/theme';
 import { API_ENDPOINTS } from "../../api/apiEndpoints";
 import { apiFetch } from "../../api/apiFetch";
 import ScreenHeaderLayout from "../../components/layout/ScreenHeaderLayout";
+import { useQueryClient } from "@tanstack/react-query";
 import StepIndicator from "../../components/ui/StepIndicator";
 import { useThemeStore } from '../../stores/themeStore';
 
@@ -19,6 +20,7 @@ const STEPS = ["Name", "Description", "Species", "Recipients", "Confirm"];
 export default function AddTaskScreen({ navigation }: any) {
   const { theme } = useThemeStore();
   const themeColors = Colors[theme as keyof typeof Colors];
+  const queryClient = useQueryClient();
 
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState<AddTaskFormData>({
@@ -103,6 +105,8 @@ export default function AddTaskScreen({ navigation }: any) {
       if (!res.ok) {
         throw new Error("Failed response");
       }
+
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
 
       Alert.alert("Success", "Task created successfully!");
       navigation.navigate("Tasks Management"); // go back to tasks list

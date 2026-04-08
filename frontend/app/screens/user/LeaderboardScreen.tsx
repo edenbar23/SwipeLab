@@ -6,6 +6,7 @@ import { apiFetch } from '../../api/apiFetch';
 import ScreenHeaderLayout from '../../components/layout/ScreenHeaderLayout/ScreenHeaderLayout';
 import { useThemeStore } from '../../stores/themeStore';
 import { API_ENDPOINTS } from '../../api/apiEndpoints';
+import { useLeaderboard } from '../../api/queries';
 
 
 interface LeaderboardEntry {
@@ -105,66 +106,30 @@ function LeaderboardTable({ title, data, type }: LeaderboardTableProps) {
 const DEBUG_MODE = false;
 
 export default function LeaderboardScreen() {
-    const [data, setData] = useState<LeaderboardData | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
     const navigation = useNavigation<any>();
     const { theme } = useThemeStore();
     const themeColors = Colors[theme as keyof typeof Colors];
 
-    const fetchLeaderboard = useCallback(async () => {
-        try {
-            setLoading(true);
-            const response = await apiFetch(API_ENDPOINTS.GAMIFICATION.LEADERBOARD);
+    const { data: rawData, isLoading: loading, error } = useLeaderboard();
 
-            if (!response.ok) {
-                throw new Error('Failed to fetch leaderboard');
-            }
-
-            const leaderboardData = await response.json();
-
-            // Transform data to match UI requirements
-            const allTime = leaderboardData.map((item: any, index: number) => ({
-                rank: index + 1,
-                username: item.username,
-                score: item.score
-            }));
-
-            // Mock monthly data for now as backend doesn't provide it yet
-            const monthly = [...allTime].sort((a, b) => b.score - a.score).slice(0, 5);
-
-            // Find current user in the list or mock it if not found
-            // In a real app, we should fetch current user rank from backend
-            const currentUser = allTime.find((item: any) => item.username === "You") || {
-                rank: 0,
-                username: "You",
-                score: 0
-            };
-
-            setData({
-                currentUser,
-                allTime,
-                monthly
-            });
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'Unknown error');
-        } finally {
-            setLoading(false);
-        }
-    }, []);
-
-    useEffect(() => {
-        fetchLeaderboard();
-    }, [fetchLeaderboard]);
+    const data = React.useMemo(() => {
+        if (!rawData) return null;
+        const allTime = rawData.map((item: any, index: number) => ({
+            rank: index + 1,
+            username: item.username,
+            score: item.score
+        }));
+        const monthly = [...allTime].sort((a, b) => b.score - a.score).slice(0, 5);
+        const currentUser = allTime.find((item: any) => item.username === "You") || {
+            rank: 0,
+            username: "You",
+            score: 0
+        };
+        return { currentUser, allTime, monthly };
+    }, [rawData]);
 
     const updateScore = async (newScore: number) => {
-        // API endpoint for updating score is likely different too, 
-        // based on GamificationController it might not even exist yet or be different.
-        // verified GamificationController has no update-score endpoint.
-        // disabling for now to prevent errors.
         console.warn("Update score not implemented in backend yet");
-        // await apiFetch('/api/v1/leaderboard/update-score', { ... });
-        // fetchLeaderboard(); 
     };
 
     if (loading) {
@@ -179,7 +144,7 @@ export default function LeaderboardScreen() {
     if (error || !data) {
         return (
             <View style={styles.errorContainer}>
-                <Text style={styles.errorText}>⚠️ {error || 'Failed to load leaderboard'}</Text>
+                <Text style={styles.errorText}>⚠️ {(error as Error)?.message || 'Failed to load leaderboard'}</Text>
             </View>
         );
     }

@@ -14,6 +14,7 @@ import { Colors } from '../../../constants/theme';
 import { API_ENDPOINTS } from '../../api/apiEndpoints';
 import { apiFetch } from "../../api/apiFetch";
 import ScreenHeaderLayout from "../../components/layout/ScreenHeaderLayout";
+import { useQueryClient } from "@tanstack/react-query";
 import MultiSelect from "../../components/ui/MultiSelect";
 import { AdminStackParamList } from "../../navigation/adminStack.types";
 import { useThemeStore } from '../../stores/themeStore';
@@ -26,6 +27,7 @@ type Props = NativeStackScreenProps<
 
 export default function EditTaskScreen({ route, navigation }: Props) {
   const { taskId } = route.params;
+  const queryClient = useQueryClient();
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -132,6 +134,9 @@ export default function EditTaskScreen({ route, navigation }: Props) {
       }
 
       await res.json();
+
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["taskDetails", taskId] });
 
       Alert.alert("Success", "Task updated successfully");
       navigation.navigate("TasksManagement");

@@ -7,23 +7,13 @@ import TaskCard from "../../components/admin/TaskCard";
 import ScreenHeaderLayout from "../../components/layout/ScreenHeaderLayout";
 import { useThemeStore } from '../../stores/themeStore';
 import { API_ENDPOINTS } from '../../api/apiEndpoints';
+import { useAdminTasks } from "../../api/queries";
 
 
 export default function TasksManagementScreen({ navigation }: any) {
-  const [tasks, setTasks] = useState<any[]>([]);
   const { theme } = useThemeStore();
   const themeColors = Colors[theme as keyof typeof Colors];
-
-  useEffect(() => {
-    apiFetch(API_ENDPOINTS.TASKS.DASHBOARD)
-      .then((res: Response) => res.json()) // parse the JSON body
-      .then((data) => {
-        console.log("Parsed API data:", data); // now you can see the actual tasks
-        setTasks(data); // The backend returns an array directly
-      })
-      .catch((err) => console.error("API fetch error:", err));
-  }, []);
-
+  const { data: tasks = [], isLoading } = useAdminTasks();
 
   return (
     <ScreenHeaderLayout

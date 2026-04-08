@@ -1,5 +1,5 @@
 import { useNavigation } from "@react-navigation/native";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { ActivityIndicator, Alert, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { apiFetch } from "../../api/apiFetch";
 import ScreenHeaderLayout from "../../components/layout/ScreenHeaderLayout/ScreenHeaderLayout";
@@ -16,15 +16,14 @@ interface UserProfile {
 import { Colors } from '../../../constants/theme';
 import { useThemeStore } from '../../stores/themeStore';
 import { API_ENDPOINTS } from '../../api/apiEndpoints';
-
+import { useProfile } from "../../api/queries";
 
 export default function ProfileScreen() {
     const navigation = useNavigation<any>();
     const { isDesktop } = useResponsive();
     const { theme } = useThemeStore();
     const themeColors = Colors[theme as keyof typeof Colors];
-    const [user, setUser] = useState<UserProfile | null>(null);
-    const [loading, setLoading] = useState(true);
+    const { data: user, isLoading: loading, error, refetch } = useProfile();
 
     // Change Password State
     const [isChangingPassword, setIsChangingPassword] = useState(false);
@@ -32,24 +31,6 @@ export default function ProfileScreen() {
     const [confirmPassword, setConfirmPassword] = useState("");
     const [passwordError, setPasswordError] = useState("");
     const [isSavingPassword, setIsSavingPassword] = useState(false);
-
-    useEffect(() => {
-        fetchProfile();
-    }, []);
-
-    const fetchProfile = async () => {
-        try {
-            const response = await apiFetch(API_ENDPOINTS.USERS.ME);
-            if (!response.ok) throw new Error("Failed to fetch");
-            const data = await response.json();
-            setUser(data);
-        } catch (error) {
-            console.error("Failed to fetch profile:", error);
-            Alert.alert("Error", "Failed to load profile data.");
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const handleStartChangePassword = () => {
         setIsChangingPassword(true);
@@ -165,7 +146,7 @@ export default function ProfileScreen() {
                 <View style={styles.section}>
                     <Text style={[styles.sectionTitle, { color: themeColors.text }]}>Badges</Text>
                     <View style={styles.badgesContainer}>
-                        {user.badges.map((badge, index) => (
+                        {user.badges?.map((badge: string, index: number) => (
                             <View key={index} style={[styles.badge, { backgroundColor: themeColors.background, borderColor: themeColors.border }]}>
                                 <Text style={styles.badgeText}>{badge}</Text>
                             </View>

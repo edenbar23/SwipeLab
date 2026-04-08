@@ -13,6 +13,7 @@ import addTaskImg from "../../../assets/images/add_task.png";
 import profileImg from "../../../assets/images/profile.png";
 import usersImg from "../../../assets/images/users.png";
 import { API_ENDPOINTS } from '../../api/apiEndpoints';
+import { useAdminUsers } from "../../api/queries";
 
 
 type UsersManagementScreenNavigationProp = NativeStackNavigationProp<AdminStackParamList, 'UsersManagement'>;
@@ -25,31 +26,10 @@ interface User {
 
 export default function UsersManagementScreen() {
     const navigation = useNavigation<UsersManagementScreenNavigationProp>();
-    const [users, setUsers] = React.useState<User[]>([]);
-    const [loading, setLoading] = React.useState(true);
     const { theme } = useThemeStore();
     const themeColors = Colors[theme as keyof typeof Colors];
 
-    React.useEffect(() => {
-        loadUsers();
-    }, []);
-
-    const loadUsers = async () => {
-        try {
-            setLoading(true);
-            const res = await apiFetch(API_ENDPOINTS.USERS.GET_ALL);
-            if (res.ok) {
-                const data = await res.json();
-                setUsers(data);
-            } else {
-                console.error("Failed to load users", res.status);
-            }
-        } catch (e) {
-            console.error("Error loading users", e);
-        } finally {
-            setLoading(false);
-        }
-    };
+    const { data: users = [], isLoading: loading } = useAdminUsers();
 
     const renderItem = ({ item }: { item: User }) => (
         <TouchableOpacity style={[styles.card, { backgroundColor: themeColors.card, borderColor: themeColors.border }]}>

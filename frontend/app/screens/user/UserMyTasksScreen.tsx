@@ -1,5 +1,7 @@
 import { useNavigation } from '@react-navigation/native';
 import React, { useCallback, useEffect, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { useMyTasks, useAvailableTasks, useStatistics, QUERY_KEYS } from "../../api/queries";
 import { RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Colors } from '../../../constants/theme';
 import { API_ENDPOINTS } from '../../api/apiEndpoints';
@@ -13,59 +15,39 @@ export default function UserMyTasksScreen() {
     const navigation = useNavigation<any>();
     const { theme } = useThemeStore();
     const themeColors = Colors[theme as keyof typeof Colors];
-    const [refreshing, setRefreshing] = useState(false);
+    const queryClient = useQueryClient();
 
-    // State for data
-    const [stats, setStats] = useState<any>(null);
-    const [tasks, setTasks] = useState<any[]>([]);
-    const [availableTasks, setAvailableTasks] = useState<any[]>([]);
+    const { data: stats, isLoading: statsLoading, refetch: refetchStats } = useStatistics();
+    const { data: tasks = [], isLoading: tasksLoading, refetch: refetchTasks } = useMyTasks();
+    const { data: availableTasks = [], isLoading: availableLoading, refetch: refetchAvailable } = useAvailableTasks();
 
-    const loadData = useCallback(async () => {
-        setRefreshing(true);
-        try {
-            const [statsRes, tasksRes, availableRes] = await Promise.all([
-                apiFetch(API_ENDPOINTS.STATISTICS.ME).catch(() => null),
-                apiFetch(API_ENDPOINTS.TASKS.MY_TASKS).catch(() => null),
-                apiFetch(API_ENDPOINTS.TASKS.AVAILABLE_TASKS).catch(() => null)
-            ]);
+    const refreshing = statsLoading || tasksLoading || availableLoading;
 
-            if (statsRes && statsRes.ok) setStats(await statsRes.json());
-            if (tasksRes && tasksRes.ok) {
-                const tasksData = await tasksRes.json();
-                setTasks(tasksData.tasks || []);
-            }
-
-            if (availableRes && availableRes.ok) {
-                setAvailableTasks(await availableRes.json());
-            } else {
-                console.log('available tasks not implemented yet');
-            }
-        } catch (e) {
-            console.error('Failed to load tasks data:', e);
-        } finally {
-            setRefreshing(false);
-        }
-    }, []);
+    const loadData = useCallback(() => {
+        refetchStats();
+        refetchTasks();
+        refetchAvailable();
+    }, [refetchStats, refetchTasks, refetchAvailable]);
 
     const handleAddTask = (taskId: number) => {
-        const taskToAdd = availableTasks.find(t => t.taskId === taskId);
+        const taskToAdd = availableTasks.find((t: any) => t.taskId === taskId);
         if (taskToAdd) {
-            setTasks(prev => [...prev, taskToAdd]);
-            setAvailableTasks(prev => prev.filter(t => t.taskId !== taskId));
+            queryClient.setQueryData(QUERY_KEYS.myTasks, (prev: any) => [...(prev || []), taskToAdd]);
+            queryClient.setQueryData(QUERY_KEYS.availableTasks, (prev: any) => 
+                (prev || []).filter((t: any) => t.taskId !== taskId)
+            );
             console.log(`Added task ${taskId} to my tasks`);
         }
     };
-
-    useEffect(() => {
-        loadData();
-    }, [loadData]);
 
     const handleTaskPress = (task: any) => {
         navigation.navigate('TaskDetails', { task });
     };
 
     const handleRemoveTask = (taskId: number) => {
-        setTasks(prev => prev.filter(t => t.taskId !== taskId));
+        queryClient.setQueryData(QUERY_KEYS.myTasks, (prev: any) => 
+            (prev || []).filter((t: any) => t.taskId !== taskId)
+        );
     };
 
     const handleLogout = () => {
@@ -83,7 +65,7 @@ export default function UserMyTasksScreen() {
     const totalAssigned = tasks.length;
     let totalImages = 0;
     let totalClassified = 0;
-    tasks.forEach(t => {
+    tasks.forEach((t: any) => {
         totalImages += t.totalImages;
         totalClassified += t.imagesClassified;
     });
@@ -121,7 +103,7 @@ export default function UserMyTasksScreen() {
                     <Text style={[styles.emptyState, { color: themeColors.textSecondary }]}>No tasks assigned yet.</Text>
                 )}
 
-                {tasks.map((task) => {
+                {tasks.map((task: any) => {
                     // Calculate progress
                     const progress = task.totalImages ? Math.round((task.imagesClassified / task.totalImages) * 100) : 0;
 
@@ -144,7 +126,7 @@ export default function UserMyTasksScreen() {
                     <Text style={[styles.sectionTitle, { color: '#0EA5E9' }]}>Explore Tasks</Text>
                 </View>
 
-                {availableTasks.map((task) => {
+                {availableTasks.map((task: any) => {
                     // Calculate progress
                     const progress = task.totalImages ? Math.round((task.imagesClassified / task.totalImages) * 100) : 0;
 

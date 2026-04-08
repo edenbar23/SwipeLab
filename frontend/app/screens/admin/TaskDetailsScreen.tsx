@@ -1,13 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { Colors } from '../../../constants/theme';
 import { apiFetch } from "../../api/apiFetch";
 import { AdminStackParamList } from "../../navigation/adminStack.types";
 import { useThemeStore } from '../../stores/themeStore';
-import { API_ENDPOINTS } from '../../api/apiEndpoints';
+import { useTaskDetails } from "../../api/queries";
 
 
 type Props = NativeStackScreenProps<AdminStackParamList, "TaskDetails">;
@@ -31,30 +31,13 @@ type TaskDetails = {
 
 export default function TaskDetailsScreen({ route, navigation }: Props) {
   const { taskId } = route.params;
-  const [task, setTask] = useState<TaskDetails | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const { theme } = useThemeStore();
   const themeColors = Colors[theme as keyof typeof Colors];
 
-  useEffect(() => {
-    async function fetchTask() {
-      try {
-        const res = await apiFetch(API_ENDPOINTS.TASKS.DASHBOARD_TASK(taskId), { method: "GET" });
-        const data: TaskDetails = await res.json();
-        setTask(data);
-      } catch (err: any) {
-        console.error(err);
-        setError(err.message || "Failed to fetch task");
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchTask();
-  }, [taskId]);
+  const { data: task, isLoading: loading, error } = useTaskDetails(taskId);
 
   if (loading) return <Text style={styles.loading}>Loading...</Text>;
-  if (error) return <Text style={styles.error}>Error: {error}</Text>;
+  if (error) return <Text style={styles.error}>Error: {(error as Error).message || "Failed to fetch task"}</Text>;
   if (!task) return <Text style={styles.error}>Task not found</Text>;
 
   const isActive = task.status === "ACTIVE";
@@ -119,13 +102,13 @@ export default function TaskDetailsScreen({ route, navigation }: Props) {
 
       {/* Target Species */}
       <Text style={[styles.sectionTitle, { color: themeColors.text }]}>Target Species</Text>
-      {task.targetSpecies.map((species) => (
+      {task.targetSpecies.map((species: any) => (
         <View key={species.name} style={[styles.speciesCard, { backgroundColor: themeColors.card }]}>
           <Text style={[styles.speciesName, { color: themeColors.text }]}>
             {species.commonName} ({species.name})
           </Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 8 }}>
-            {species.referenceImages.map((img, idx) => (
+            {species.referenceImages.map((img: any, idx: number) => (
               <View key={idx} style={styles.imageCard}>
                 <Image
                   source={{ uri: `data:${img.contentType};base64,${img.data}` }}

@@ -86,6 +86,8 @@ export const useAuthStore = create<AuthState>((set) => ({
     });
     // Clear mode on logout
     useModeStore.getState().resetMode?.();
+    const { queryClient } = require("../queryClient");
+    queryClient.clear();
   },
 
   initialize: async () => {

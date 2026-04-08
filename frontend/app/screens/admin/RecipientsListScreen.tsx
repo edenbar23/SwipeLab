@@ -22,6 +22,7 @@ import { RecipientGroup } from '../../mocks/data/recipients.mock';
 import { User } from '../../mocks/data/users.mock';
 import { AdminStackParamList } from '../../navigation/adminStack.types';
 import { useThemeStore } from '../../stores/themeStore';
+import { useAdminUsers, useRecipients } from '../../api/queries';
 
 
 type NavigationProp = NativeStackNavigationProp<AdminStackParamList, 'RecipientsList'>;
@@ -36,9 +37,8 @@ export default function RecipientsListScreen() {
     const { theme } = useThemeStore();
     const themeColors = Colors[theme as keyof typeof Colors];
 
-    const [groups, setGroups] = useState<RecipientGroup[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [refreshing, setRefreshing] = useState(false);
+    const { data: rawUsers = [] } = useAdminUsers();
+    const { data: rawGroups = [], isLoading: groupsLoading, refetch: refetchGroups, isRefetching } = useRecipients();
 
     // Create Modal
     const [createModalVisible, setCreateModalVisible] = useState(false);
@@ -46,78 +46,30 @@ export default function RecipientsListScreen() {
     const [createErrorMsg, setCreateErrorMsg] = useState('');
 
     // User Selection for New Group
-    const [allUsers, setAllUsers] = useState<User[]>([]);
     const [activeTab, setActiveTab] = useState<'USERS' | 'GROUPS'>('USERS');
     const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
     const [selectedGroupIds, setSelectedGroupIds] = useState<number[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
 
-    useEffect(() => {
-        if (createModalVisible) {
-            // Fetch users when opening modal to show selection
-            fetchUsers();
-        }
-    }, [createModalVisible]);
+    const allUsers = React.useMemo(() => rawUsers.map((u: any) => ({ ...u, id: u.username || u.id })), [rawUsers]);
 
-    const fetchUsers = async () => {
-        try {
-            const res = await apiFetch(API_ENDPOINTS.USERS.GET_ALL);
-            if (res.ok) {
-                const data = await res.json();
-                const normalized = data.map((u: any) => ({ ...u, id: u.username || u.id }));
-                setAllUsers(normalized);
-            }
-        } catch (error) {
-            console.error('Failed to fetch users', error);
-        }
-    };
+    const groups = React.useMemo(() => {
+        return rawGroups.map((g: any) => ({
+            id: g.groupId,
+            name: g.name,
+            usersCount: g.userCount || g.usernames?.length || 0,
+            users: (g.usernames || []).map((uname: string) => {
+                const u = allUsers.find((user: any) => (user.username || user.id) === uname);
+                return u || { id: uname, username: uname, description: 'User' };
+            })
+        }));
+    }, [rawGroups, allUsers]);
 
-    const fetchGroups = async () => {
-        try {
-            const [usersRes, groupsRes] = await Promise.all([
-                apiFetch(API_ENDPOINTS.USERS.GET_ALL).catch(() => null),
-                apiFetch(API_ENDPOINTS.ADMIN.RECIPIENTS).catch(() => null)
-            ]);
-
-            let fetchedUsers: User[] = [];
-            if (usersRes && usersRes.ok) {
-                const rawUsers = await usersRes.json();
-                fetchedUsers = rawUsers.map((u: any) => ({ ...u, id: u.username || u.id }));
-                setAllUsers(fetchedUsers);
-            }
-
-            if (groupsRes && groupsRes.ok) {
-                const rawGroups = await groupsRes.json();
-                const mappedGroups: RecipientGroup[] = rawGroups.map((g: any) => ({
-                    id: g.groupId,
-                    name: g.name,
-                    usersCount: g.userCount || g.usernames?.length || 0,
-                    users: (g.usernames || []).map((uname: string) => {
-                        const u = fetchedUsers.find(user => (user.username || user.id) === uname);
-                        return u || { id: uname, username: uname, description: 'User' };
-                    })
-                }));
-                setGroups(mappedGroups);
-            }
-        } catch (error) {
-            console.error('Failed to fetch recipient groups', error);
-        } finally {
-            setLoading(false);
-            setRefreshing(false);
-        }
-    };
-
-    useEffect(() => {
-        // Refresh when navigating back to see updated counts
-        const unsubscribe = navigation.addListener('focus', () => {
-            fetchGroups();
-        });
-        return unsubscribe;
-    }, [navigation]);
+    const loading = groupsLoading;
+    const refreshing = isRefetching;
 
     const onRefresh = () => {
-        setRefreshing(true);
-        fetchGroups();
+        refetchGroups();
     };
 
     const handleCreateGroup = async () => {
@@ -129,9 +81,9 @@ export default function RecipientsListScreen() {
 
         // Merge selected users + users from selected groups
         let finalUsernames: string[] = [...selectedUserIds];
-        const groupsToAdd = groups.filter(g => selectedGroupIds.includes(g.id));
-        groupsToAdd.forEach(g => {
-            g.users.forEach(u => {
+        const groupsToAdd = groups.filter((g: any) => selectedGroupIds.includes(g.id));
+        groupsToAdd.forEach((g: any) => {
+            g.users.forEach((u: any) => {
                 finalUsernames.push(u.id); // id is now username (string)
             });
         });
@@ -159,7 +111,7 @@ export default function RecipientsListScreen() {
                 setSelectedUserIds([]);
                 setSelectedGroupIds([]);
                 setCreateErrorMsg('');
-                fetchGroups();
+                refetchGroups();
             } else {
                 let errorMsg = "Failed to create group";
                 try {
@@ -210,12 +162,12 @@ export default function RecipientsListScreen() {
             >
 
                 <View style={styles.grid}>
-                    {groups.map(group => {
+                    {groups.map((group: any) => {
                         // Calculate mini-composition
                         const total = group.users ? group.users.length : 0;
                         const composition = group.users ? (() => {
                             const counts: Record<string, number> = {};
-                            group.users.forEach(u => {
+                            group.users.forEach((u: any) => {
                                 const type = u.description || 'Other';
                                 counts[type] = (counts[type] || 0) + 1;
                             });
@@ -303,8 +255,8 @@ export default function RecipientsListScreen() {
                                     <ScrollView style={[styles.userList, { borderColor: themeColors.border }]} nestedScrollEnabled showsVerticalScrollIndicator={false}>
                                         {activeTab === 'USERS' ? (
                                             allUsers
-                                                .filter(u => u.username.toLowerCase().includes(searchQuery.toLowerCase()))
-                                                .map((u) => {
+                                                .filter((u: any) => u.username.toLowerCase().includes(searchQuery.toLowerCase()))
+                                                .map((u: any) => {
                                                     const isSelected = selectedUserIds.includes(u.id);
                                                     return (
                                                         <TouchableOpacity
@@ -327,8 +279,8 @@ export default function RecipientsListScreen() {
                                                 })
                                         ) : (
                                             groups
-                                                .filter(g => g.name.toLowerCase().includes(searchQuery.toLowerCase()))
-                                                .map((g) => {
+                                                .filter((g: any) => g.name.toLowerCase().includes(searchQuery.toLowerCase()))
+                                                .map((g: any) => {
                                                     const isSelected = selectedGroupIds.includes(g.id);
                                                     return (
                                                         <TouchableOpacity

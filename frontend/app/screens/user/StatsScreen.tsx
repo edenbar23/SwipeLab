@@ -6,6 +6,7 @@ import { API_ENDPOINTS } from '../../api/apiEndpoints';
 import { apiFetch } from '../../api/apiFetch';
 import ScreenHeaderLayout from '../../components/layout/ScreenHeaderLayout/ScreenHeaderLayout';
 import { useThemeStore } from '../../stores/themeStore';
+import { useAllStatistics } from '../../api/queries';
 
 
 const DEBUG_MODE = false; // Set to true for testing controls
@@ -78,56 +79,16 @@ function SummaryCard({ title, value, subtext }: { title: string; value: string |
 }
 
 export default function StatsScreen() {
-    const [data, setData] = useState<StatsData | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [refreshing, setRefreshing] = useState(false);
     const navigation = useNavigation<any>();
     const { theme } = useThemeStore();
     const themeColors = Colors[theme as keyof typeof Colors];
-
-    const fetchStats = useCallback(async () => {
-        try {
-            // Fetch all stats in parallel
-            const [summaryRes, expertsRes, usersRes, breakdownRes] = await Promise.all([
-                apiFetch(API_ENDPOINTS.STATISTICS.ME),
-                apiFetch(API_ENDPOINTS.STATISTICS.VS_EXPERTS),
-                apiFetch(API_ENDPOINTS.STATISTICS.VS_USERS),
-                apiFetch(API_ENDPOINTS.STATISTICS.BREAKDOWN),
-            ]);
-
-            if (summaryRes.ok && expertsRes.ok && usersRes.ok && breakdownRes.ok) {
-                setData({
-                    summary: await summaryRes.json(),
-                    vsExperts: await expertsRes.json(),
-                    vsUsers: await usersRes.json(),
-                    breakdown: await breakdownRes.json(),
-                });
-            }
-        } catch (error) {
-            console.error('Failed to fetch stats', error);
-        } finally {
-            setLoading(false);
-            setRefreshing(false);
-        }
-    }, []);
-
-    useEffect(() => {
-        fetchStats();
-    }, [fetchStats]);
-
+    
+    const { data, isLoading: loading, refetch, isRefetching } = useAllStatistics();
+    const refreshing = isRefetching;
+    
     const onRefresh = useCallback(() => {
-        setRefreshing(true);
-        fetchStats();
-    }, [fetchStats]);
-
-    // const updateAccuracy = async (newAcc: number) => {
-    //     setLoading(true);
-    //     await apiFetch(API_ENDPOINTS.STATISTICS.UPDATE_ACCURACY, {
-    //         method: 'POST',
-    //         body: JSON.stringify({ accuracy: newAcc }),
-    //     });
-    //     fetchStats();
-    // };
+        refetch();
+    }, [refetch]);
 
     if (loading && !refreshing && !data) {
         return (
@@ -214,7 +175,7 @@ export default function StatsScreen() {
                 {/* Breakdown */}
                 <View style={styles.section}>
                     <Text style={[styles.sectionTitle, { color: themeColors.text }]}>📝 Task Breakdown</Text>
-                    {data.breakdown?.byTask?.map((task) => (
+                    {data.breakdown?.byTask?.map((task: any) => (
                         <View key={task.taskId} style={[styles.taskRow, { backgroundColor: themeColors.card }]}>
                             <View style={styles.taskInfo}>
                                 <Text style={[styles.taskName, { color: themeColors.text }]}>{task.taskName}</Text>
