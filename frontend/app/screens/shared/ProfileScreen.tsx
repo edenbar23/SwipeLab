@@ -16,7 +16,7 @@ interface UserProfile {
 import { Colors } from '../../../constants/theme';
 import { useThemeStore } from '../../stores/themeStore';
 import { API_ENDPOINTS } from '../../api/apiEndpoints';
-import { useProfile } from "../../api/queries";
+import { useProfile, useMyBadges } from "../../api/queries";
 
 export default function ProfileScreen() {
     const navigation = useNavigation<any>();
@@ -24,6 +24,7 @@ export default function ProfileScreen() {
     const { theme } = useThemeStore();
     const themeColors = Colors[theme as keyof typeof Colors];
     const { data: user, isLoading: loading, error, refetch } = useProfile();
+    const { data: myBadges = [], isLoading: loadingBadges } = useMyBadges();
 
     // Change Password State
     const [isChangingPassword, setIsChangingPassword] = useState(false);
@@ -146,9 +147,12 @@ export default function ProfileScreen() {
                 <View style={styles.section}>
                     <Text style={[styles.sectionTitle, { color: themeColors.text }]}>Badges</Text>
                     <View style={styles.badgesContainer}>
-                        {user.badges?.map((badge: string, index: number) => (
-                            <View key={index} style={[styles.badge, { backgroundColor: themeColors.background, borderColor: themeColors.border }]}>
-                                <Text style={styles.badgeText}>{badge}</Text>
+                        {myBadges?.map((badge: any, index: number) => (
+                            <View key={index} style={[styles.badge, { backgroundColor: themeColors.background, borderColor: themeColors.border, alignItems: 'center' }]}>
+                                {badge.iconUrl && (
+                                    <Image source={{ uri: badge.iconUrl }} style={{ width: 40, height: 40, marginBottom: 5, resizeMode: 'contain' }} />
+                                )}
+                                <Text style={[styles.badgeText, { fontSize: 14 }]}>{badge.title}</Text>
                             </View>
                         ))}
                     </View>

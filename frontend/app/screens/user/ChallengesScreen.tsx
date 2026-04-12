@@ -18,25 +18,26 @@ import { API_ENDPOINTS } from '../../api/apiEndpoints';
 import { useChallenges } from '../../api/queries';
 
 
-interface Challenge {
-    id: number;
-    title: string;
+interface ChallengeDto {
+    challengeId: string;
+    name: string;
     description: string;
-    type: 'DAILY' | 'WEEKLY' | 'STREAK' | 'MILESTONE';
     progress: number;
-    total: number;
-    reward: string;
-    bgColor: string;
-    icon: string;
+    target: number;
+    completed: boolean;
+    badge: {
+        title: string;
+        iconUrl: string;
+    } | null;
 }
 
-function ChallengeCard({ challenge }: { challenge: Challenge }) {
-    const progressPercent = Math.min(100, Math.max(0, (challenge.progress / challenge.total) * 100));
+function ChallengeCard({ challenge }: { challenge: ChallengeDto }) {
+    const progressPercent = Math.min(100, Math.max(0, (challenge.progress / challenge.target) * 100));
 
     return (
-        <View style={[styles.card, { backgroundColor: challenge.bgColor }]}>
+        <View style={[styles.card, { backgroundColor: '#fff' }]}>
             {/* Header Row: Title */}
-            <Text style={styles.cardTitle}>{challenge.title}</Text>
+            <Text style={styles.cardTitle}>{challenge.name}</Text>
 
             {/* Description */}
             <Text style={styles.cardDesc}>{challenge.description}</Text>
@@ -48,7 +49,7 @@ function ChallengeCard({ challenge }: { challenge: Challenge }) {
                         Progression: {Math.round(progressPercent)}%
                     </Text>
                     <Text style={styles.progressText}>
-                        Completed: {challenge.progress}/{challenge.total}
+                        Completed: {challenge.progress}/{challenge.target}
                     </Text>
                     {/* Progress Bar */}
                     <View style={styles.progressBarTrack}>
@@ -63,7 +64,14 @@ function ChallengeCard({ challenge }: { challenge: Challenge }) {
 
                 {/* Reward/Icon Container */}
                 <View style={styles.iconContainer}>
-                    <Text style={styles.iconText}>{challenge.icon}</Text>
+                    {challenge.badge?.iconUrl ? (
+                         <Image 
+                            source={{ uri: challenge.badge.iconUrl }}
+                            style={{ width: 48, height: 48, resizeMode: 'contain' }}
+                         />
+                    ) : (
+                         <Text style={styles.iconText}>🏆</Text>
+                    )}
                 </View>
             </View>
         </View>
@@ -112,14 +120,14 @@ export default function ChallengesScreen() {
 
                 {/* In Progress Section */}
                 <Text style={[styles.sectionHeader, { color: themeColors.text }]}>In Progress</Text>
-                {challenges.filter((c: any) => c.progress < c.total).map((challenge: any) => (
-                    <ChallengeCard key={challenge.id} challenge={challenge} />
+                {challenges.filter((c: ChallengeDto) => !c.completed).map((challenge: ChallengeDto) => (
+                    <ChallengeCard key={challenge.challengeId} challenge={challenge} />
                 ))}
 
                 {/* Completed Section */}
                 <Text style={[styles.sectionHeader, { color: themeColors.text }]}>Completed</Text>
-                {challenges.filter((c: any) => c.progress >= c.total).map((challenge: any) => (
-                    <ChallengeCard key={challenge.id} challenge={challenge} />
+                {challenges.filter((c: ChallengeDto) => c.completed).map((challenge: ChallengeDto) => (
+                    <ChallengeCard key={challenge.challengeId} challenge={challenge} />
                 ))}
 
                 <View style={{ height: 40 }} />

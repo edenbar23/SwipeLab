@@ -40,7 +40,8 @@ export const API_ENDPOINTS = {
     },
     GAMIFICATION: {
         LEADERBOARD: '/api/v1/gamification/leaderboard',
-        CHALLENGES: '/api/v1/challenges',
+        CHALLENGES: '/api/v1/gamification/challenges',
+        MY_BADGES: '/api/v1/gamification/me/badges',
     },
     ADMIN: {
         //ANALYTICS

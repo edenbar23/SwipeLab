@@ -23,6 +23,7 @@ export const QUERY_KEYS = {
   statistics: ['statistics', 'me'],
   leaderboard: ['gamification', 'leaderboard'],
   challenges: ['gamification', 'challenges'],
+  myBadges: ['gamification', 'my_badges'],
   collection: ['collection', 'base'],
   
   // Swipe State
@@ -139,6 +140,14 @@ export const useChallenges = () => {
   return useQuery({
     queryKey: QUERY_KEYS.challenges,
     queryFn: () => fetchJson(API_ENDPOINTS.GAMIFICATION.CHALLENGES),
+    staleTime: 5 * 60 * 1000,
+  });
+};
+
+export const useMyBadges = () => {
+  return useQuery({
+    queryKey: QUERY_KEYS.myBadges,
+    queryFn: () => fetchJson(API_ENDPOINTS.GAMIFICATION.MY_BADGES).catch(() => []),
     staleTime: 5 * 60 * 1000,
   });
 };
