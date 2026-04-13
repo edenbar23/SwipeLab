@@ -74,7 +74,7 @@ public class AuthController {
                    "<p style='font-size: 16px; color: #333;'>Your account is now fully active.</p>" +
                    "<p style='font-size: 16px; color: #666;'>You will be redirected back to the app to log in shortly.</p>" +
                    "<p style='font-size: 14px; color: #999; margin-top: 20px;'>Redirecting in <span id='countdown'>5</span> seconds...</p>" +
-                   "<script>var time=5; setInterval(function(){ if(time>0){time--; document.getElementById('countdown').innerText=time;} }, 1000);</script>" +
+                   "<script>var time=5; setInterval(function(){ if(time>0){time--; document.getElementById('countdown').innerText=time;} if(time===0){time--; window.location.href='" + frontendUrl + "';} }, 1000);</script>" +
                    "</div></body></html>";
         } catch (Exception e) {
             return "<html><body style='font-family:sans-serif; text-align:center; padding-top: 50px; background-color: #f4f6f9;'>" +
