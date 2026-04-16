@@ -42,8 +42,11 @@ public class StardbiClient {
 
     private HttpHeaders createAuthHeaders(String accessToken) {
         HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(accessToken);
+        if (accessToken != null) {
+            headers.setBearerAuth(accessToken);
+        }
         headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
         return headers;
     }
 
@@ -109,7 +112,9 @@ public class StardbiClient {
 
     public byte[] getImageBuffer(Long boxId) {
         String url = baseUrl + "/swipe_lab/crops/" + boxId + "/image/";
-        HttpEntity<Void> entity = new HttpEntity<>(createAuthHeaders(getServiceAccountToken()));
+        HttpHeaders headers = createAuthHeaders(getServiceAccountToken());
+        headers.setAccept(List.of(MediaType.ALL));
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
         
         ResponseEntity<byte[]> response = restTemplate.exchange(
                 url, HttpMethod.GET, entity, byte[].class);
