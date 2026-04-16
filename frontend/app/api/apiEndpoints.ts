@@ -19,6 +19,7 @@ export const API_ENDPOINTS = {
         DASHBOARD_TASK: (taskId: string | number) => `/api/v1/tasks/dashboard/${taskId}`,
         EXPERIMENTS: '/api/v1/tasks/dashboard/experiments',
         PLAY_TASK: (taskId: string | number) => `/api/v1/classifications/tasks/${taskId}/play`,
+        CREATE_TASK: '/api/v1/tasks/create',
         UPDATE_TASK: (taskId: string | number) => `/api/v1/tasks/${taskId}`,
     },
     CLASSIFICATIONS: {

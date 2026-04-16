@@ -105,7 +105,7 @@ export default function AddTaskScreen({ navigation }: any) {
 
     try {
       setLoading(true);
-      const res = await apiFetch("/api/v1/dashboard/tasks", {
+      const res = await apiFetch(API_ENDPOINTS.TASKS.CREATE_TASK, {
         method: "POST",
         body: JSON.stringify(payload),
         headers: { "Content-Type": "application/json" },
@@ -182,8 +182,8 @@ export default function AddTaskScreen({ navigation }: any) {
       rightTitle="Tasks"
       onRightPress={() => navigation.navigate("TasksManagement")}
     >
-      <KeyboardAvoidingView 
-        style={[styles.container, { backgroundColor: themeColors.background }]} 
+      <KeyboardAvoidingView
+        style={[styles.container, { backgroundColor: themeColors.background }]}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         {/* Step Progress Indicator */}
