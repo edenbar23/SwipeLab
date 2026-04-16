@@ -34,7 +34,7 @@ logging:
   level:
     com.swipelab: DEBUG
 
-# Override Stardbi API URL to point to our mock controller
-stardbi:
-  api:
-    url: http://localhost:8080
+# # Override Stardbi API URL to point to our mock controller
+# stardbi:
+#   api:
+#     url: http://localhost:8080
