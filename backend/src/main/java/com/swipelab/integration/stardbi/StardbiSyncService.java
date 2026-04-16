@@ -30,8 +30,8 @@ public class StardbiSyncService {
         log.info("Starting STARdbi experiment synchronization...");
         
         try {
-            // TODO: Fetch token securely for a user or admin account performing the sync
-            List<ExternalExperimentDto> experiments = stardbiClient.getExperiments("MOCK_TOKEN");
+            // Fetch token securely for a user or admin account performing the sync
+            List<ExternalExperimentDto> experiments = stardbiClient.getExperiments();
 
             for (ExternalExperimentDto exp : experiments) {
                 // Here we would check if taskRepository.findByExternalExperimentId(exp.getId()) exists.

@@ -97,13 +97,18 @@ public class StardbiClient {
         return response.getBody();
     }
 
+    public List<ExternalExperimentDto> getExperiments() {
+        return getExperiments(getServiceAccountToken());
+    }
+
     // ======================================
     // IMAGES (BOUNDING BOXES)
     // ======================================
 
-    public List<ExternalCropDto> getUnclassifiedImageIds(Long experimentId, String accessToken) {
+    public List<ExternalCropDto> getUnclassifiedImageIds(Long experimentId) {
         String url = baseUrl + "/swipe_lab/crops/download/?experiment=" + experimentId;
-        HttpEntity<Void> entity = new HttpEntity<>(createAuthHeaders(accessToken));
+        // Use the Stardbi service account token instead of the SwipeLab JWT
+        HttpEntity<Void> entity = new HttpEntity<>(createAuthHeaders(getServiceAccountToken()));
         
         ResponseEntity<List<ExternalCropDto>> response = restTemplate.exchange(
                 url, HttpMethod.GET, entity, new ParameterizedTypeReference<List<ExternalCropDto>>() {});
