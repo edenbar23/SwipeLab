@@ -151,8 +151,11 @@ export default function LeaderboardScreen() {
 
     return (
         <ScreenHeaderLayout
-            leftIcon={require('../../../assets/images/leaderboard.png')}
-            leftTitle="Leaderboard"
+            leftIcon={require('../../../assets/images/challenges.png')}
+            leftTitle="Challenges"
+            onLeftPress={() => navigation.navigate('Challenges')}
+            centerIcon={require('../../../assets/images/leaderboard.png')}
+            centerTitle="Leaderboard"
             rightIcon={require('../../../assets/images/profile.png')}
             rightTitle={data ? `Your Spot: #${data.currentUser.rank}` : 'Your Spot: -'}
             contentContainerStyle={{ padding: 0 }}

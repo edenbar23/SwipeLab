@@ -34,23 +34,21 @@ public class ExternalAuthFilter extends OncePerRequestFilter {
                 String token = getJwtFromRequest(request);
                 if (StringUtils.hasText(token)) {
                     // Fast check: look if token looks like a Stardbi token before doing a network call.
-                    // This is handled by processStardbiToken validating it
-                    UserDetails userDetails = stardbiAuthService.processStardbiToken(token);
-                    if (userDetails != null) {
-                        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                                userDetails, null, userDetails.getAuthorities());
-                        authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                        SecurityContextHolder.getContext().setAuthentication(authentication);
-                    } else if (looksLikeStardbiToken(token)) {
-                        // If it looked like a Stardbi token but validation failed, it's expired/invalid.
-                        // "if expired -> try refresh; if refresh fails -> reject (401)"
-                        log.warn("Stardbi token rejected or expired.");
-                        // The user requirements requested rejection with 401:
-                        // "reject (401)"
-                        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                        response.setContentType("application/json");
-                        response.getWriter().write("{\"error\": \"Unauthorized\", \"message\": \"External token expired or invalid. Please refresh.\"}");
-                        return; // Halt filter chain
+                    if (looksLikeStardbiToken(token)) {
+                        UserDetails userDetails = stardbiAuthService.processStardbiToken(token);
+                        if (userDetails != null) {
+                            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                                    userDetails, null, userDetails.getAuthorities());
+                            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                            SecurityContextHolder.getContext().setAuthentication(authentication);
+                        } else {
+                            // If it looked like a Stardbi token but validation failed, it's expired/invalid.
+                            log.warn("Stardbi token rejected or expired.");
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setContentType("application/json");
+                            response.getWriter().write("{\"error\": \"Unauthorized\", \"message\": \"External token expired or invalid. Please refresh.\"}");
+                            return; // Halt filter chain
+                        }
                     }
                 }
             }

@@ -41,10 +41,9 @@ public class ClassificationController {
         }
 
         // 2.2 Submit Classification
-        // Path: /api/v1/classifications/{classificationId}/submit
-        @PostMapping("/{classificationId}/submit")
+        // Path: /api/v1/classifications/submit
+        @PostMapping("/submit")
         public ResponseEntity<NextBatchResponse> submitClassification(
-                        @PathVariable Long classificationId, // Ignored
                         @AuthenticationPrincipal UserDetails userDetails,
                         @Valid @RequestBody SubmitClassificationRequest request) {
 

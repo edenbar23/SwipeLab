@@ -373,7 +373,14 @@ public class MockDataSeeder implements CommandLineRunner {
                     .iconUrl("/badges/silver.png")
                     .build();
 
-            badgeDefinitionRepository.saveAll(List.of(legendBadge, silverBadge));
+            BadgeDefinition firstSwipeBadge = BadgeDefinition.builder()
+                    .title("First Swipe")
+                    .code("FIRST_SWIPE")
+                    .description("Classify your very first image")
+                    .iconUrl("/badges/first_swipe.png")
+                    .build();
+
+            badgeDefinitionRepository.saveAll(List.of(legendBadge, silverBadge, firstSwipeBadge));
 
             if (challengeDefinitionRepository.count() == 0) {
                 ChallengeDefinition legendChallenge = ChallengeDefinition.builder()
@@ -398,7 +405,18 @@ public class MockDataSeeder implements CommandLineRunner {
                         .active(true)
                         .build();
 
-                challengeDefinitionRepository.saveAll(List.of(legendChallenge, dailyChallenge));
+                ChallengeDefinition firstSwipeChallenge = ChallengeDefinition.builder()
+                        .name("Classify 1 image")
+                        .description("Classify your very first image to earn a badge quickly")
+                        .metricType(MetricType.CLASSIFICATION)
+                        .aggregationType(AggregationType.COUNT)
+                        .targetValue(1)
+                        .timeWindowType(TimeWindowType.LIFETIME)
+                        .badgeId(firstSwipeBadge.getId())
+                        .active(true)
+                        .build();
+
+                challengeDefinitionRepository.saveAll(List.of(legendChallenge, dailyChallenge, firstSwipeChallenge));
                 log.info("Seeded Challenges and Badge Definitions.");
             }
         }

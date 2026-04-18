@@ -8,6 +8,7 @@ import { Colors } from '../../../../constants/theme';
 export default function ScreenHeaderLayout({
   leftIcon,
   leftTitle,
+  onLeftPress,
   rightIcon,
   rightTitle,
   onRightPress,
@@ -25,10 +26,14 @@ export default function ScreenHeaderLayout({
       {/* Header */}
       <View style={[styles.header, { borderColor: themeColors.border, backgroundColor: themeColors.card }]}>
         {/* Left (current screen) */}
-        <View style={styles.leftHeaderItem}>
+        <TouchableOpacity 
+          style={styles.leftHeaderItem} 
+          onPress={onLeftPress} 
+          disabled={!onLeftPress}
+        >
           {React.isValidElement(leftIcon) ? leftIcon : <Image source={leftIcon as any} style={styles.icon} />}
           <Text style={[styles.title, { color: themeColors.text }]} numberOfLines={1}>{leftTitle}</Text>
-        </View>
+        </TouchableOpacity>
 
         {/* Center (optional navigation action) */}
         {centerTitle && (
