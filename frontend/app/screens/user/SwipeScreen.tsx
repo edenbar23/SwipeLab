@@ -94,7 +94,15 @@ export default function SwipeScreen() {
           decision: decision,
           responseTimeMs: 0
         })
-      }).catch(e => console.error("Submit error:", e));
+      })
+      .then((res) => {
+        if (res.ok) {
+          // Invalidate challenges cache so it updates immediately after classification/completion
+          queryClient.invalidateQueries({ queryKey: QUERY_KEYS.challenges });
+          queryClient.invalidateQueries({ queryKey: QUERY_KEYS.myBadges });
+        }
+      })
+      .catch(e => console.error("Submit error:", e));
     }
 
     if (currentIndex + 1 < dataBatch.length) {
