@@ -14,6 +14,7 @@ import { useThemeStore } from '../../stores/themeStore';
 export interface MultiSelectOption {
     id: string | number;
     label: string;
+    searchTerms?: string;
 }
 
 interface MultiSelectProps {
@@ -22,6 +23,7 @@ interface MultiSelectProps {
     onToggle: (id: string | number) => void;
     placeholder?: string;
     loading?: boolean;
+    emptyOnNoSearch?: boolean;
 }
 
 export default function MultiSelect({
@@ -29,17 +31,23 @@ export default function MultiSelect({
     selectedIds,
     onToggle,
     placeholder = 'Search...',
-    loading = false
+    loading = false,
+    emptyOnNoSearch = false
 }: MultiSelectProps) {
     const [search, setSearch] = useState('');
     const { theme } = useThemeStore();
     const themeColors = Colors[theme as keyof typeof Colors];
 
     const filteredOptions = useMemo(() => {
-        return options.filter((opt) =>
-            opt.label.toLowerCase().includes(search.toLowerCase())
-        );
-    }, [options, search]);
+        if (!search.trim() && emptyOnNoSearch) return [];
+        if (!search.trim()) return options;
+        const queryTerms = search.toLowerCase().split(/\s+/).filter(Boolean);
+        return options.filter((opt) => {
+            const lowerLabel = opt.label.toLowerCase();
+            const lowerTerms = opt.searchTerms ? opt.searchTerms.toLowerCase() : '';
+            return queryTerms.every(term => lowerLabel.includes(term) || lowerTerms.includes(term));
+        });
+    }, [options, search, emptyOnNoSearch]);
 
     const selectedOptions = useMemo(() => {
         return options.filter((opt) => selectedIds.includes(opt.id));
@@ -104,7 +112,7 @@ export default function MultiSelect({
                 >
                     {filteredOptions.length === 0 ? (
                         <Text style={[styles.noItems, { color: themeColors.textSecondary }]}>
-                            No matches found
+                            {(!search.trim() && emptyOnNoSearch) ? "Search to see options" : "No matches found"}
                         </Text>
                     ) : (
                         filteredOptions.map((opt) => {

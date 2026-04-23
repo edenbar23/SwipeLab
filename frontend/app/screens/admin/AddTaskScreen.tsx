@@ -29,7 +29,7 @@ export default function AddTaskScreen({ route, navigation }: any) {
     name: "",
     description: "",
     selectedExperiments: [],
-    speciesList: route.params?.initialSpecies || [],
+    speciesList: route?.params?.initialSpecies || [],
     isPublic: false,
     selectedRecipients: [],
   });
@@ -66,7 +66,11 @@ export default function AddTaskScreen({ route, navigation }: any) {
         }
         if (speciesRes.ok) {
           const sps = await speciesRes.json();
-          setAvailableSpecies(sps.map((s: any) => ({ id: String(s.id), label: String(s.label) })));
+          setAvailableSpecies(sps.map((s: any) => ({ 
+            id: String(s.id), 
+            label: String(s.label),
+            searchTerms: String(s.searchTerms || "") 
+          })));
         }
         setAvailableOptions(loaded);
       } catch (error) {
@@ -205,12 +209,12 @@ export default function AddTaskScreen({ route, navigation }: any) {
         {/* Step Progress Indicator */}
         <StepIndicator steps={STEPS} currentStep={currentStep} />
 
-        {/* Pre-selected Species Banner */}
-        {route.params?.initialSpecies && route.params.initialSpecies.length > 0 && currentStep < 3 && (
+        {/* Selected Species Banner */}
+        {formData.speciesList.length > 0 && currentStep < 3 && (
           <View style={[styles.banner, { backgroundColor: themeColors.card, borderColor: '#10B981' }]}>
             <Ionicons name="leaf" size={20} color="#10B981" />
             <Text style={[styles.bannerText, { color: themeColors.text }]}>
-              {route.params.initialSpecies.length} species pre-selected for this task
+              {formData.speciesList.length} species selected for this task
             </Text>
           </View>
         )}

@@ -28,6 +28,7 @@ export default function StepSpecies({ formData, onUpdate, onNext, onBack, availa
         }}
         placeholder="Search species..."
         loading={optionsLoading}
+        emptyOnNoSearch={true}
       />
 
       <View style={styles.footer}>
