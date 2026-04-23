@@ -2,7 +2,7 @@ export type AdminStackParamList = {
   AdminDashboard: undefined;
   TasksManagement: undefined;
   TaskDetails: { taskId: number };
-  AddTask: undefined;
+  AddTask: { initialSpecies?: string[] } | undefined;
   EditTask: { taskId: number };
   GoldImagesManagement: undefined;
   AddGoldImage: undefined;

@@ -18,7 +18,7 @@ import StepExperiments from "../../components/admin/addTask/StepExperiments";
 
 const STEPS = ["Name", "Description", "Experiments", "Species", "Recipients", "Confirm"];
 
-export default function AddTaskScreen({ navigation }: any) {
+export default function AddTaskScreen({ route, navigation }: any) {
   const { theme } = useThemeStore();
   const themeColors = Colors[theme as keyof typeof Colors];
   const queryClient = useQueryClient();
@@ -28,7 +28,7 @@ export default function AddTaskScreen({ navigation }: any) {
     name: "",
     description: "",
     selectedExperiments: [],
-    speciesList: [],
+    speciesList: route.params?.initialSpecies || [],
     isPublic: false,
     selectedRecipients: [],
   });
