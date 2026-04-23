@@ -30,7 +30,7 @@ export default function TaxonomyScreen() {
     const themeColors = Colors[theme as keyof typeof Colors];
 
     const [searchQuery, setSearchQuery] = useState("");
-    const [availableSpecies, setAvailableSpecies] = useState<{ id: string; label: string }[]>([]);
+    const [availableSpecies, setAvailableSpecies] = useState<{ id: string; label: string; searchTerms: string }[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
@@ -40,7 +40,11 @@ export default function TaxonomyScreen() {
                 const res = await apiFetch('/api/v1/metadata/species');
                 if (res.ok) {
                     const data = await res.json();
-                    setAvailableSpecies(data.map((s: any) => ({ id: String(s.id), label: String(s.label) })));
+                    setAvailableSpecies(data.map((s: any) => ({ 
+                        id: String(s.id), 
+                        label: String(s.label),
+                        searchTerms: String(s.searchTerms || "")
+                    })));
                 } else {
                     Alert.alert("Error", "Failed to fetch species data");
                 }
@@ -55,9 +59,13 @@ export default function TaxonomyScreen() {
     }, []);
 
     const filteredSpecies = useMemo(() => {
-        if (!searchQuery.trim()) return availableSpecies;
-        const q = searchQuery.toLowerCase();
-        return availableSpecies.filter(s => s.label.toLowerCase().includes(q));
+        if (!searchQuery.trim()) return [];
+        const queryTerms = searchQuery.toLowerCase().split(/\s+/).filter(Boolean);
+        return availableSpecies.filter(s => {
+            const lowerLabel = s.label.toLowerCase();
+            const lowerTerms = s.searchTerms.toLowerCase();
+            return queryTerms.every(term => lowerLabel.includes(term) || lowerTerms.includes(term));
+        });
     }, [searchQuery, availableSpecies]);
 
     const toggleSelection = (id: string) => {
@@ -147,8 +155,10 @@ export default function TaxonomyScreen() {
                         showsVerticalScrollIndicator={false}
                         ListEmptyComponent={
                             <View style={styles.emptyContainer}>
-                                <Ionicons name="leaf-outline" size={48} color={themeColors.textSecondary} />
-                                <Text style={[styles.emptyText, { color: themeColors.textSecondary }]}>No species found</Text>
+                                <Ionicons name={searchQuery.trim() ? "leaf-outline" : "search-outline"} size={48} color={themeColors.textSecondary} />
+                                <Text style={[styles.emptyText, { color: themeColors.textSecondary }]}>
+                                    {searchQuery.trim() ? "No species found" : "Search to explore taxonomy"}
+                                </Text>
                             </View>
                         }
                     />

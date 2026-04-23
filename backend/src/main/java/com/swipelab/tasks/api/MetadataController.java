@@ -45,6 +45,13 @@ public class MetadataController {
                     
                     option.put("id", id);
                     option.put("label", label);
+                    option.put("searchTerms", String.join(" ",
+                        tax.getClazz() != null ? tax.getClazz() : "",
+                        tax.getOrder() != null ? tax.getOrder() : "",
+                        tax.getFamily() != null ? tax.getFamily() : "",
+                        tax.getGenus() != null ? tax.getGenus() : "",
+                        tax.getSpecies() != null ? tax.getSpecies() : ""
+                    ).toLowerCase());
                     return option;
                 })
                 .collect(Collectors.toList());

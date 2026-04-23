@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Alert, KeyboardAvoidingView, Platform, StyleSheet, View } from "react-native";
+import { Alert, KeyboardAvoidingView, Platform, StyleSheet, View, Text } from "react-native";
+import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../../constants/theme';
 import { API_ENDPOINTS } from "../../api/apiEndpoints";
 import { apiFetch } from "../../api/apiFetch";
@@ -204,6 +205,16 @@ export default function AddTaskScreen({ route, navigation }: any) {
         {/* Step Progress Indicator */}
         <StepIndicator steps={STEPS} currentStep={currentStep} />
 
+        {/* Pre-selected Species Banner */}
+        {route.params?.initialSpecies && route.params.initialSpecies.length > 0 && currentStep < 3 && (
+          <View style={[styles.banner, { backgroundColor: themeColors.card, borderColor: '#10B981' }]}>
+            <Ionicons name="leaf" size={20} color="#10B981" />
+            <Text style={[styles.bannerText, { color: themeColors.text }]}>
+              {route.params.initialSpecies.length} species pre-selected for this task
+            </Text>
+          </View>
+        )}
+
         {/* Current Step Content */}
         <View style={styles.contentContainer}>
           {renderStepContent()}
@@ -221,5 +232,19 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 16,
     paddingBottom: 16,
+  },
+  banner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 16,
+    marginBottom: 16,
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    gap: 8,
+  },
+  bannerText: {
+    fontSize: 14,
+    fontWeight: '600',
   },
 });
