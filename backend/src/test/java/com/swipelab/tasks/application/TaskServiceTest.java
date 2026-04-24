@@ -12,6 +12,7 @@ import com.swipelab.tasks.domain.Task;
 import com.swipelab.tasks.domain.TaskMapper;
 import com.swipelab.tasks.domain.TaskStatus;
 import com.swipelab.tasks.infrastructure.TaskRepository;
+import com.swipelab.classification.infrastructure.LabelRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,6 +41,9 @@ class TaskServiceTest {
 
     @Mock
     private RecipientGroupRepository recipientGroupRepository;
+
+    @Mock
+    private LabelRepository labelRepository;
 
     @Mock
     private TaskMapper taskMapper;
