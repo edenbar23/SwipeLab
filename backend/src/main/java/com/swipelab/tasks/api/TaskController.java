@@ -96,10 +96,12 @@ public class TaskController {
 
     @PostMapping("/create")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<TaskResponse> createTask(@Valid @RequestBody CreateTaskRequest request) {
+    public ResponseEntity<TaskResponse> createTask(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @Valid @RequestBody CreateTaskRequest request) {
         // In real app, verify admin role
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(taskService.createTask(request));
+                .body(taskService.createTask(request, userDetails.getUsername()));
     }
 
     @PostMapping("/{taskId}/archive")

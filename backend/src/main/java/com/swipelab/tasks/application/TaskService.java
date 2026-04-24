@@ -123,9 +123,10 @@ public class TaskService {
     }
 
     @Transactional
-    public TaskResponse createTask(CreateTaskRequest request) {
+    public TaskResponse createTask(CreateTaskRequest request, String username) {
         // TODO: Validate author (admin)
         Task task = taskMapper.toEntity(request);
+        task.setCreatedBy(username);
         task.setStatus(TaskStatus.ACTIVE);
         task = taskRepository.save(task);
         
@@ -201,16 +202,9 @@ public class TaskService {
     }
 
     public List<TaskResponse> getTasksByUser(String username) {
-        return taskRepository.findByCreatedBy_Username(username).stream()
+        return taskRepository.findByCreatedBy(username).stream()
                 .map(taskMapper::toResponse)
                 .collect(Collectors.toList());
     }
 
-    // Support overloaded createTask(String username, req) if controller still uses
-    // it
-    // or refactor controller to use admin create
-    @Transactional
-    public TaskResponse createTask(String username, CreateTaskRequest request) {
-        return createTask(request); // Delegate to admin create for now
-    }
 }

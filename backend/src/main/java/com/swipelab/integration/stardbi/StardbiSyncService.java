@@ -55,7 +55,7 @@ public class StardbiSyncService {
                                     .name(exp.getName())
                                     .sourceSystem("STARDBI")
                                     .experiments(List.of(exp.getId()))
-                                    .createdBy(systemUser)
+                                    .createdBy(systemUser.getUsername())
                                     .status(TaskStatus.ACTIVE)
                                     .build();
                             return taskRepository.save(newTask);

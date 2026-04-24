@@ -13,7 +13,7 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 
     long countByStatus(TaskStatus status);
 
-    List<Task> findByCreatedBy_Username(String username);
+    List<Task> findByCreatedBy(String username);
 
     @org.springframework.data.jpa.repository.Query(
         "SELECT DISTINCT t FROM Task t " +

@@ -166,7 +166,7 @@ public class MockDataSeeder implements CommandLineRunner {
                     .description("Identify animals in these mock images")
                     .querySpecies("Mammals")
                     .question("Is this a Cat?")
-                    .createdBy(admin)
+                    .createdBy(admin.getUsername())
                     .status(TaskStatus.ACTIVE)
                     .minClassificationsPerImage(3)
                     .consensusThreshold(80.0)

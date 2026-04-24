@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import com.swipelab.users.domain.User;
 import com.swipelab.classification.domain.Label;
 import com.swipelab.classification.domain.Image;
 
@@ -104,9 +103,8 @@ public class Task {
     @Builder.Default
     private List<Label> targetSpecies = new ArrayList<>();
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "created_by", nullable = false)
-    private User createdBy;
+    @Column(name = "created_by", nullable = false)
+    private String createdBy;
 
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
