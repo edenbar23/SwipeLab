@@ -167,7 +167,7 @@ export default function AddTaskScreen({ route, navigation }: any) {
               <Text style={{ color: themeColors.text, fontWeight: '600' }}>Create Another</Text>
             </TouchableOpacity>
             <TouchableOpacity 
-              style={{ paddingHorizontal: 20, paddingVertical: 12, backgroundColor: themeColors.primary, borderRadius: 8 }}
+              style={{ paddingHorizontal: 20, paddingVertical: 12, backgroundColor: themeColors.tint, borderRadius: 8 }}
               onPress={() => navigation.navigate("TasksManagement")}
             >
               <Text style={{ color: '#fff', fontWeight: 'bold' }}>Go to Tasks</Text>
