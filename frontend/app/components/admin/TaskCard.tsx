@@ -15,7 +15,8 @@ type AdminTask = {
   status: "ACTIVE" | "PAUSED" | "ARCHIVED";
   name: string;
   targetSpecies: {
-    commonName: string;
+    name: string;
+    commonName?: string;
   }[];
   progress: {
     totalImages: number;
@@ -69,7 +70,9 @@ export default function TaskCard({
       </View>
 
       <Text style={[styles.meta, { color: themeColors.textSecondary }]}>
-        Species: {task.targetSpecies[0]?.commonName}
+        Species: {task.targetSpecies && task.targetSpecies.length > 0 
+          ? task.targetSpecies.map(s => s.commonName || s.name).join(", ") 
+          : "None"}
       </Text>
 
       <Text style={[styles.meta, { color: themeColors.textSecondary }]}>
