@@ -28,6 +28,7 @@ public class TaskMapper {
 
         return Task.builder()
                 .title(request.getName())
+                .name(request.getName() != null ? request.getName().toLowerCase().replace(" ", "_") : null)
                 .description(request.getDescription())
                 .minClassificationsPerImage(request.getMinClassificationsPerImage())
                 .consensusThreshold(request.getConsensusThreshold())
@@ -55,6 +56,7 @@ public class TaskMapper {
 
         if (request.getName() != null) {
             task.setTitle(request.getName());
+            task.setName(request.getName().toLowerCase().replace(" ", "_"));
         }
 
         if (request.getDescription() != null) {
