@@ -160,16 +160,16 @@ export default function SwipeScreen() {
     if (rawImageData.startsWith('http')) {
       // Already a full HTTP URL
       imageUrl = rawImageData;
-    } else if (rawImageData.startsWith('/')) {
-      // Relative server path — prepend backend base URL
-      imageUrl = `${BACKEND_BASE_URL}${rawImageData}`;
     } else if (rawImageData.startsWith('data:image')) {
       // Already a correctly-formed Data URI
       imageUrl = rawImageData;
-    } else {
-      // Raw Base64 bytes — build Data URI
+    } else if (/^[A-Za-z0-9+/]/.test(rawImageData) || rawImageData.startsWith('/9')) {
+      // Raw Base64 bytes (including JPEG base64 which starts with /9j/) — build Data URI
       const contentType = currentImage?.image?.contentType || 'image/jpeg';
       imageUrl = `data:${contentType};base64,${rawImageData}`;
+    } else if (rawImageData.startsWith('/')) {
+      // Relative server path — prepend backend base URL
+      imageUrl = `${BACKEND_BASE_URL}${rawImageData}`;
     }
   }
 
