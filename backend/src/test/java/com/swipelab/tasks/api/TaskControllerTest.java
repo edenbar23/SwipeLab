@@ -120,7 +120,7 @@ class TaskControllerTest {
         CreateTaskRequest request = new CreateTaskRequest();
         request.setName("New Task");
 
-        when(taskService.createTask(any(CreateTaskRequest.class))).thenReturn(taskResponse);
+        when(taskService.createTask(any(CreateTaskRequest.class), anyString())).thenReturn(taskResponse);
 
         mockMvc.perform(post("/api/v1/tasks/create")
                 .contentType(MediaType.APPLICATION_JSON)

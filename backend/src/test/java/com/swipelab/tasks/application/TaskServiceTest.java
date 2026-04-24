@@ -154,7 +154,7 @@ class TaskServiceTest {
         when(taskRepository.save(task)).thenReturn(task);
         when(taskMapper.toResponse(task, false)).thenReturn(taskResponse);
 
-        TaskResponse response = taskService.createTask(request);
+        TaskResponse response = taskService.createTask(request, "admin_mock");
 
         assertNotNull(response);
         assertEquals(TaskStatus.ACTIVE, task.getStatus());
