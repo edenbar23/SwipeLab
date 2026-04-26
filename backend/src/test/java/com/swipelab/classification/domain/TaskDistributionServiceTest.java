@@ -11,11 +11,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageRequest;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,6 +34,8 @@ class TaskDistributionServiceTest {
     private Image regularImage2;
     private Image goldImage;
 
+    private static final List<String> SPECIES = List.of("Bat");
+
     @BeforeEach
     void setUp() {
         regularImage1 = new Image();
@@ -51,25 +53,33 @@ class TaskDistributionServiceTest {
     @Test
     void getNextImageForUser_ShouldReturnRegularImage() {
         when(classificationRepository.countByUsernameAndTaskId("testuser", 1L)).thenReturn(0L);
-        when(imageRepository.findNextRegularImageCandidates(eq("testuser"), eq(1L), eq(PageRequest.of(0, 1))))
-                .thenReturn(Collections.singletonList(regularImage2));
+        when(imageRepository.findRegularImageCandidatesForUser(eq("testuser"), eq(1L), eq(1), any(PageRequest.class)))
+                .thenReturn(List.of(regularImage2));
+        when(classificationRepository.findQueriedSpeciesByUsernameAndImageId("testuser", 2L))
+                .thenReturn(Collections.emptyList());
 
-        Optional<Image> result = taskDistributionService.getNextImageForUser("testuser", 1L);
+        Optional<TaskDistributionService.ImageSpeciesPair> result =
+                taskDistributionService.getNextImageForUser("testuser", 1L, SPECIES);
 
         assertTrue(result.isPresent());
-        assertEquals(2L, result.get().getId());
+        assertEquals(2L, result.get().image().getId());
+        assertEquals("Bat", result.get().species());
     }
 
     @Test
     void getNextImageForUser_ShouldReturnGoldImage_WhenCountIs15() {
         when(classificationRepository.countByUsernameAndTaskId("testuser", 1L)).thenReturn(15L);
         when(imageRepository.findUnclassifiedGoldImages("testuser", 1L))
-                .thenReturn(Collections.singletonList(goldImage));
+                .thenReturn(List.of(goldImage));
+        when(classificationRepository.findQueriedSpeciesByUsernameAndImageId("testuser", 3L))
+                .thenReturn(Collections.emptyList());
 
-        Optional<Image> result = taskDistributionService.getNextImageForUser("testuser", 1L);
+        Optional<TaskDistributionService.ImageSpeciesPair> result =
+                taskDistributionService.getNextImageForUser("testuser", 1L, SPECIES);
 
         assertTrue(result.isPresent());
-        assertEquals(3L, result.get().getId());
+        assertEquals(3L, result.get().image().getId());
+        assertEquals("Bat", result.get().species());
     }
 
     @Test
@@ -77,20 +87,23 @@ class TaskDistributionServiceTest {
         when(classificationRepository.countByUsernameAndTaskId("testuser", 1L)).thenReturn(15L);
         when(imageRepository.findUnclassifiedGoldImages("testuser", 1L))
                 .thenReturn(Collections.emptyList());
-        when(imageRepository.findNextRegularImageCandidates(eq("testuser"), eq(1L), eq(PageRequest.of(0, 1))))
-                .thenReturn(Collections.singletonList(regularImage1));
+        when(imageRepository.findRegularImageCandidatesForUser(eq("testuser"), eq(1L), eq(1), any(PageRequest.class)))
+                .thenReturn(List.of(regularImage1));
+        when(classificationRepository.findQueriedSpeciesByUsernameAndImageId("testuser", 1L))
+                .thenReturn(Collections.emptyList());
 
-        Optional<Image> result = taskDistributionService.getNextImageForUser("testuser", 1L);
+        Optional<TaskDistributionService.ImageSpeciesPair> result =
+                taskDistributionService.getNextImageForUser("testuser", 1L, SPECIES);
 
         assertTrue(result.isPresent());
-        assertEquals(1L, result.get().getId());
+        assertEquals(1L, result.get().image().getId());
     }
 
     @Test
     void resetUserSession_ShouldBeNoOp() {
-        // Just verify it runs without throwing exceptions since it's a no-op now
         taskDistributionService.resetUserSession("testuser", 1L);
         verifyNoInteractions(classificationRepository);
         verifyNoInteractions(imageRepository);
     }
 }
+

@@ -39,30 +39,30 @@ public class ImageService {
                 Task task = taskRepository.findById(taskId)
                                 .orElseThrow(() -> new ResourceNotFoundException("Task not found: " + taskId));
 
-                List<BatchImageDto> batchImages = new ArrayList<>();
+                // Build the list of species names for this task
+                List<String> taskSpecies = task.getTargetSpecies() == null ? List.of() :
+                        task.getTargetSpecies().stream()
+                                .map(com.swipelab.classification.domain.Label::getName)
+                                .collect(Collectors.toList());
 
-                // Retry mechanism to find available images properly
+                List<BatchImageDto> batchImages = new ArrayList<>();
                 int attempt = 0;
                 int found = 0;
 
-                // Very basic loop. In production, we'd bulk fetch.
-                // Re-using taskDistributionService but it's designed for single fetch with
-                // state.
-                // We will loop. State update in taskDist might be redundant or messy if we call
-                // it multiple times.
-                // But let's use it for now as it handles logic.
+                while (found < count && attempt < count * 3) {
+                        Optional<TaskDistributionService.ImageSpeciesPair> pairOpt =
+                                taskDistributionService.getNextImageForUser(username, taskId, taskSpecies);
+                        if (pairOpt.isEmpty()) break;
 
-                while (found < count && attempt < count * 2) {
-                        Optional<Image> imageOpt = taskDistributionService.getNextImageForUser(username, taskId);
-                        if (imageOpt.isEmpty()) {
-                                break;
-                        }
-                        Image image = imageOpt.get();
+                        TaskDistributionService.ImageSpeciesPair pair = pairOpt.get();
 
-                        // Avoid duplicates in this batch if any (TaskDist might give different ones,
-                        // hopefully)
-                        if (batchImages.stream().noneMatch(b -> b.getImageId().equals(image.getId()))) {
-                                batchImages.add(mapToBatchDto(image, task));
+                        // Deduplicate within this batch on image+species
+                        boolean alreadyInBatch = batchImages.stream()
+                                .anyMatch(b -> b.getImageId().equals(pair.image().getId())
+                                        && b.getQuestion() != null
+                                        && b.getQuestion().contains(pair.species() != null ? pair.species() : ""));
+                        if (!alreadyInBatch) {
+                                batchImages.add(mapToBatchDto(pair.image(), task, pair.species()));
                                 found++;
                         }
                         attempt++;
@@ -71,22 +71,19 @@ public class ImageService {
                 return NextBatchResponse.builder().images(batchImages).build();
         }
 
-        private BatchImageDto mapToBatchDto(Image image, Task task) {
+
+        private BatchImageDto mapToBatchDto(Image image, Task task, String species) {
                 String src = getProvidedImagePath(image.getSrcPath());
                 String contentType = "image/jpeg";
 
-                // Build question from targetSpecies list, or fall back to task.question, then generic
-                String question = task.getQuestion();
-                if (question == null || question.isBlank()) {
-                        List<com.swipelab.classification.domain.Label> species = task.getTargetSpecies();
-                        if (species != null && !species.isEmpty()) {
-                                String speciesNames = species.stream()
-                                        .map(com.swipelab.classification.domain.Label::getName)
-                                        .collect(java.util.stream.Collectors.joining(" / "));
-                                question = "Is this a " + speciesNames + "?";
-                        } else {
-                                question = "Classify this image";
-                        }
+                // Build question from the explicitly selected species for this image
+                String question;
+                if (task.getQuestion() != null && !task.getQuestion().isBlank()) {
+                        question = task.getQuestion();
+                } else if (species != null && !species.isBlank()) {
+                        question = "Is this a " + species + "?";
+                } else {
+                        question = "Classify this image";
                 }
 
                 return BatchImageDto.builder()

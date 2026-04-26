@@ -2,6 +2,7 @@ package com.swipelab.classification.domain;
 
 import com.swipelab.classification.infrastructure.ClassificationRepository;
 import com.swipelab.classification.infrastructure.ImageRepository;
+import com.swipelab.tasks.domain.Task;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -22,70 +23,85 @@ public class TaskDistributionService {
     private static final int GOLD_IMAGE_FREQUENCY = 15;
 
     /**
-     * Get the next image for a user to classify.
-     * Implements:
-     * - Gold image insertion (1 in 15)
-     * - Duplicate prevention
-     * - Intelligent assignment (prioritize under-classified images)
+     * Holds the selected image and the species to query for that image.
+     */
+    public record ImageSpeciesPair(Image image, String species) {}
+
+    /**
+     * Get the next image+species pair for a user to classify.
+     * The same image may reappear with a different species if the user has not yet
+     * classified it for all species in the task.
      */
     @Transactional(readOnly = true)
-    public Optional<Image> getNextImageForUser(String username, Long taskId) {
-        // Get user's classification count using database to avoid stateful memory leaks
+    public Optional<ImageSpeciesPair> getNextImageForUser(String username, Long taskId, List<String> taskSpecies) {
+        // Get user's classification count for gold-image scheduling
         Long count = classificationRepository.countByUsernameAndTaskId(username, taskId);
-        if (count == null) {
-            count = 0L;
-        }
+        if (count == null) count = 0L;
 
-        // Determine if this should be a gold image (every 15th image)
         boolean shouldBeGold = (count > 0) && (count % GOLD_IMAGE_FREQUENCY == 0);
 
         if (shouldBeGold) {
-            Optional<Image> nextImage = getNextGoldImage(username, taskId);
-            // If gold images are available, return it. Otherwise fall through to regular images.
-            if (nextImage.isPresent()) {
-                return nextImage;
-            }
+            Optional<ImageSpeciesPair> goldPair = getNextGoldImagePair(username, taskId, taskSpecies);
+            if (goldPair.isPresent()) return goldPair;
         }
-        
-        return getNextRegularImage(username, taskId);
+
+        return getNextRegularImagePair(username, taskId, taskSpecies);
     }
 
     /**
-     * Get next gold standard image that user hasn't classified yet
+     * Get next gold standard image+species pair that user hasn't classified yet for that species.
      */
-    private Optional<Image> getNextGoldImage(String username, Long taskId) {
-        List<Image> unclassifiedGold = imageRepository.findUnclassifiedGoldImages(username, taskId);
+    private Optional<ImageSpeciesPair> getNextGoldImagePair(String username, Long taskId, List<String> taskSpecies) {
+        List<Image> goldImages = imageRepository.findUnclassifiedGoldImages(username, taskId);
+        if (goldImages.isEmpty()) return Optional.empty();
 
-        if (unclassifiedGold.isEmpty()) {
-            return Optional.empty();
+        for (Image image : goldImages) {
+            String species = pickUnqueriedSpecies(username, image.getId(), taskSpecies);
+            if (species != null) return Optional.of(new ImageSpeciesPair(image, species));
         }
-
-        // Randomly select from available unclassified gold images
-        Collections.shuffle(unclassifiedGold);
-        return Optional.of(unclassifiedGold.get(0));
+        return Optional.empty();
     }
 
     /**
-     * Get next regular image with intelligent assignment.
-     * Prioritizes images with fewer classifications, resolved optimally via database query.
+     * Get next regular image+species pair, prioritising images with fewer total classifications.
+     * Candidates are images the user hasn't classified for EVERY species yet.
      */
-    private Optional<Image> getNextRegularImage(String username, Long taskId) {
-        List<Image> unclassifiedRegular = imageRepository.findNextRegularImageCandidates(
-                username, taskId, PageRequest.of(0, 1));
+    private Optional<ImageSpeciesPair> getNextRegularImagePair(String username, Long taskId, List<String> taskSpecies) {
+        int speciesCount = taskSpecies == null || taskSpecies.isEmpty() ? 1 : taskSpecies.size();
+        // Fetch a larger pool so we can find one with an un-queried species
+        List<Image> candidates = imageRepository.findRegularImageCandidatesForUser(
+                username, taskId, speciesCount, PageRequest.of(0, 20));
 
-        if (unclassifiedRegular.isEmpty()) {
-            return Optional.empty();
+        // Shuffle to avoid always picking the same image when multiple are available
+        Collections.shuffle(candidates);
+
+        for (Image image : candidates) {
+            String species = pickUnqueriedSpecies(username, image.getId(), taskSpecies);
+            if (species != null) return Optional.of(new ImageSpeciesPair(image, species));
         }
-
-        return Optional.of(unclassifiedRegular.get(0));
+        return Optional.empty();
     }
 
     /**
-     * Reset classification count for a user session
-     * (No-op now since we compute classifications directly from the database)
+     * From the task species list, randomly pick one the user hasn't queried for this image yet.
      */
+    private String pickUnqueriedSpecies(String username, Long imageId, List<String> taskSpecies) {
+        if (taskSpecies == null || taskSpecies.isEmpty()) return null;
+
+        List<String> alreadyQueried = classificationRepository
+                .findQueriedSpeciesByUsernameAndImageId(username, imageId);
+
+        List<String> remaining = taskSpecies.stream()
+                .filter(s -> !alreadyQueried.contains(s))
+                .collect(java.util.stream.Collectors.toList());
+
+        if (remaining.isEmpty()) return null;
+
+        Collections.shuffle(remaining);
+        return remaining.get(0);
+    }
+
     public void resetUserSession(String username, Long taskId) {
-        // No-op because state is no longer kept in memory map
-        // Method kept to maintain API contract
+        // No-op — state is computed from DB
     }
 }

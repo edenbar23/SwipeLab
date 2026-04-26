@@ -72,9 +72,10 @@ class ImageServiceTest {
     @Test
     void getNextBatchForApi_ShouldReturnImages() {
         when(taskRepository.findById(1L)).thenReturn(Optional.of(task));
-        when(taskDistributionService.getNextImageForUser(anyString(), anyLong()))
-                .thenReturn(Optional.of(image))
-                .thenReturn(Optional.empty()); // simulate running out of images after 1
+        // task has no targetSpecies so species list is empty → question comes from task.getQuestion()
+        when(taskDistributionService.getNextImageForUser(anyString(), anyLong(), anyList()))
+                .thenReturn(Optional.of(new TaskDistributionService.ImageSpeciesPair(image, null)))
+                .thenReturn(Optional.empty());
 
         NextBatchResponse response = imageService.getNextBatchForApi(1L, "testuser", 5);
 

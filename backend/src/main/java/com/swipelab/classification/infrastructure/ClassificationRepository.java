@@ -75,4 +75,16 @@ public interface ClassificationRepository extends JpaRepository<Classification, 
      */
     @Query("SELECT COUNT(c) FROM Classification c WHERE c.username = :username AND c.taskId = :taskId")
     Long countByUsernameAndTaskId(@Param("username") String username, @Param("taskId") Long taskId);
+
+    /**
+     * Check if a user has already classified a specific image for a specific species.
+     * This allows the same image to appear again if a different species is queried.
+     */
+    boolean existsByUsernameAndImage_IdAndQuerySpecies(String username, Long imageId, String querySpecies);
+
+    /**
+     * Get all species already queried for a given image by a user.
+     */
+    @Query("SELECT c.querySpecies FROM Classification c WHERE c.username = :username AND c.image.id = :imageId")
+    List<String> findQueriedSpeciesByUsernameAndImageId(@Param("username") String username, @Param("imageId") Long imageId);
 }
