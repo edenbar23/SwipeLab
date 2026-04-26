@@ -98,10 +98,16 @@ public class TaskController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<TaskResponse> createTask(
             @AuthenticationPrincipal UserDetails userDetails,
-            @RequestHeader(value = "X-Stardbi-Access-Token", required = false) String stardbiAccessToken,
+            @RequestHeader(value = "Authorization", required = false) String authHeader,
+            @RequestHeader(value = "X-Stardbi-Access-Token", required = false) String explicitStardbiToken,
             @RequestHeader(value = "X-Stardbi-Refresh-Token", required = false) String stardbiRefreshToken,
             @Valid @RequestBody CreateTaskRequest request) {
-        // In real app, verify admin role
+        
+        String stardbiAccessToken = explicitStardbiToken;
+        if ((stardbiAccessToken == null || stardbiAccessToken.isEmpty()) && authHeader != null && authHeader.startsWith("Bearer ")) {
+            stardbiAccessToken = authHeader.substring(7);
+        }
+
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(taskService.createTask(request, userDetails.getUsername(), stardbiAccessToken, stardbiRefreshToken));
     }
