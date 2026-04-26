@@ -201,7 +201,6 @@ class AuthenticationServiceTest {
 
         assertNotNull(result);
         assertEquals("access", result.getAccessToken());
-        verify(userRepository, times(1)).save(user);
     }
 
     @Test

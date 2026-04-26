@@ -192,11 +192,11 @@ public class StardbiSyncService {
         }
     }
 
-    private String extractImageIdFromFileName(String fileName) {
+    private Long extractImageIdFromFileName(String fileName) {
         try {
             String nameWithoutExt = fileName.substring(0, fileName.lastIndexOf('.'));
             String[] parts = nameWithoutExt.split("_");
-            return String.join("_", java.util.Arrays.copyOf(parts, parts.length - 1));
+            return Long.parseLong(String.join("", java.util.Arrays.copyOf(parts, parts.length - 1)));
         } catch (Exception e) {
             return null;
         }
