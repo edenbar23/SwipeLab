@@ -127,11 +127,11 @@ public class TaskService {
     }
 
     @Transactional
-    public TaskResponse createTask(CreateTaskRequest request, String username) {
+    public TaskResponse createTask(CreateTaskRequest request, String username, String stardbiAccessToken, String stardbiRefreshToken) {
         // TODO: Validate author (admin)
         Task task = taskMapper.toEntity(request);
         task.setCreatedBy(username);
-        task.setStatus(TaskStatus.ACTIVE);
+        task.setStatus(TaskStatus.PROCESSING);
         
         if (request.getTargetSpecies() != null && !request.getTargetSpecies().isEmpty()) {
             List<Label> labels = new ArrayList<>();
@@ -145,8 +145,9 @@ public class TaskService {
         
         task = taskRepository.save(task);
         
-        // Trigger a background sync in case the new task includes external experiments
-        CompletableFuture.runAsync(stardbiSyncService::syncExperiments);
+        // Trigger a background sync using the user's Stardbi token
+        final Task savedTask = task;
+        CompletableFuture.runAsync(() -> stardbiSyncService.syncExperimentsForTask(savedTask, stardbiAccessToken, stardbiRefreshToken));
         
         return mapToResponse(task);
     }

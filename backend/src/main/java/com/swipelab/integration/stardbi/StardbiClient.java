@@ -132,6 +132,18 @@ public class StardbiClient {
         return response.getBody();
     }
 
+    public byte[] downloadExperimentCropsZip(Long experimentId, String accessToken) {
+        String url = baseUrl + "/swipe_lab/crops/download/?experiment=" + experimentId;
+        String tokenToUse = (accessToken != null && !accessToken.isEmpty()) ? accessToken : getServiceAccountToken();
+        HttpHeaders headers = createAuthHeaders(tokenToUse);
+        headers.setAccept(List.of(MediaType.ALL));
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+        
+        ResponseEntity<byte[]> response = restTemplate.exchange(
+                url, HttpMethod.GET, entity, byte[].class);
+        return response.getBody();
+    }
+
     // ======================================
     // TAXONOMY
     // ======================================

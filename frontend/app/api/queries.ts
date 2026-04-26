@@ -169,6 +169,13 @@ export const useAdminTasks = () => {
     queryKey: QUERY_KEYS.dashboardTasks,
     queryFn: () => fetchJson(API_ENDPOINTS.TASKS.DASHBOARD),
     staleTime: 2 * 60 * 1000,
+    refetchInterval: (query: any) => {
+      const data = query?.state?.data;
+      if (Array.isArray(data) && data.some((t: any) => t.status === 'PROCESSING')) {
+        return 3000;
+      }
+      return false;
+    },
   });
 };
 

@@ -29,6 +29,9 @@ public class StardbiSyncService {
     private final ImageRepository imageRepository;
     private final UserRepository userRepository;
 
+    @org.springframework.beans.factory.annotation.Value("${swipelab.storage.path:./storage/crops}")
+    private String storagePath;
+
     /**
      * Periodically syncs experiments from STARdbi and creates local Tasks.
      * Can be configured via yaml. For now, runs hourly.
@@ -98,6 +101,104 @@ public class StardbiSyncService {
             log.info("Finished STARdbi experiment synchronization.");
         } catch (Exception e) {
             log.error("Error during STARdbi synchronization", e);
+        }
+    }
+
+    @Transactional
+    public void syncExperimentsForTask(Task task, String accessToken, String refreshToken) {
+        log.info("Starting STARdbi experiment ZIP download for task: {}", task.getId());
+        
+        try {
+            // Ensure storage directory exists
+            java.io.File storageDir = new java.io.File(storagePath);
+            if (!storageDir.exists()) {
+                storageDir.mkdirs();
+            }
+
+            String currentAccessToken = accessToken;
+            if (currentAccessToken == null || currentAccessToken.isEmpty()) {
+                log.info("No user Stardbi token provided for task {}, falling back to service account token.", task.getId());
+                // We don't have a public getServiceAccountToken method, so we pass null and let the client handle it if we modify it, or we can use it.
+                // Wait, getServiceAccountToken() in StardbiClient is private!
+                // If it's private, StardbiClient must handle null tokens by using the service account token.
+            } else if (!stardbiClient.checkAuth(currentAccessToken)) {
+                log.info("Stardbi access token expired for task {}, attempting refresh...", task.getId());
+                if (refreshToken != null) {
+                    com.swipelab.integration.stardbi.dto.StardbiAuthResponseDto newAuth = 
+                        stardbiClient.refreshToken(new com.swipelab.integration.stardbi.dto.StardbiRefreshTokenRequestDto(refreshToken));
+                    currentAccessToken = newAuth.getAccess();
+                } else {
+                    log.error("No refresh token provided, using service account token as fallback.");
+                    currentAccessToken = null;
+                }
+            }
+
+            for (Long expId : task.getExperiments()) {
+                byte[] zipBytes = null;
+                try {
+                    zipBytes = stardbiClient.downloadExperimentCropsZip(expId, currentAccessToken);
+                } catch (Exception e) {
+                    log.error("Failed to download zip for experiment {}", expId, e);
+                    continue;
+                }
+
+                if (zipBytes != null && zipBytes.length > 0) {
+                    try (java.util.zip.ZipInputStream zis = new java.util.zip.ZipInputStream(new java.io.ByteArrayInputStream(zipBytes))) {
+                        java.util.zip.ZipEntry zipEntry = zis.getNextEntry();
+                        int savedCount = 0;
+                        while (zipEntry != null) {
+                            if (!zipEntry.isDirectory()) {
+                                String fileName = zipEntry.getName();
+                                Long boxId = extractBoxIdFromFileName(fileName);
+                                
+                                if (boxId != null && !imageRepository.existsByExternalBoxId(boxId)) {
+                                    java.io.File outputFile = new java.io.File(storageDir, expId + "_" + fileName);
+                                    java.nio.file.Files.copy(zis, outputFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                                    
+                                    Image newImage = Image.builder()
+                                            .task(task)
+                                            .externalBoxId(boxId)
+                                            .parentImageId(extractImageIdFromFileName(fileName))
+                                            .srcPath(outputFile.getAbsolutePath())
+                                            .experimentId(expId)
+                                            .build();
+                                    
+                                    imageRepository.save(newImage);
+                                    savedCount++;
+                                }
+                            }
+                            zipEntry = zis.getNextEntry();
+                        }
+                        log.info("Extracted and saved {} new crops for experiment {}", savedCount, expId);
+                    }
+                }
+            }
+
+            task.setStatus(TaskStatus.ACTIVE);
+            taskRepository.save(task);
+            log.info("Task {} is now ACTIVE", task.getId());
+        } catch (Exception e) {
+            log.error("Error during STARdbi zip synchronization for task {}", task.getId(), e);
+        }
+    }
+
+    private Long extractBoxIdFromFileName(String fileName) {
+        try {
+            String nameWithoutExt = fileName.substring(0, fileName.lastIndexOf('.'));
+            String[] parts = nameWithoutExt.split("_");
+            return Long.parseLong(parts[parts.length - 1]);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private String extractImageIdFromFileName(String fileName) {
+        try {
+            String nameWithoutExt = fileName.substring(0, fileName.lastIndexOf('.'));
+            String[] parts = nameWithoutExt.split("_");
+            return String.join("_", java.util.Arrays.copyOf(parts, parts.length - 1));
+        } catch (Exception e) {
+            return null;
         }
     }
 }

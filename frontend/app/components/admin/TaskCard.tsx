@@ -12,7 +12,7 @@ import { Colors } from '../../../constants/theme';
 
 type AdminTask = {
   taskId: number;
-  status: "ACTIVE" | "PAUSED" | "ARCHIVED";
+  status: "ACTIVE" | "PAUSED" | "ARCHIVED" | "PROCESSING";
   name: string;
   targetSpecies: {
     name: string;
@@ -40,14 +40,19 @@ export default function TaskCard({
   onArchive,
 }: Props) {
   const isActive = task.status === "ACTIVE";
+  const isProcessing = task.status === "PROCESSING";
   const { theme } = useThemeStore();
   const themeColors = Colors[theme as keyof typeof Colors];
 
   return (
     <TouchableOpacity
-      style={[styles.card, { backgroundColor: themeColors.card }]}
-      activeOpacity={0.85}
-      onPress={onPress}
+      style={[
+        styles.card, 
+        { backgroundColor: themeColors.card },
+        isProcessing && { opacity: 0.7 }
+      ]}
+      activeOpacity={isProcessing ? 1 : 0.85}
+      onPress={isProcessing ? undefined : onPress}
     >
       {/* Header */}
       <View style={styles.header}>
@@ -55,18 +60,25 @@ export default function TaskCard({
           {task.name}
         </Text>
 
-        <TouchableOpacity
-          onPress={(e) => {
-            e.stopPropagation();
-            onToggleStatus();
-          }}
-        >
-          <Ionicons
-            name={isActive ? "pause-circle" : "play-circle"}
-            size={26}
-            color={isActive ? "#F59E0B" : "#10B981"}
-          />
-        </TouchableOpacity>
+        {isProcessing ? (
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+            <Ionicons name="cloud-download-outline" size={18} color="#3B82F6" />
+            <Text style={{ fontSize: 12, color: "#3B82F6", fontWeight: 'bold' }}>Loading Images...</Text>
+          </View>
+        ) : (
+          <TouchableOpacity
+            onPress={(e) => {
+              e.stopPropagation();
+              onToggleStatus();
+            }}
+          >
+            <Ionicons
+              name={isActive ? "pause-circle" : "play-circle"}
+              size={26}
+              color={isActive ? "#F59E0B" : "#10B981"}
+            />
+          </TouchableOpacity>
+        )}
       </View>
 
       <Text style={[styles.meta, { color: themeColors.textSecondary }]}>
@@ -81,8 +93,9 @@ export default function TaskCard({
       </Text>
 
       {/* Actions */}
-      <View style={styles.actions}>
+      <View style={[styles.actions, isProcessing && { opacity: 0.5 }]}>
         <TouchableOpacity
+          disabled={isProcessing}
           onPress={(e) => {
             e.stopPropagation();
             onEdit();
@@ -92,6 +105,7 @@ export default function TaskCard({
         </TouchableOpacity>
 
         <TouchableOpacity
+          disabled={isProcessing}
           onPress={(e) => {
             e.stopPropagation();
             onArchive();

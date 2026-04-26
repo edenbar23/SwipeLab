@@ -98,10 +98,12 @@ public class TaskController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<TaskResponse> createTask(
             @AuthenticationPrincipal UserDetails userDetails,
+            @RequestHeader(value = "X-Stardbi-Access-Token", required = false) String stardbiAccessToken,
+            @RequestHeader(value = "X-Stardbi-Refresh-Token", required = false) String stardbiRefreshToken,
             @Valid @RequestBody CreateTaskRequest request) {
         // In real app, verify admin role
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(taskService.createTask(request, userDetails.getUsername()));
+                .body(taskService.createTask(request, userDetails.getUsername(), stardbiAccessToken, stardbiRefreshToken));
     }
 
     @PostMapping("/{taskId}/archive")

@@ -12,6 +12,7 @@ import { useThemeStore } from '../../stores/themeStore';
 import { AddTaskFormData } from "../../components/admin/addTask/addTaskTypes";
 import StepConfirm from "../../components/admin/addTask/StepConfirm";
 import StepDescription from "../../components/admin/addTask/StepDescription";
+import { useAuthStore } from "../../stores/authStore";
 import StepName from "../../components/admin/addTask/StepName";
 import StepRecipients from "../../components/admin/addTask/StepRecipients";
 import StepSpecies from "../../components/admin/addTask/StepSpecies";
@@ -117,10 +118,24 @@ export default function AddTaskScreen({ route, navigation }: any) {
 
     try {
       setLoading(true);
+
+      const authState = useAuthStore.getState();
+      const isStardbi = authState.authProvider === "STARDBI";
+      let headers: any = { "Content-Type": "application/json" };
+      
+      if (isStardbi && authState.token) {
+        headers["X-Stardbi-Access-Token"] = authState.token;
+        if (Platform.OS === 'web') {
+          headers["X-Stardbi-Refresh-Token"] = localStorage.getItem("refreshToken") || "";
+        }
+        // In React Native environment, getting SecureStore synchronously is tricky,
+        // but typically refreshToken is stored securely. For web, localStorage is fast.
+      }
+
       const res = await apiFetch(API_ENDPOINTS.TASKS.CREATE_TASK, {
         method: "POST",
         body: JSON.stringify(payload),
-        headers: { "Content-Type": "application/json" },
+        headers,
       });
 
       if (!res.ok) {
