@@ -73,37 +73,67 @@ public class ImageService {
 
         private BatchImageDto mapToBatchDto(Image image, Task task) {
                 String src = getProvidedImagePath(image.getSrcPath());
-                String contentType = "image/jpeg"; // always a valid MIME type; HTTP/base64 distinction is handled by the 'data' value itself
-                
+                String contentType = "image/jpeg";
+
+                // Build question from targetSpecies list, or fall back to task.question, then generic
+                String question = task.getQuestion();
+                if (question == null || question.isBlank()) {
+                        List<com.swipelab.classification.domain.Label> species = task.getTargetSpecies();
+                        if (species != null && !species.isEmpty()) {
+                                String speciesNames = species.stream()
+                                        .map(com.swipelab.classification.domain.Label::getName)
+                                        .collect(java.util.stream.Collectors.joining(" / "));
+                                question = "Is this a " + speciesNames + "?";
+                        } else {
+                                question = "Classify this image";
+                        }
+                }
+
                 return BatchImageDto.builder()
                                 .imageId(image.getId())
                                 .taskId(task.getId())
-                                .question(task.getQuestion() != null ? task.getQuestion() : "Classify this image")
+                                .question(question)
                                 .image(ImageDataDto.builder()
                                                 .contentType(contentType)
                                                 .data(src)
                                                 .build())
-                                .referenceImages(List.of()) // Placeholder
+                                .referenceImages(List.of())
                                 .build();
         }
 
         private String getProvidedImagePath(String path) {
-                if (path != null && path.startsWith("http")) {
-                        return path;
-                }
-                
-                // Real test of the mock server!
-                try {
-                        org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
-                        org.springframework.http.ResponseEntity<byte[]> response = restTemplate.getForEntity("http://localhost:8080/swipelab/bounding_boxes/" + path + "/", byte[].class);
-                        if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                                return java.util.Base64.getEncoder().encodeToString(response.getBody());
-                        }
-                } catch (Exception e) {
-                        // ignore and use fallback
+                if (path == null) {
+                        return getFallbackImage();
                 }
 
-                // Fallback to a 1x1 white jpeg
+                // Already a full HTTP URL — return as-is
+                if (path.startsWith("http")) {
+                        return path;
+                }
+
+                // Local file path — read from disk and return as base64
+                try {
+                        java.io.File file = new java.io.File(path);
+                        if (file.exists() && file.isFile()) {
+                                byte[] bytes = java.nio.file.Files.readAllBytes(file.toPath());
+                                return java.util.Base64.getEncoder().encodeToString(bytes);
+                        }
+                } catch (Exception e) {
+                        // log and fall through to fallback
+                        org.slf4j.LoggerFactory.getLogger(ImageService.class)
+                                .warn("Could not read image from path: {}", path, e);
+                }
+
+                // Already raw base64 or data URI
+                if (path.startsWith("data:image") || path.startsWith("/9j") || path.startsWith("iVBOR")) {
+                        return path;
+                }
+
+                return getFallbackImage();
+        }
+
+        private String getFallbackImage() {
+                // 1x1 white JPEG
                 return "/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=";
         }
 
