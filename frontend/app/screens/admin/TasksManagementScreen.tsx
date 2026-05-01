@@ -7,13 +7,14 @@ import TaskCard from "../../components/admin/TaskCard";
 import ScreenHeaderLayout from "../../components/layout/ScreenHeaderLayout";
 import { useThemeStore } from '../../stores/themeStore';
 import { API_ENDPOINTS } from '../../api/apiEndpoints';
-import { useAdminTasks } from "../../api/queries";
+import { useAdminTasks, useUpdateTaskStatus } from "../../api/queries";
 
 
 export default function TasksManagementScreen({ navigation }: any) {
   const { theme } = useThemeStore();
   const themeColors = Colors[theme as keyof typeof Colors];
   const { data: tasks = [], isLoading } = useAdminTasks();
+  const { mutate: updateStatus } = useUpdateTaskStatus();
 
   return (
     <ScreenHeaderLayout
@@ -42,10 +43,10 @@ export default function TasksManagementScreen({ navigation }: any) {
                 })
               }
               onToggleStatus={() => {
-                // PATCH /tasks/{id}/status
+                updateStatus({ taskId: item.taskId, action: item.status === 'ACTIVE' ? 'pause' : 'activate' });
               }}
               onArchive={() => {
-                // confirm + archive
+                updateStatus({ taskId: item.taskId, action: 'archive' });
               }}
             />
           )}

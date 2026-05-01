@@ -215,6 +215,25 @@ export const useSwipeBatch = (taskId: string | number) => {
   });
 };
 
+export const useUpdateTaskStatus = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async ({ taskId, action }: { taskId: string | number, action: 'pause' | 'archive' | 'activate' }) => {
+      const endpoint = action === 'pause' ? API_ENDPOINTS.TASKS.PAUSE_TASK(taskId) :
+                       action === 'archive' ? API_ENDPOINTS.TASKS.ARCHIVE_TASK(taskId) :
+                       API_ENDPOINTS.TASKS.ACTIVATE_TASK(taskId);
+      const res = await apiFetch(endpoint, { method: 'POST' });
+      if (!res.ok) throw new Error(`Failed to ${action} task`);
+      return res.json();
+    },
+    onSuccess: (updatedTask, { taskId }) => {
+      queryClient.setQueryData(QUERY_KEYS.taskDetails(taskId), updatedTask);
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.dashboardTasks });
+    }
+  });
+};
+
 import { queryClient } from '../queryClient';
 
 export const preloadAfterLogin = async (role: string) => {

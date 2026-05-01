@@ -7,7 +7,7 @@ import { Colors } from '../../../constants/theme';
 import { apiFetch } from "../../api/apiFetch";
 import { AdminStackParamList } from "../../navigation/adminStack.types";
 import { useThemeStore } from '../../stores/themeStore';
-import { useTaskDetails, useExperiments } from "../../api/queries";
+import { useTaskDetails, useExperiments, useUpdateTaskStatus } from "../../api/queries";
 
 
 type Props = NativeStackScreenProps<AdminStackParamList, "TaskDetails">;
@@ -36,6 +36,7 @@ export default function TaskDetailsScreen({ route, navigation }: Props) {
 
   const { data: task, isLoading: loading, error } = useTaskDetails(taskId);
   const { data: experimentsList } = useExperiments();
+  const { mutate: updateStatus } = useUpdateTaskStatus();
 
   if (loading) return <Text style={styles.loading}>Loading...</Text>;
   if (error) return <Text style={styles.error}>Error: {(error as Error).message || "Failed to fetch task"}</Text>;
@@ -64,7 +65,7 @@ export default function TaskDetailsScreen({ route, navigation }: Props) {
             <Ionicons name="create-outline" size={26} color="#2563EB" />
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={() => console.log("Toggle Pause/Resume", taskId)}>
+          <TouchableOpacity onPress={() => updateStatus({ taskId, action: isActive ? 'pause' : 'activate' })}>
             <Ionicons
               name={isActive ? "pause-circle" : "play-circle"}
               size={26}
@@ -72,7 +73,7 @@ export default function TaskDetailsScreen({ route, navigation }: Props) {
             />
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={() => console.log("Archive task", taskId)}>
+          <TouchableOpacity onPress={() => updateStatus({ taskId, action: 'archive' })}>
             <Ionicons name="archive-outline" size={26} color="#EF4444" />
           </TouchableOpacity>
         </View>
