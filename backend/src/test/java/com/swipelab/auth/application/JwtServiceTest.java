@@ -107,7 +107,7 @@ class JwtServiceTest {
         when(tokenProvider.isTokenValid("valid-token")).thenReturn(true);
         when(tokenProvider.extractTokenType("valid-token")).thenReturn(TokenType.REFRESH);
         when(tokenProvider.extractUsername("valid-token")).thenReturn("testuser");
-        
+
         testUser.setRefreshTokenHash("different-hash");
         when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(testUser));
         when(passwordEncoder.matches("valid-token", "different-hash")).thenReturn(false);
@@ -120,7 +120,7 @@ class JwtServiceTest {
         when(tokenProvider.isTokenValid("valid-token")).thenReturn(true);
         when(tokenProvider.extractTokenType("valid-token")).thenReturn(TokenType.REFRESH);
         when(tokenProvider.extractUsername("valid-token")).thenReturn("testuser");
-        
+
         testUser.setRefreshTokenHash("hash");
         when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(testUser));
         when(passwordEncoder.matches("valid-token", "hash")).thenReturn(true);
@@ -136,7 +136,7 @@ class JwtServiceTest {
         when(tokenProvider.isTokenValid("old-refresh")).thenReturn(true);
         when(tokenProvider.extractTokenType("old-refresh")).thenReturn(TokenType.REFRESH);
         when(tokenProvider.extractUsername("old-refresh")).thenReturn("testuser");
-        
+
         testUser.setRefreshTokenHash("hash");
         when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(testUser));
         when(passwordEncoder.matches("old-refresh", "hash")).thenReturn(true);
@@ -167,18 +167,19 @@ class JwtServiceTest {
         assertNull(testUser.getRefreshTokenHash());
         verify(userRepository).save(testUser);
     }
-    
+
     @Test
     void refreshTokens_ShouldThrowException_WhenTokenInvalid() {
         when(tokenProvider.isTokenValid("invalid")).thenReturn(false);
         assertThrows(UnauthorizedException.class, () -> jwtService.refreshTokens("invalid"));
     }
-    
+
     @Test
     void isRefreshToken_ShouldReturnTrue_WhenValidAndTypeMatch() {
         when(tokenProvider.isTokenValid("token")).thenReturn(true);
         when(tokenProvider.extractTokenType("token")).thenReturn(TokenType.REFRESH);
-        
+
         assertTrue(jwtService.isRefreshToken("token"));
     }
 }
+// test the CI

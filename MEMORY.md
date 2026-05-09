@@ -29,4 +29,3 @@ Architecture: Modular Hexagonal/DDD.
 ## Agent Guidelines
 * Update this file only upon task completion or major architectural changes.
 * Use LOCAL_SCRATCHPAD.md for internal logs and step-by-step execution details.
-## testing the CI
