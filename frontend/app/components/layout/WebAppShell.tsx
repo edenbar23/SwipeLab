@@ -48,7 +48,6 @@ export default function WebAppShell({ children, variant = 'user', style }: Props
           {
             maxWidth,
             backgroundColor: themeColors.background,
-            // Vertical separator lines on dark mode for a clean edge
             borderLeftWidth: 1,
             borderRightWidth: 1,
             borderColor: themeColors.border,
@@ -65,12 +64,15 @@ export default function WebAppShell({ children, variant = 'user', style }: Props
 const styles = StyleSheet.create({
   gutter: {
     flex: 1,
-    alignItems: 'center',
+    // Do NOT use alignItems: 'center' here — it collapses child height to
+    // 'auto' in React Native web, breaking all inner flex/scroll chains.
   },
   shell: {
     flex: 1,
     width: '100%',
-    // Shadow gives depth against the gutter
+    // marginHorizontal auto centers the shell horizontally on web
+    // without affecting its height (unlike alignItems: 'center' on parent).
+    marginHorizontal: 'auto' as any,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,

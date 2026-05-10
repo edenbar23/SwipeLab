@@ -205,12 +205,12 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  screenContainer: { flex: 1 },
-  // Web: full-page background with centered card
+  screenContainer: { flex: 1, backgroundColor: '#fff' },
+  // Web: center the card vertically on the page
   webScreenContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#e8eaf0',
+    backgroundColor: '#fff',
   },
   container: {
     flex: 1,
@@ -219,17 +219,18 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     paddingHorizontal: 20,
   },
-  // Web: contained card, no full-height stretch
+  // Web: contained card, shadow only for desktop feel
   webCard: {
     flex: 0,
     width: '100%',
     maxWidth: 460,
     borderRadius: 16,
     paddingVertical: 48,
+    backgroundColor: '#fff',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 20,
+    shadowOpacity: 0.08,
+    shadowRadius: 16,
   },
   logo: { width: 140, height: 140, resizeMode: "contain", marginBottom: 30 },
   title: { fontSize: 28, fontWeight: "bold", marginBottom: 6 },
