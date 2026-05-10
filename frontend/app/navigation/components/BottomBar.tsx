@@ -1,6 +1,6 @@
 import { useNavigation } from "@react-navigation/native";
 import React from "react";
-import { Image, ImageSourcePropType, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Image, ImageSourcePropType, Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useThemeStore } from "../../stores/themeStore";
 
 interface NavItem {
@@ -44,14 +44,16 @@ export default function BottomBar({ items }: Props) {
   );
 }
 
+const isWeb = Platform.OS === 'web';
+
 const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
     borderTopWidth: 1,
-    paddingVertical: 10,
+    paddingVertical: isWeb ? 8 : 10,
     justifyContent: "space-around",
   },
-  button: { alignItems: "center", padding: 6 },
+  button: { alignItems: "center", padding: isWeb ? 4 : 6 },
   icon: { width: 22, height: 22, marginBottom: 2 },
-  label: { fontSize: 14, fontWeight: "600" },
+  label: { fontSize: isWeb ? 12 : 14, fontWeight: "600" },
 });

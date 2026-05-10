@@ -1,7 +1,7 @@
 import * as Google from "expo-auth-session/providers/google";
 import * as WebBrowser from "expo-web-browser";
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Image, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { API_ENDPOINTS } from '../../api/apiEndpoints';
 import { apiFetch } from "../../api/apiFetch";
 import { preloadAfterLogin } from "../../api/queries";
@@ -147,10 +147,12 @@ export default function LoginScreen() {
   };
 
 
+  const isWeb = Platform.OS === 'web';
+
   return (
-    <View style={styles.screenContainer}>
-      {/* LOGIN SCREEN */}
-      <View style={[styles.container, showRegister && { opacity: 0.75 }]}>
+    <View style={[styles.screenContainer, isWeb && styles.webScreenContainer]}>
+      {/* LOGIN CARD */}
+      <View style={[styles.container, isWeb && styles.webCard, showRegister && { opacity: 0.75 }]}>
         <Image source={require("../../../assets/images/icon.png")} style={styles.logo} />
         <Text style={styles.title}>Welcome to SwipeLab</Text>
         <Text style={styles.subtitle}>Swipe • Label • Improve Research</Text>
@@ -204,6 +206,12 @@ export default function LoginScreen() {
 
 const styles = StyleSheet.create({
   screenContainer: { flex: 1 },
+  // Web: full-page background with centered card
+  webScreenContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#e8eaf0',
+  },
   container: {
     flex: 1,
     alignItems: "center",
@@ -211,12 +219,24 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     paddingHorizontal: 20,
   },
+  // Web: contained card, no full-height stretch
+  webCard: {
+    flex: 0,
+    width: '100%',
+    maxWidth: 460,
+    borderRadius: 16,
+    paddingVertical: 48,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 20,
+  },
   logo: { width: 140, height: 140, resizeMode: "contain", marginBottom: 30 },
   title: { fontSize: 28, fontWeight: "bold", marginBottom: 6 },
   subtitle: { fontSize: 16, color: "#777", marginBottom: 20 },
   input: { width: "85%", borderWidth: 1, borderColor: "#ccc", padding: 10, borderRadius: 8, color: "#000", marginBottom: 12 },
   loginButton: { width: "85%", backgroundColor: "#4B7BE5", padding: 12, borderRadius: 8, alignItems: "center", marginBottom: 12 },
-  researcherButton: { backgroundColor: "#2E8B57" }, // Distinct color for Researcher
+  researcherButton: { backgroundColor: "#2E8B57" },
   loginButtonText: { color: "#fff", fontSize: 16, fontWeight: "600" },
   orText: { marginVertical: 10, fontSize: 14, color: "#555" },
   googleButton: { width: "85%", backgroundColor: "white", padding: 12, flexDirection: "row", alignItems: "center", borderRadius: 8, borderWidth: 1, borderColor: "#ccc", justifyContent: "center" },
