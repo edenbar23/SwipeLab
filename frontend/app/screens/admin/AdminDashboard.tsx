@@ -30,18 +30,17 @@ const buttons = [
 ];
 
 export default function AdminDashboard({ navigation }: any) {
-  const { isPhone } = useResponsive();
+  const { isPhone, isDesktop } = useResponsive();
   const { theme } = useThemeStore();
   const themeColors = Colors[theme as keyof typeof Colors];
-  const isWeb = Platform.OS === "web";
 
   // 🔹 Tile sizing
-  const tileSize = isWeb ? 180 : isPhone ? 140 : 150;
+  const tileSize = isDesktop ? 180 : isPhone ? 140 : 150;
   const imageSize = tileSize * 0.45;
   const fontSize = 14;
 
   const Content = (
-    <View style={[styles.container, isWeb && styles.webContainer]}>
+    <View style={[styles.container, isDesktop && styles.webContainer]}>
       {buttons.map((btn, index) => (
         <TouchableOpacity
           key={index}
@@ -69,14 +68,11 @@ export default function AdminDashboard({ navigation }: any) {
     </View>
   );
 
-  // 🌐 WEB — full-width background, no scroll
-  if (isWeb) {
-    return <View style={[styles.background, { backgroundColor: themeColors.background }]}>{Content}</View>;
-  }
-
-  // 📱 MOBILE — scroll enabled
   return (
-    <ScrollView contentContainerStyle={[styles.scrollContainer, { backgroundColor: themeColors.background }]} showsVerticalScrollIndicator={false}>
+    <ScrollView 
+      contentContainerStyle={[styles.scrollContainer, { backgroundColor: themeColors.background }]} 
+      showsVerticalScrollIndicator={false}
+    >
       {Content}
     </ScrollView>
   );

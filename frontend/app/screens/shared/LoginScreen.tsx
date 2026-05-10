@@ -7,6 +7,7 @@ import { apiFetch } from "../../api/apiFetch";
 import { preloadAfterLogin } from "../../api/queries";
 import RegisterForm from "../../components/RegisterForm";
 import { useAuthStore } from "../../stores/authStore";
+import useResponsive from "../../hooks/useResponsive";
 
 
 
@@ -147,12 +148,12 @@ export default function LoginScreen() {
   };
 
 
-  const isWeb = Platform.OS === 'web';
+  const { isDesktop } = useResponsive();
 
   return (
-    <View style={[styles.screenContainer, isWeb && styles.webScreenContainer]}>
+    <View style={[styles.screenContainer, isDesktop && styles.webScreenContainer]}>
       {/* LOGIN CARD */}
-      <View style={[styles.container, isWeb && styles.webCard, showRegister && { opacity: 0.75 }]}>
+      <View style={[styles.container, isDesktop && styles.webCard, showRegister && { opacity: 0.75 }]}>
         <Image source={require("../../../assets/images/icon.png")} style={styles.logo} />
         <Text style={styles.title}>Welcome to SwipeLab</Text>
         <Text style={styles.subtitle}>Swipe • Label • Improve Research</Text>
