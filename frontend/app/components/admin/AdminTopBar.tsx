@@ -8,6 +8,7 @@ import { Ionicons as VectorIcons } from '@expo/vector-icons';
 // Cast to any to accept strict React 19 types
 const Ionicons = VectorIcons as any;
 import { useNavigation, CommonActions } from '@react-navigation/native';
+import useResponsive from "../../hooks/useResponsive";
 
 
 export default function AdminTopBar() {
@@ -15,6 +16,7 @@ export default function AdminTopBar() {
   const { logout } = useAuthStore();
   const { setMode } = useModeStore();
   const { theme } = useThemeStore();
+  const { isPhone } = useResponsive();
 
   const isDarkMode = theme === 'dark';
 
@@ -43,19 +45,21 @@ export default function AdminTopBar() {
         </View>
       </TouchableOpacity>
 
-      <View style={styles.card}>
-        <Text style={styles.text}>Manager Dashboard</Text>
-        <Text style={styles.subText}>Overview</Text>
+      <View style={[styles.card, isPhone && { paddingHorizontal: 12, height: 60, flexShrink: 1, marginHorizontal: 8 }]}>
+        <Text style={[styles.text, isPhone && { fontSize: 11, textAlign: 'center' }]} numberOfLines={isPhone ? 2 : 1}>
+          {isPhone ? "Manager\nDashboard" : "Manager Dashboard"}
+        </Text>
+        {!isPhone && <Text style={styles.subText}>Overview</Text>}
       </View>
 
       <View style={styles.rightSection}>
         <TouchableOpacity onPress={handleSwitchToPlayer} style={styles.switchBtn}>
           <Ionicons name="game-controller-outline" size={20} color="#0EA5E9" />
-          <Text style={[styles.logoutText, dynamicStyles.actionText]}>Play</Text>
+          {!isPhone && <Text style={[styles.logoutText, dynamicStyles.actionText]}>Play</Text>}
         </TouchableOpacity>
         <TouchableOpacity style={styles.logoutBtn} onPress={logout}>
           <Ionicons name="log-out-outline" size={24} color="#EF4444" />
-          <Text style={[styles.logoutText, dynamicStyles.actionText]}>Logout</Text>
+          {!isPhone && <Text style={[styles.logoutText, dynamicStyles.actionText]}>Logout</Text>}
         </TouchableOpacity>
       </View>
     </View>
@@ -65,7 +69,7 @@ export default function AdminTopBar() {
 const styles = StyleSheet.create({
   container: {
     flexDirection: "row", justifyContent: 'space-between',
-    paddingHorizontal: 16, paddingVertical: 12, alignItems: "center",
+    paddingHorizontal: 8, paddingVertical: 12, alignItems: "center",
     borderBottomWidth: 1, borderBottomColor: '#f0f0f0',
   },
   profileSection: { alignItems: 'center', justifyContent: 'center' },
@@ -82,7 +86,7 @@ const styles = StyleSheet.create({
   text: { color: "white", fontWeight: "700", fontSize: 13, lineHeight: 18 },
   subText: { color: "white", fontSize: 10, opacity: 0.9 },
   rightSection: { flexDirection: 'row', alignItems: 'center' },
-  switchBtn: { alignItems: 'center', marginRight: 16 },
+  switchBtn: { alignItems: 'center', marginRight: 12 },
   logoutBtn: { alignItems: "center", justifyContent: "center" },
   logoutText: { fontSize: 10, marginTop: 2 },
 });

@@ -7,6 +7,7 @@ import { apiFetch } from "../../api/apiFetch";
 import { useAuthStore } from "../../stores/authStore";
 import { useModeStore } from "../../stores/modeStore";
 import { useThemeStore } from "../../stores/themeStore";
+import useResponsive from "../../hooks/useResponsive";
 
 // Cast to any to accept strict React 19 types
 const Ionicons = VectorIcons as any;
@@ -30,6 +31,7 @@ export default function UserTopBar({
   const { setMode } = useModeStore();
   const { theme } = useThemeStore();
   const navigation = useNavigation<any>();
+  const { isPhone } = useResponsive();
 
   const isDarkMode = theme === 'dark';
 
@@ -87,22 +89,22 @@ export default function UserTopBar({
         </View>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.statsBlock} onPress={() => navigation.navigate("Challenges")}>
-        <Text style={styles.statsText}>Score: {formattedScore}</Text>
-        <Text style={styles.statsText}>Rank: {displayRank}</Text>
-        <Text style={styles.statsText}>{displayStreak} days streak</Text>
+      <TouchableOpacity style={[styles.statsBlock, isPhone && { paddingHorizontal: 12, height: 60, flexShrink: 1, marginHorizontal: 8 }]} onPress={() => navigation.navigate("Challenges")}>
+        <Text style={[styles.statsText, isPhone && { fontSize: 11 }]} numberOfLines={1}>Score: {formattedScore}</Text>
+        <Text style={[styles.statsText, isPhone && { fontSize: 11 }]} numberOfLines={1}>Rank: {displayRank}</Text>
+        {!isPhone && <Text style={styles.statsText}>{displayStreak} days streak</Text>}
       </TouchableOpacity>
 
       <View style={styles.rightSection}>
         {role === 'ADMIN' && (
           <TouchableOpacity onPress={handleSwitchToManager} style={styles.switchBtn}>
             <Ionicons name="briefcase-outline" size={20} color="#0EA5E9" />
-            <Text style={[styles.actionText, dynamicStyles.actionText]}>Manager</Text>
+            {!isPhone && <Text style={[styles.actionText, dynamicStyles.actionText]}>Manager</Text>}
           </TouchableOpacity>
         )}
         <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
           <Ionicons name="log-out-outline" size={24} color="#EF4444" />
-          <Text style={[styles.actionText, dynamicStyles.actionText]}>Logout</Text>
+          {!isPhone && <Text style={[styles.actionText, dynamicStyles.actionText]}>Logout</Text>}
         </TouchableOpacity>
       </View>
     </View>
@@ -114,7 +116,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: 8,
     paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
@@ -133,7 +135,7 @@ const styles = StyleSheet.create({
   },
   statsText: { color: '#fff', fontSize: 12, fontWeight: '600', lineHeight: 18 },
   rightSection: { flexDirection: 'row', alignItems: 'center' },
-  switchBtn: { alignItems: 'center', marginRight: 16 },
+  switchBtn: { alignItems: 'center', marginRight: 12 },
   logoutBtn: { alignItems: 'center' },
   actionText: { fontSize: 10, marginTop: 2 },
 });

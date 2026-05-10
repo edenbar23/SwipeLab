@@ -73,6 +73,7 @@ const styles = StyleSheet.create({
     // marginHorizontal auto centers the shell horizontally on web
     // without affecting its height (unlike alignItems: 'center' on parent).
     marginHorizontal: 'auto' as any,
+    overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
