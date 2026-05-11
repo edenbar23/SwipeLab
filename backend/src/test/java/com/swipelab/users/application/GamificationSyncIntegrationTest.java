@@ -25,7 +25,7 @@ import static org.awaitility.Awaitility.await;
  * ↓
  * User entity: score / badges / rank updated in DB
  *
- * A real in-memory Kafka broker is started via @EmbeddedKafka.
+ * A real in-memory ApplicationEventPublisher handles the event routing.
  */
 @SpringBootTest
 @ActiveProfiles("integration")

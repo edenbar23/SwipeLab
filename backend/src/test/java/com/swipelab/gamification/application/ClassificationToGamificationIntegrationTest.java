@@ -27,7 +27,7 @@ import static org.awaitility.Awaitility.await;
  * GamificationOrchestratorService
  * and results in points / streaks being recorded in the database.
  *
- * Uses Spring's in-memory EmbeddedKafka — no external Kafka broker needed.
+ * Uses Spring's in-memory ApplicationEvents — no external message broker needed.
  */
 @SpringBootTest
 @ActiveProfiles("integration")
@@ -88,7 +88,7 @@ class ClassificationToGamificationIntegrationTest {
         }
 
         /**
-         * Read gamification in a fresh transaction to see committed Kafka consumer
+         * Read gamification in a fresh transaction to see committed event listener
          * writes
          */
         private Gamification readGamification() {

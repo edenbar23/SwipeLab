@@ -29,7 +29,7 @@ import static org.awaitility.Awaitility.await;
  * ↓
  * UserStatusChangedEvent → "user-events" topic
  *
- * A real in-memory Kafka broker is started via @EmbeddedKafka.
+ * A real in-memory ApplicationEventPublisher handles the event routing.
  * H2 is used as the database (integration profile).
  */
 @SpringBootTest
@@ -75,7 +75,7 @@ class FraudDetectionFlowIntegrationTest {
         }
 
         /**
-         * Helper to read user outside the test transaction to see Kafka listener's
+         * Helper to read user outside the test transaction to see event listener's
          * commits
          */
         private User readUser(String username) {

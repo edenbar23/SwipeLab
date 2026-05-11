@@ -236,7 +236,7 @@ const styles = StyleSheet.create({
   logo: { width: 140, height: 140, resizeMode: "contain", marginBottom: 30 },
   title: { fontSize: 28, fontWeight: "bold", marginBottom: 6 },
   subtitle: { fontSize: 16, color: "#777", marginBottom: 20 },
-  input: { width: "85%", borderWidth: 1, borderColor: "#ccc", padding: 10, borderRadius: 8, color: "#000", marginBottom: 12 },
+  input: { width: "85%", borderWidth: 1, borderColor: "#ccc", padding: 10, borderRadius: 8, color: "#000", marginBottom: 12, fontSize: 16 },
   loginButton: { width: "85%", backgroundColor: "#4B7BE5", padding: 12, borderRadius: 8, alignItems: "center", marginBottom: 12 },
   researcherButton: { backgroundColor: "#2E8B57" },
   loginButtonText: { color: "#fff", fontSize: 16, fontWeight: "600" },
