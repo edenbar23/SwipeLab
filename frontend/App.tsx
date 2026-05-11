@@ -16,7 +16,7 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <SafeAreaProvider>
+        <SafeAreaProvider style={{ flex: 1 }}>
           <RootNavigator />
         </SafeAreaProvider>
       </GestureHandlerRootView>

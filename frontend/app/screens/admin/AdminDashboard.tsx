@@ -70,6 +70,7 @@ export default function AdminDashboard({ navigation }: any) {
 
   return (
     <ScrollView 
+      style={{ flex: 1 }}
       contentContainerStyle={[styles.scrollContainer, { backgroundColor: themeColors.background }]} 
       showsVerticalScrollIndicator={false}
     >
