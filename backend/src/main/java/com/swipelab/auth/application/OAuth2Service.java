@@ -26,6 +26,7 @@ import java.security.GeneralSecurityException;
 public class OAuth2Service {
 
     private final UserRepository userRepository;
+    private final SecurityAuthorizationService securityAuthorizationService;
 
     @Value("${GOOGLE_CLIENT_ID:your-google-client-id}")
     private String googleClientId;
@@ -97,7 +98,10 @@ public class OAuth2Service {
         user.setProfileImageUrl(picture);
         user.setProvider(AuthProvider.GOOGLE);
         user.setProviderId(providerId);
-        user.setRole(UserRole.USER);
+        
+        UserRole initialRole = securityAuthorizationService.isSuperAdmin(email) 
+                ? UserRole.RESEARCHER : UserRole.USER;
+        user.setRole(initialRole);
         user.setEmailVerified(true);
         user.setActive(true);
         user.setAccountLocked(false);

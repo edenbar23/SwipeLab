@@ -91,6 +91,7 @@ app:
   security:
     super-admin:
       username: ${SUPER_ADMIN_USERNAME:superadmin@swipelab.com}
+      password: ${SUPER_ADMIN_PASSWORD:superpassword123}
 
 # Stardbi Configuration
 stardbi:

@@ -24,11 +24,14 @@ public class AuthMapper {
             return null;
         }
 
+        UserRole initialRole = securityAuthorizationService.isSuperAdmin(request.getUsername()) 
+                ? UserRole.RESEARCHER : UserRole.USER;
+
         return User.builder()
                 .username(request.getUsername())
                 .email(request.getEmail())
                 .displayName(request.getDisplayName())
-                .role(UserRole.USER)
+                .role(initialRole)
                 .provider(AuthProvider.LOCAL)
                 .active(true)
                 .accountLocked(false)
