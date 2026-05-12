@@ -9,6 +9,7 @@ import { apiFetch } from '../../api/apiFetch';
 import ScreenHeaderLayout from '../../components/layout/ScreenHeaderLayout/ScreenHeaderLayout';
 import TaskCard from '../../components/user/TaskCard';
 import { useThemeStore } from '../../stores/themeStore';
+import { useSwipeStore } from '../../stores/swipeStore';
 
 
 export default function UserMyTasksScreen() {
@@ -16,6 +17,7 @@ export default function UserMyTasksScreen() {
     const { theme } = useThemeStore();
     const themeColors = Colors[theme as keyof typeof Colors];
     const queryClient = useQueryClient();
+    const { setActiveTaskId } = useSwipeStore();
 
     const { data: stats, isLoading: statsLoading, refetch: refetchStats } = useStatistics();
     const { data: tasks = [], isLoading: tasksLoading, refetch: refetchTasks } = useMyTasks();
@@ -72,9 +74,9 @@ export default function UserMyTasksScreen() {
     const completionPercent = totalImages > 0 ? Math.round((totalClassified / totalImages) * 100) : 0;
 
     const handlePlayTask = (taskId: number) => {
-        console.log(`Playing task ${taskId}`);
-        // Navigate to the swipe screen (gameplay)
-        navigation.navigate('SwipeLab', { taskId });
+        // Persist chosen task in global store, then navigate to the Swipe tab
+        setActiveTaskId(taskId);
+        navigation.navigate('SwipeLab');
     };
 
     return (
