@@ -203,7 +203,10 @@ export const useGoldImages = () => {
   });
 };
 
-export const useSwipeBatch = (taskId: string | number) => {
+export const useSwipeBatch = (
+  taskId: string | number,
+  options?: { enabled?: boolean }
+) => {
   return useQuery({
     queryKey: QUERY_KEYS.swipeBatch(taskId),
     queryFn: async () => {
@@ -212,6 +215,8 @@ export const useSwipeBatch = (taskId: string | number) => {
       return res.json();
     },
     staleTime: 5 * 60 * 1000,
+    // Caller can opt out (e.g. when no task is selected yet)
+    enabled: options?.enabled !== false,
   });
 };
 
@@ -244,14 +249,6 @@ export const preloadAfterLogin = async (role: string) => {
         queryKey: QUERY_KEYS.userProfile,
         queryFn: () => fetchJson(API_ENDPOINTS.USERS.ME)
       }),
-      queryClient.prefetchQuery({
-        queryKey: QUERY_KEYS.swipeBatch(1),
-        queryFn: async () => {
-          const res = await apiFetch(API_ENDPOINTS.TASKS.PLAY_TASK(1), { method: 'POST' });
-          if (!res.ok) throw new Error("Failed to load batch");
-          return res.json();
-        }
-      })
     ]);
 
     // Step 2: Non-blocking background preloads
