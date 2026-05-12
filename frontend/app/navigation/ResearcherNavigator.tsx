@@ -75,21 +75,17 @@ export default function ResearcherNavigator() {
               options={{ title: "Edit Task" }}
             />
 
-            {isSuperAdmin && (
-              <>
-                <Stack.Screen
-                  name="GoldImagesManagement"
-                  component={GoldImagesManagementScreen}
-                  options={{ title: "Gold Images Management" }}
-                />
+            <Stack.Screen
+              name="GoldImagesManagement"
+              component={GoldImagesManagementScreen}
+              options={{ title: "Gold Images Management" }}
+            />
 
-                <Stack.Screen
-                  name="AddGoldImage"
-                  component={AddGoldImageScreen}
-                  options={{ title: "Add Gold Image" }}
-                />
-              </>
-            )}
+            <Stack.Screen
+              name="AddGoldImage"
+              component={AddGoldImageScreen}
+              options={{ title: "Add Gold Image" }}
+            />
 
             <Stack.Screen
               name="RecipientsList"
@@ -136,13 +132,11 @@ export default function ResearcherNavigator() {
               options={{ title: "My Profile" }}
             />
 
-            {isSuperAdmin && (
-              <Stack.Screen
-                name="Taxonomy"
-                component={TaxonomyScreen}
-                options={{ title: "Taxonomy" }}
-              />
-            )}
+            <Stack.Screen
+              name="Taxonomy"
+              component={TaxonomyScreen}
+              options={{ title: "Taxonomy" }}
+            />
           </Stack.Navigator>
 
         </View>

@@ -57,6 +57,7 @@ public class AuthMapper {
                         : new ArrayList<>())
                 .rank(user.getRank() != null ? user.getRank() : "UNRANKED")
                 .isSuperAdmin(securityAuthorizationService.isSuperAdmin(user.getUsername()))
+                .active(user.getActive() != null ? user.getActive() : true)
                 .build();
     }
 

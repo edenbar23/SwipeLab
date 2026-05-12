@@ -31,11 +31,9 @@ export default function ResearcherDashboard({ navigation }: any) {
     { title: "Tasks", image: tasksImg, screen: "TasksManagement" },
     { title: "Add Task", image: addTaskImg, screen: "AddTask" },
     { title: "Recipients List", image: recipientsImg, screen: "RecipientsList" },
-    ...(isSuperAdmin ? [
-      { title: "Taxonomy", image: taxonomyImg, screen: "Taxonomy" },
-      { title: "Gold Images", image: goldImagesImg, screen: "GoldImagesManagement" },
-      { title: "Add Gold Image", image: addGoldImg, screen: "AddGoldImage" },
-    ] : []),
+    { title: "Taxonomy", image: taxonomyImg, screen: "Taxonomy" },
+    { title: "Gold Images", image: goldImagesImg, screen: "GoldImagesManagement" },
+    { title: "Add Gold Image", image: addGoldImg, screen: "AddGoldImage" },
   ];
 
   // 🔹 Tile sizing

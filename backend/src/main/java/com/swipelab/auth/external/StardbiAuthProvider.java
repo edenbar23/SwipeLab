@@ -70,7 +70,7 @@ public class StardbiAuthProvider implements ExternalAuthProvider {
                     UserDetails user = User.builder()
                             .username(username)
                             .password("")
-                            .authorities("ROLE_ADMIN")
+                            .authorities("ROLE_RESEARCHER")
                             .build();
                     tokenCache.put(accessToken, user);
                     return user;
@@ -87,7 +87,7 @@ public class StardbiAuthProvider implements ExternalAuthProvider {
         UserDetails user = User.builder()
                 .username(username)
                 .password("")
-                .authorities("ROLE_ADMIN")
+                .authorities("ROLE_RESEARCHER")
                 .build();
         tokenCache.put(accessToken, user);
     }

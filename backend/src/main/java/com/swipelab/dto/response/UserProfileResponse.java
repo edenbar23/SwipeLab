@@ -23,4 +23,5 @@ public class UserProfileResponse {
     private List<String> badges;
     private String rank;
     private boolean isSuperAdmin;
+    private boolean active;
 }

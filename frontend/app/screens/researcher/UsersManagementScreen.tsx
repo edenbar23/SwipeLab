@@ -13,7 +13,8 @@ import addTaskImg from "../../../assets/images/add_task.png";
 import profileImg from "../../../assets/images/profile.png";
 import usersImg from "../../../assets/images/users.png";
 import { API_ENDPOINTS } from '../../api/apiEndpoints';
-import { useAdminUsers } from "../../api/queries";
+import { useAdminUsers, QUERY_KEYS } from "../../api/queries";
+import { useQueryClient, useMutation } from '@tanstack/react-query';
 
 
 type UsersManagementScreenNavigationProp = NativeStackNavigationProp<researcherStackParamList, 'UsersManagement'>;
@@ -22,14 +23,28 @@ interface User {
     id: string;
     username: string;
     score: number;
+    active: boolean;
 }
 
 export default function UsersManagementScreen() {
     const navigation = useNavigation<UsersManagementScreenNavigationProp>();
     const { theme } = useThemeStore();
     const themeColors = Colors[theme as keyof typeof Colors];
+    const queryClient = useQueryClient();
 
     const { data: users = [], isLoading: loading } = useAdminUsers();
+
+    const toggleBanStatus = useMutation({
+        mutationFn: async ({ username, isBanned }: { username: string, isBanned: boolean }) => {
+            const endpoint = isBanned ? `/api/v1/users/unban/${username}` : `/api/v1/users/ban/${username}`;
+            const res = await apiFetch(endpoint, { method: 'POST' });
+            if (!res.ok) throw new Error('Failed to toggle ban status');
+            return res.json();
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.allUsers });
+        }
+    });
 
     const renderItem = ({ item }: { item: User }) => (
         <TouchableOpacity style={[styles.card, { backgroundColor: themeColors.card, borderColor: themeColors.border }]}>
@@ -38,6 +53,13 @@ export default function UsersManagementScreen() {
             </View>
             <Text style={[styles.username, { color: themeColors.text }]}>{item.username}</Text>
             <Text style={[styles.score, { color: themeColors.textSecondary }]}>{item.score}</Text>
+            
+            <TouchableOpacity 
+                style={[styles.actionButton, { backgroundColor: item.active ? '#ff4d4f' : '#52c41a' }]}
+                onPress={() => toggleBanStatus.mutate({ username: item.username, isBanned: !item.active })}
+            >
+                <Text style={styles.actionButtonText}>{item.active ? 'Ban' : 'Unban'}</Text>
+            </TouchableOpacity>
         </TouchableOpacity>
     );
 
@@ -123,5 +145,16 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontWeight: 'bold',
         color: '#333',
+    },
+    actionButton: {
+        marginTop: 10,
+        paddingVertical: 6,
+        paddingHorizontal: 16,
+        borderRadius: 16,
+    },
+    actionButtonText: {
+        color: 'white',
+        fontWeight: 'bold',
+        fontSize: 12,
     },
 });
