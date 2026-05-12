@@ -1,7 +1,7 @@
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import React from 'react';
-import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useState } from 'react';
+import { FlatList, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Colors } from '../../../constants/theme';
 import { apiFetch } from "../../api/apiFetch";
 import ScreenHeaderLayout from "../../components/layout/ScreenHeaderLayout/ScreenHeaderLayout";
@@ -30,6 +30,11 @@ export default function UsersManagementScreen() {
     const themeColors = Colors[theme as keyof typeof Colors];
 
     const { data: users = [], isLoading: loading } = useAdminUsers();
+    const [searchQuery, setSearchQuery] = useState('');
+
+    const filteredUsers = users.filter(user => 
+        user.username.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
     const renderItem = ({ item }: { item: User }) => (
         <TouchableOpacity style={[styles.card, { backgroundColor: themeColors.card, borderColor: themeColors.border }]}>
@@ -50,12 +55,21 @@ export default function UsersManagementScreen() {
             onRightPress={() => navigation.navigate('AddUser')}
         >
             <View style={[styles.container, { backgroundColor: themeColors.background }]}>
+                <TextInput
+                    style={[styles.searchInput, { color: themeColors.text, borderColor: themeColors.border, backgroundColor: themeColors.card }]}
+                    placeholder="Search users..."
+                    placeholderTextColor={themeColors.textSecondary}
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
+                />
                 {loading ? (
                     <Text style={{ textAlign: 'center', marginTop: 20, color: themeColors.text }}>Loading...</Text>
+                ) : filteredUsers.length === 0 ? (
+                    <Text style={{ textAlign: 'center', marginTop: 20, color: themeColors.textSecondary }}>No users found.</Text>
                 ) : (
                     <FlatList
                         showsVerticalScrollIndicator={false}
-                        data={users}
+                        data={filteredUsers}
                         renderItem={renderItem}
                         keyExtractor={item => item.id}
                         numColumns={3}
@@ -76,6 +90,15 @@ const styles = StyleSheet.create({
     listContent: {
         paddingTop: 16,
         paddingBottom: 32,
+    },
+    searchInput: {
+        height: 40,
+        borderWidth: 1,
+        borderRadius: 8,
+        paddingHorizontal: 12,
+        marginTop: 16,
+        marginBottom: 8,
+        fontSize: 16,
     },
     columnWrapper: {
         justifyContent: 'space-between',

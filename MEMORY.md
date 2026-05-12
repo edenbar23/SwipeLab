@@ -15,6 +15,7 @@ Architecture: Modular Hexagonal/DDD.
 * Database: Schema migrations updated (V1-V8) including gamification and challenges.
 * Frontend: Fixed frontend rendering for uploaded Gold Images by correcting the static path base parsing logic (Issue #216).
 * Security/Validation: Implemented comprehensive input validation, stored XSS protection, and username normalization (Issue #227).
+* Frontend: Added search bar and filter logic to the admin UsersManagementScreen, along with Playwright tests (Issue #217).
 
 ## Current Focus (Active GitHub Issues)
 * Issue #204: Fix SwipeScreen showing mock task by default.
@@ -31,7 +32,6 @@ Architecture: Modular Hexagonal/DDD.
 * Issue #220: [Backend] improve and add analytics new endpoints.
 * Issue #219: [Frontend] Add to UsersScreen ONLY for Admin role control buttons.
 * Issue #218: [Frontend] adding sort by credibility score in UsersScreen.
-* Issue #217: [Frontend] adding search bar for users in the UsersScreen.
 
 ## Architecture & Design Decisions
 * Backend: Strictly modular. No direct calls from API to Infrastructure. Use Application services.
