@@ -143,9 +143,13 @@ export async function apiFetch(
   });
 
   if (response.status === 401) {
-    // Do not intercept 401s for login or refresh endpoints to allow normal error handling
+    // Do not intercept 401s for login, refresh, or logout endpoints
     const urlString = input.toString();
-    if (urlString.includes('/login') || urlString.includes('/refresh')) {
+    if (
+      urlString.includes('/login') ||
+      urlString.includes('/refresh') ||
+      urlString.includes('/logout')
+    ) {
       return response;
     }
 

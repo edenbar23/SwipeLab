@@ -127,7 +127,13 @@ export const useAuthStore = create<AuthState>((set) => ({
         headers: {
           "Authorization": `Bearer ${refreshToken}`
         }
-      }).catch(e => console.error("Logout request failed", e));
+      })
+      .then(res => {
+        if (res.status === 401) {
+          console.warn("[logout] Server returned 401 on logout, but local cleanup is already complete.");
+        }
+      })
+      .catch(e => console.error("Logout request failed", e));
     }
 
     // 4. Clear mode and query cache
