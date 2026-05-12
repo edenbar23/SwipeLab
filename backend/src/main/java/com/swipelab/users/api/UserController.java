@@ -43,6 +43,13 @@ public class UserController {
         return ResponseEntity.ok(userService.getAllUsers());
     }
 
+    // get users by role
+    @PreAuthorize("hasRole('RESEARCHER') or @securityAuthorizationService.isSuperAdmin(authentication.name)")
+    @GetMapping("/roles/{role}")
+    public ResponseEntity<List<UserProfileResponse>> getUsersByRole(@PathVariable String role) {
+        return ResponseEntity.ok(userService.getUsersByRole(role));
+    }
+
     // ban user
     @PreAuthorize("hasRole('RESEARCHER') or @securityAuthorizationService.isSuperAdmin(authentication.name)")
     @PostMapping("/ban/{username}")

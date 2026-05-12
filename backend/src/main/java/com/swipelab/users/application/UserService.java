@@ -83,6 +83,17 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
+    public List<UserProfileResponse> getUsersByRole(String roleName) {
+        try {
+            com.swipelab.model.enums.UserRole role = com.swipelab.model.enums.UserRole.valueOf(roleName.toUpperCase());
+            return userRepository.findByRole(role).stream()
+                    .map(authMapper::toUserProfileResponse)
+                    .collect(Collectors.toList());
+        } catch (IllegalArgumentException e) {
+            throw new ResourceNotFoundException("Invalid role: " + roleName);
+        }
+    }
+
     @Transactional
     public UserProfileResponse banUser(String username) {
         User user = userRepository.findByUsername(username)

@@ -27,6 +27,8 @@ public interface UserRepository extends JpaRepository<User, String> {
 
     Set<User> findByUsernameIn(Collection<String> usernames);
 
+    List<User> findByRole(com.swipelab.model.enums.UserRole role);
+
     /**
      * Revokes the refresh token for a user directly via UPDATE — no prior SELECT needed.
      * Eliminates the redundant DB roundtrip in the logout flow.
