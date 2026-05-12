@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasRole('RESEARCHER') or @securityAuthorizationService.isSuperAdmin(authentication.name)")
 @RequestMapping("/api/admin/gold-images")
 @RequiredArgsConstructor
 public class GoldImageController {

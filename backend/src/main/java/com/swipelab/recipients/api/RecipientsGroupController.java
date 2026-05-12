@@ -15,7 +15,7 @@ import com.swipelab.recipients.application.RecipientGroupService;
 
 @RestController
 @RequestMapping("/api/v1/dashboard/recipients")
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasRole('RESEARCHER') or @securityAuthorizationService.isSuperAdmin(authentication.name)")
 @RequiredArgsConstructor
 public class RecipientsGroupController {
     private final RecipientGroupService recipientGroupService;

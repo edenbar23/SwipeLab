@@ -18,6 +18,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.access.AccessDeniedException;
+import com.swipelab.auth.application.SecurityAuthorizationService;
 
 import java.util.Collections;
 import java.util.List;
@@ -35,6 +37,7 @@ public class TaskService {
     private final TargetSpeciesProvider targetSpeciesProvider;
     private final TaskMapper taskMapper;
     private final StardbiSyncService stardbiSyncService;
+    private final SecurityAuthorizationService securityAuthorizationService;
 
 
     // =========================
@@ -110,20 +113,30 @@ public class TaskService {
     }
 
     // =========================
-    // Admin Operations
+    // Researcher Operations
     // =========================
 
     @Transactional(readOnly = true)
-    public List<TaskResponse> getAdminDashboard() {
-        // Returns all tasks with full details
-        return taskRepository.findAll().stream()
+    public List<TaskResponse> getResearcherDashboard(String username) {
+        List<Task> tasks;
+        if (securityAuthorizationService.isSuperAdmin(username)) {
+            tasks = taskRepository.findAll();
+        } else {
+            tasks = taskRepository.findAll().stream()
+                .filter(task -> task.getCreatedBy().equals(username) || 
+                                (task.getSharedWithResearchers() != null && task.getSharedWithResearchers().contains(username)))
+                .collect(Collectors.toList());
+        }
+        return tasks.stream()
                 .map(task -> taskMapper.toResponse(task, false))
                 .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
-    public TaskResponse getTaskDetailsAdmin(Long taskId) {
-        return mapToResponse(getTask(taskId));
+    public TaskResponse getTaskDetailsResearcher(Long taskId, String username) {
+        Task task = getTask(taskId);
+        verifyTaskAccess(task, username);
+        return mapToResponse(task);
     }
 
     @Transactional
@@ -163,29 +176,33 @@ public class TaskService {
     }
 
     @Transactional
-    public TaskResponse archiveTask(Long taskId) {
+    public TaskResponse archiveTask(Long taskId, String username) {
         Task task = getTask(taskId);
+        verifyTaskAccess(task, username);
         task.archive();
         return mapToResponse(task);
     }
 
     @Transactional
-    public TaskResponse activateTask(Long taskId) {
+    public TaskResponse activateTask(Long taskId, String username) {
         Task task = getTask(taskId);
+        verifyTaskAccess(task, username);
         task.activate();
         return mapToResponse(task);
     }
 
     @Transactional
-    public TaskResponse pauseTask(Long taskId) {
+    public TaskResponse pauseTask(Long taskId, String username) {
         Task task = getTask(taskId);
+        verifyTaskAccess(task, username);
         task.pause();
         return mapToResponse(task);
     }
 
     @Transactional
-    public TaskResponse updateTask(Long taskId, UpdateTaskRequest request) {
+    public TaskResponse updateTask(Long taskId, UpdateTaskRequest request, String username) {
         Task task = getTask(taskId);
+        verifyTaskAccess(task, username);
 
         // If updating status via update payload is supported, handle it,
         // but explicit endpoints (activate/pause/archive) are preferred.
@@ -221,8 +238,21 @@ public class TaskService {
     }
 
     // Legacy support if needed, but preferably use new methods
-    public List<TaskResponse> getAllTasks() {
-        return getAdminDashboard();
+    public List<TaskResponse> getAllTasks(String username) {
+        return getResearcherDashboard(username);
+    }
+
+    private void verifyTaskAccess(Task task, String username) {
+        if (securityAuthorizationService.isSuperAdmin(username)) {
+            return;
+        }
+        if (task.getCreatedBy().equals(username)) {
+            return;
+        }
+        if (task.getSharedWithResearchers() != null && task.getSharedWithResearchers().contains(username)) {
+            return;
+        }
+        throw new AccessDeniedException("You do not have permission to access or modify this task");
     }
 
     public List<TaskResponse> getActiveTasks() {

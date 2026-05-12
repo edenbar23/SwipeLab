@@ -105,7 +105,7 @@ public class MockDataSeeder implements CommandLineRunner {
                     .passwordHash(passwordHash)
                     .emailVerified(true)
                     .provider(AuthProvider.LOCAL)
-                    .role(UserRole.ADMIN)
+                    .role(UserRole.RESEARCHER)
                     .displayName("Mock Admin")
                     .active(true)
                     .build();

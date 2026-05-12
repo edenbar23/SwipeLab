@@ -49,6 +49,10 @@ public class TaskMapper {
                                 ? request.getAssignedUsernames()
                                 : Collections.emptyList())
                 .isPublic(request.getIsPublic() != null ? request.getIsPublic() : false)
+                .sharedWithResearchers(
+                        request.getSharedWithResearchers() != null
+                                ? request.getSharedWithResearchers()
+                                : Collections.emptyList())
                 // targetSpecies resolved in service
                 .build();
     }
@@ -82,6 +86,10 @@ public class TaskMapper {
         if (request.getIsPublic() != null) {
             task.setIsPublic(request.getIsPublic());
         }
+
+        if (request.getSharedWithResearchers() != null) {
+            task.setSharedWithResearchers(request.getSharedWithResearchers());
+        }
         // targetSpecies handled in service
     }
 
@@ -106,6 +114,7 @@ public class TaskMapper {
                 .experiments(task.getExperiments())
                 .recipientGroups(task.getRecipientGroups())
                 .assignedUsernames(task.getAssignedUsernames())
+                .sharedWithResearchers(task.getSharedWithResearchers())
                 .isPublic(task.getIsPublic())
                 .targetSpecies(targetSpeciesProvider.getSpeciesByIds(task.getTargetSpeciesIds()))
                 .progress(TaskProgressResponse.empty())

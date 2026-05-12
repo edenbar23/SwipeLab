@@ -19,6 +19,7 @@ public class CreateTaskRequest {
     private List<Long> experiments;
     private List<Long> recipientGroups;
     private List<String> assignedUsernames;
+    private List<String> sharedWithResearchers;
     private Boolean isPublic;
     private int minClassificationsPerImage;
     private double consensusThreshold;

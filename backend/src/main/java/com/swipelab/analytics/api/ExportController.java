@@ -17,7 +17,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1/admin/export")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasRole('RESEARCHER') or @securityAuthorizationService.isSuperAdmin(authentication.name)")
 public class ExportController {
 
     private final ExportService exportService;

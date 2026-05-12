@@ -13,7 +13,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/users")
-@PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+@PreAuthorize("hasAnyRole('USER', 'RESEARCHER') or @securityAuthorizationService.isSuperAdmin(authentication.name)")
 @RequiredArgsConstructor
 public class UserController {
 
@@ -37,21 +37,21 @@ public class UserController {
 
     // Manager endpoints
     // get all users
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('RESEARCHER') or @securityAuthorizationService.isSuperAdmin(authentication.name)")
     @GetMapping("/get-all")
     public ResponseEntity<List<UserProfileResponse>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
     }
 
     // ban user
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('RESEARCHER') or @securityAuthorizationService.isSuperAdmin(authentication.name)")
     @PostMapping("/ban/{username}")
     public ResponseEntity<UserProfileResponse> banUser(@PathVariable String username) {
         return ResponseEntity.ok(userService.banUser(username));
     }
 
     // unban user
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('RESEARCHER') or @securityAuthorizationService.isSuperAdmin(authentication.name)")
     @PostMapping("/unban/{username}")
     public ResponseEntity<UserProfileResponse> unbanUser(@PathVariable String username) {
         return ResponseEntity.ok(userService.unbanUser(username));

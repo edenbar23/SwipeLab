@@ -71,7 +71,7 @@ public class StardbiAuthService {
                 .displayName(displayName)
                 .provider(AuthProvider.STARDBI)
                 .providerId(String.valueOf(request.getId()))
-                .role(UserRole.ADMIN)
+                .role(UserRole.RESEARCHER)
                 .status(UserStatus.ACTIVE)
                 .emailVerified(true)          // external provider is implicitly verified
                 .active(true)

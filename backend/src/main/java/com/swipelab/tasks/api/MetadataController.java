@@ -25,7 +25,7 @@ public class MetadataController {
     private final StardbiClient stardbiClient;
 
     @GetMapping("/species")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('RESEARCHER') or @securityAuthorizationService.isSuperAdmin(authentication.name)")
     public ResponseEntity<?> getSpecies() {
         try {
             // Retrieves target species taxonomy directly from Stardbi

@@ -51,6 +51,9 @@ class TaskServiceTest {
     @Mock
     private com.swipelab.integration.stardbi.StardbiSyncService stardbiSyncService;
 
+    @Mock
+    private com.swipelab.auth.application.SecurityAuthorizationService securityAuthorizationService;
+
 
 
     @InjectMocks
@@ -147,11 +150,12 @@ class TaskServiceTest {
     }
 
     @Test
-    void getAdminDashboard_ShouldReturnAllTasks() {
+    void getResearcherDashboard_ShouldReturnAllTasks() {
+        when(securityAuthorizationService.isSuperAdmin(anyString())).thenReturn(true);
         when(taskRepository.findAll()).thenReturn(Collections.singletonList(task));
         when(taskMapper.toResponse(task, false)).thenReturn(taskResponse);
 
-        List<TaskResponse> responses = taskService.getAdminDashboard();
+        List<TaskResponse> responses = taskService.getResearcherDashboard("superadmin");
 
         assertEquals(1, responses.size());
     }
@@ -190,10 +194,11 @@ class TaskServiceTest {
 
     @Test
     void archiveTask_ShouldSetStatusArchived() {
+        when(securityAuthorizationService.isSuperAdmin(anyString())).thenReturn(true);
         when(taskRepository.findById(1L)).thenReturn(Optional.of(task));
         when(taskMapper.toResponse(task, false)).thenReturn(taskResponse);
 
-        taskService.archiveTask(1L);
+        taskService.archiveTask(1L, "superadmin");
 
         assertEquals(TaskStatus.ARCHIVED, task.getStatus());
     }
@@ -201,31 +206,34 @@ class TaskServiceTest {
     @Test
     void activateTask_ShouldSetStatusActive() {
         task.setStatus(TaskStatus.PAUSED);
+        when(securityAuthorizationService.isSuperAdmin(anyString())).thenReturn(true);
         when(taskRepository.findById(1L)).thenReturn(Optional.of(task));
         when(taskMapper.toResponse(task, false)).thenReturn(taskResponse);
 
-        taskService.activateTask(1L);
+        taskService.activateTask(1L, "superadmin");
 
         assertEquals(TaskStatus.ACTIVE, task.getStatus());
     }
 
     @Test
     void pauseTask_ShouldSetStatusPaused() {
+        when(securityAuthorizationService.isSuperAdmin(anyString())).thenReturn(true);
         when(taskRepository.findById(1L)).thenReturn(Optional.of(task));
         when(taskMapper.toResponse(task, false)).thenReturn(taskResponse);
 
-        taskService.pauseTask(1L);
+        taskService.pauseTask(1L, "superadmin");
 
         assertEquals(TaskStatus.PAUSED, task.getStatus());
     }
 
     @Test
     void updateTask_ShouldUpdateFields() {
+        when(securityAuthorizationService.isSuperAdmin(anyString())).thenReturn(true);
         when(taskRepository.findById(1L)).thenReturn(Optional.of(task));
         UpdateTaskRequest request = new UpdateTaskRequest();
         when(taskMapper.toResponse(task, false)).thenReturn(taskResponse);
 
-        taskService.updateTask(1L, request);
+        taskService.updateTask(1L, request, "superadmin");
 
         verify(taskMapper, times(1)).updateEntity(task, request);
     }

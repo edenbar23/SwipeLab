@@ -97,8 +97,8 @@ class TaskControllerTest {
     }
 
     @Test
-    void getAdminDashboard_ShouldReturnListOfTaskResponse() throws Exception {
-        when(taskService.getAdminDashboard()).thenReturn(Collections.singletonList(taskResponse));
+    void getResearcherDashboard_ShouldReturnListOfTaskResponse() throws Exception {
+        when(taskService.getResearcherDashboard(anyString())).thenReturn(Collections.singletonList(taskResponse));
 
         mockMvc.perform(get("/api/v1/tasks/dashboard"))
                 .andExpect(status().isOk())
@@ -107,8 +107,8 @@ class TaskControllerTest {
     }
 
     @Test
-    void getTaskDetailsAdmin_ShouldReturnTaskResponse() throws Exception {
-        when(taskService.getTaskDetailsAdmin(1L)).thenReturn(taskResponse);
+    void getTaskDetailsResearcher_ShouldReturnTaskResponse() throws Exception {
+        when(taskService.getTaskDetailsResearcher(eq(1L), anyString())).thenReturn(taskResponse);
 
         mockMvc.perform(get("/api/v1/tasks/dashboard/{taskId}", 1L))
                 .andExpect(status().isOk())
@@ -132,7 +132,7 @@ class TaskControllerTest {
 
     @Test
     void archiveTask_ShouldReturnOk() throws Exception {
-        when(taskService.archiveTask(1L)).thenReturn(taskResponse);
+        when(taskService.archiveTask(eq(1L), anyString())).thenReturn(taskResponse);
 
         mockMvc.perform(post("/api/v1/tasks/{taskId}/archive", 1L))
                 .andExpect(status().isOk());
@@ -143,7 +143,7 @@ class TaskControllerTest {
         UpdateTaskRequest request = new UpdateTaskRequest();
         request.setName("Updated");
 
-        when(taskService.updateTask(eq(1L), any(UpdateTaskRequest.class))).thenReturn(taskResponse);
+        when(taskService.updateTask(eq(1L), any(UpdateTaskRequest.class), anyString())).thenReturn(taskResponse);
 
         mockMvc.perform(put("/api/v1/tasks/{taskId}", 1L)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -153,7 +153,7 @@ class TaskControllerTest {
 
     @Test
     void activateTask_ShouldReturnOk() throws Exception {
-        when(taskService.activateTask(1L)).thenReturn(taskResponse);
+        when(taskService.activateTask(eq(1L), anyString())).thenReturn(taskResponse);
 
         mockMvc.perform(post("/api/v1/tasks/{taskId}/activate", 1L))
                 .andExpect(status().isOk());
@@ -161,7 +161,7 @@ class TaskControllerTest {
 
     @Test
     void pauseTask_ShouldReturnOk() throws Exception {
-        when(taskService.pauseTask(1L)).thenReturn(taskResponse);
+        when(taskService.pauseTask(eq(1L), anyString())).thenReturn(taskResponse);
 
         mockMvc.perform(post("/api/v1/tasks/{taskId}/pause", 1L))
                 .andExpect(status().isOk());

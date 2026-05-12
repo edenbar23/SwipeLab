@@ -25,4 +25,5 @@ public class TaskResponse {
 
     private Boolean isPublic;
     private List<String> assignedUsernames;
+    private List<String> sharedWithResearchers;
 }

@@ -11,5 +11,5 @@ public class InviteAdminRequest {
     @Email(message = "Invalid email format")
     private String email;
 
-    private UserRole role = UserRole.ADMIN;
+    private UserRole role = UserRole.RESEARCHER;
 }

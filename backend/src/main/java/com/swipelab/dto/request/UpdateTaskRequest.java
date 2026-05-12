@@ -12,5 +12,6 @@ public class UpdateTaskRequest {
     private List<Long> experiments;
     private List<Long> recipientGroups;
     private List<String> assignedUsernames;
+    private List<String> sharedWithResearchers;
     private Boolean isPublic;
 }

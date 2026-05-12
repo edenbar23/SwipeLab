@@ -35,7 +35,7 @@ public class TaskController {
     // =========================
 
     @GetMapping("/my-tasks")
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('USER', 'RESEARCHER') or @securityAuthorizationService.isSuperAdmin(authentication.name)")
     public ResponseEntity<TaskPageResponse> getMyTasks(
             @AuthenticationPrincipal UserDetails userDetails,
             @PageableDefault(size = 20) Pageable pageable) {
@@ -43,7 +43,7 @@ public class TaskController {
     }
 
     @GetMapping("/available-tasks")
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('USER', 'RESEARCHER') or @securityAuthorizationService.isSuperAdmin(authentication.name)")
     public ResponseEntity<TaskPageResponse> getAvailableTasks(
             @AuthenticationPrincipal UserDetails userDetails,
             @PageableDefault(size = 20) Pageable pageable) {
@@ -59,7 +59,7 @@ public class TaskController {
     }
 
     @GetMapping("/my-tasks/{taskId}")
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('USER', 'RESEARCHER') or @securityAuthorizationService.isSuperAdmin(authentication.name)")
     public ResponseEntity<TaskResponse> getMyTaskDetails(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable Long taskId) {
@@ -71,21 +71,20 @@ public class TaskController {
     // =========================
 
     @GetMapping("/dashboard")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<TaskResponse>> getAdminDashboard() {
-        // In real app, verify admin role
-        return ResponseEntity.ok(taskService.getAdminDashboard());
+    @PreAuthorize("hasRole('RESEARCHER') or @securityAuthorizationService.isSuperAdmin(authentication.name)")
+    public ResponseEntity<List<TaskResponse>> getResearcherDashboard(@AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(taskService.getResearcherDashboard(userDetails.getUsername()));
     }
 
     @GetMapping("/dashboard/{taskId}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('RESEARCHER') or @securityAuthorizationService.isSuperAdmin(authentication.name)")
     // get task details admin view
-    public ResponseEntity<TaskResponse> getTaskDetailsAdmin(@PathVariable Long taskId) {
-        return ResponseEntity.ok(taskService.getTaskDetailsAdmin(taskId));
+    public ResponseEntity<TaskResponse> getTaskDetailsResearcher(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long taskId) {
+        return ResponseEntity.ok(taskService.getTaskDetailsResearcher(taskId, userDetails.getUsername()));
     }
 
     @GetMapping("/dashboard/experiments")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('RESEARCHER') or @securityAuthorizationService.isSuperAdmin(authentication.name)")
     public ResponseEntity<List<ExternalExperimentDto>> getExperiments(@RequestHeader(value = "Authorization", required = false) String authHeader) {
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -95,7 +94,7 @@ public class TaskController {
     }
 
     @PostMapping("/create")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('RESEARCHER') or @securityAuthorizationService.isSuperAdmin(authentication.name)")
     public ResponseEntity<TaskResponse> createTask(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestHeader(value = "Authorization", required = false) String authHeader,
@@ -113,29 +112,30 @@ public class TaskController {
     }
 
     @PostMapping("/{taskId}/archive")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<TaskResponse> archiveTask(@PathVariable Long taskId) {
-        return ResponseEntity.ok(taskService.archiveTask(taskId));
+    @PreAuthorize("hasRole('RESEARCHER') or @securityAuthorizationService.isSuperAdmin(authentication.name)")
+    public ResponseEntity<TaskResponse> archiveTask(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long taskId) {
+        return ResponseEntity.ok(taskService.archiveTask(taskId, userDetails.getUsername()));
     }
 
     @PutMapping("/{taskId}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('RESEARCHER') or @securityAuthorizationService.isSuperAdmin(authentication.name)")
     public ResponseEntity<TaskResponse> updateTask(
+            @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable Long taskId,
             @Valid @RequestBody UpdateTaskRequest request) {
-        return ResponseEntity.ok(taskService.updateTask(taskId, request));
+        return ResponseEntity.ok(taskService.updateTask(taskId, request, userDetails.getUsername()));
     }
 
     @PostMapping("/{taskId}/activate")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<TaskResponse> activateTask(@PathVariable Long taskId) {
-        return ResponseEntity.ok(taskService.activateTask(taskId));
+    @PreAuthorize("hasRole('RESEARCHER') or @securityAuthorizationService.isSuperAdmin(authentication.name)")
+    public ResponseEntity<TaskResponse> activateTask(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long taskId) {
+        return ResponseEntity.ok(taskService.activateTask(taskId, userDetails.getUsername()));
     }
 
     @PostMapping("/{taskId}/pause")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<TaskResponse> pauseTask(@PathVariable Long taskId) {
-        return ResponseEntity.ok(taskService.pauseTask(taskId));
+    @PreAuthorize("hasRole('RESEARCHER') or @securityAuthorizationService.isSuperAdmin(authentication.name)")
+    public ResponseEntity<TaskResponse> pauseTask(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long taskId) {
+        return ResponseEntity.ok(taskService.pauseTask(taskId, userDetails.getUsername()));
     }
 
     // =========================

@@ -105,6 +105,13 @@ public class Task {
     @Column(name = "created_by", nullable = false)
     private String createdBy;
 
+    @BatchSize(size = 20)
+    @ElementCollection
+    @CollectionTable(name = "task_shared_researchers", joinColumns = @JoinColumn(name = "task_id"))
+    @Column(name = "username")
+    @Builder.Default
+    private List<String> sharedWithResearchers = new ArrayList<>();
+
     // =========================
     // Status & Lifecycle
     // =========================
