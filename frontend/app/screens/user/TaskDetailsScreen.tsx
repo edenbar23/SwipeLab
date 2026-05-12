@@ -5,6 +5,7 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-nati
 
 import { Colors } from '../../../constants/theme';
 import { useThemeStore } from '../../stores/themeStore';
+import { useSwipeStore } from '../../stores/swipeStore';
 
 export default function TaskDetailsScreen() {
     const navigation = useNavigation<any>();
@@ -12,8 +13,11 @@ export default function TaskDetailsScreen() {
     const { task } = route.params;
     const { theme } = useThemeStore();
     const themeColors = Colors[theme as keyof typeof Colors];
+    const { setActiveTaskId } = useSwipeStore();
 
     const handlePlay = () => {
+        // Persist chosen task in global store so SwipeScreen can read it without nav params
+        setActiveTaskId(task.id);
         navigation.navigate('SwipeLab');
     };
 

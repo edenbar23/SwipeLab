@@ -15,9 +15,9 @@ Architecture: Modular Hexagonal/DDD.
 * Database: Schema migrations updated (V1-V8) including gamification and challenges.
 * Frontend: Fixed frontend rendering for uploaded Gold Images by correcting the static path base parsing logic (Issue #216).
 * Security/Validation: Implemented comprehensive input validation, stored XSS protection, and username normalization (Issue #227).
+* Frontend: Removed hardcoded mock task (id=1) from SwipeScreen; added activeTaskId to swipeStore; implemented empty state with "Explore Tasks" CTA (Issue #204).
 
 ## Current Focus (Active GitHub Issues)
-* Issue #204: Fix SwipeScreen showing mock task by default.
 * Issue #205: Fix logic causing same task to appear twice in Assigned/Explore.
 * Issue #206: Update UI/UX for the Gold Images Upload screen.
 * Issue #201: Refactor Backend roles to include Researchers and Super Admin.
