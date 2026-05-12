@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 public interface UserRepository extends JpaRepository<User, String> {
