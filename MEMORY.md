@@ -15,6 +15,7 @@ Architecture: Modular Hexagonal/DDD.
 * Database: Schema migrations updated (V1-V8) including gamification and challenges.
 * Frontend: Fixed frontend rendering for uploaded Gold Images by correcting the static path base parsing logic (Issue #216).
 * Security/Validation: Implemented comprehensive input validation, stored XSS protection, and username normalization (Issue #227).
+* Frontend/Auth: Fixed a persistent navigation bug where `isSuperAdmin` state was lost on app refresh, causing the Users screen and toolbar option to disappear for Super Admins.
 
 ## Current Focus (Active GitHub Issues)
 * Issue #204: Fix SwipeScreen showing mock task by default.

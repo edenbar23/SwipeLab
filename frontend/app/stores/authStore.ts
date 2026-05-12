@@ -34,7 +34,14 @@ export const useAuthStore = create<AuthState>((set) => ({
   isLoading: true,
   sessionExpiredMessage: false,
   setSessionExpiredMessage: (show) => set({ sessionExpiredMessage: show }),
-  setIsSuperAdmin: (isSuperAdmin) => set({ isSuperAdmin }),
+  setIsSuperAdmin: (isSuperAdmin) => {
+    set({ isSuperAdmin });
+    if (Platform.OS === 'web') {
+      localStorage.setItem("isSuperAdmin", isSuperAdmin ? "true" : "false");
+    } else {
+      SecureStore.setItemAsync("isSuperAdmin", isSuperAdmin ? "true" : "false").catch(console.error);
+    }
+  },
 
   setAuth: async (token, role, refreshToken) => {
     set({ token, role, authProvider: "LOCAL" });
@@ -112,11 +119,13 @@ export const useAuthStore = create<AuthState>((set) => ({
       localStorage.removeItem("role");
       localStorage.removeItem("refreshToken");
       localStorage.removeItem("authProvider");
+      localStorage.removeItem("isSuperAdmin");
     } else {
       await SecureStore.deleteItemAsync("token");
       await SecureStore.deleteItemAsync("role");
       await SecureStore.deleteItemAsync("refreshToken");
       await SecureStore.deleteItemAsync("authProvider");
+      await SecureStore.deleteItemAsync("isSuperAdmin");
     }
 
     // 3. Call the backend to invalidate the refresh token (fire-and-forget)
@@ -148,15 +157,17 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   initialize: async () => {
     try {
-      let token, role, authProvider;
+      let token, role, authProvider, isSuperAdmin = false;
       if (Platform.OS === 'web') {
         token = localStorage.getItem("token");
         role = localStorage.getItem("role") as Role;
         authProvider = localStorage.getItem("authProvider") as "LOCAL" | "STARDBI" | null;
+        isSuperAdmin = localStorage.getItem("isSuperAdmin") === "true";
       } else {
         token = await SecureStore.getItemAsync("token");
         role = (await SecureStore.getItemAsync("role")) as Role;
         authProvider = (await SecureStore.getItemAsync("authProvider")) as "LOCAL" | "STARDBI" | null;
+        isSuperAdmin = (await SecureStore.getItemAsync("isSuperAdmin")) === "true";
       }
 
       if (token) {
@@ -180,16 +191,18 @@ export const useAuthStore = create<AuthState>((set) => ({
               localStorage.removeItem("role");
               localStorage.removeItem("refreshToken");
               localStorage.removeItem("authProvider");
+              localStorage.removeItem("isSuperAdmin");
             } else {
               await SecureStore.deleteItemAsync("token");
               await SecureStore.deleteItemAsync("role");
               await SecureStore.deleteItemAsync("refreshToken");
               await SecureStore.deleteItemAsync("authProvider");
+              await SecureStore.deleteItemAsync("isSuperAdmin");
             }
             set({ token: null, role: null, authProvider: null, isSuperAdmin: false, sessionExpiredMessage: false });
           }, 2000);
         } else {
-          set({ token, role, authProvider });
+          set({ token, role, authProvider, isSuperAdmin });
 
           if (role === "RESEARCHER") {
             useModeStore.getState().setMode("researcher");
