@@ -83,8 +83,8 @@ export default function RegisterForm({ onClose }: Props) {
         setAuth(accessToken, userRole, refreshToken);
 
         // Set default mode based on role
-        if (userRole === "ADMIN") {
-          setMode("ADMIN");
+        if (userRole === "researcher") {
+          setMode("researcher");
         } else {
           setMode("USER");
         }

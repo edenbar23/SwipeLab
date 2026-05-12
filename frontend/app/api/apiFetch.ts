@@ -85,7 +85,7 @@ export async function apiFetch(
               }
               // Require useAuthStore without top level static import to avoid circular dependency
               const { useAuthStore } = require("../stores/authStore");
-              useAuthStore.getState().setAuth(newAccess, "ADMIN", refreshToken);
+              useAuthStore.getState().setAuth(newAccess, "researcher", refreshToken);
 
               return fetch(backendUrl + input, {
                 ...init,

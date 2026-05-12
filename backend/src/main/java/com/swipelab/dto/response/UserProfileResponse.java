@@ -22,4 +22,5 @@ public class UserProfileResponse {
     private Long score;
     private List<String> badges;
     private String rank;
+    private boolean isSuperAdmin;
 }

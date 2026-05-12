@@ -14,12 +14,12 @@ import { Colors } from '../../../constants/theme';
 import ScreenHeaderLayout from '../../components/layout/ScreenHeaderLayout/ScreenHeaderLayout';
 import { useNavigation } from '@react-navigation/native';
 import { apiFetch } from '../../api/apiFetch';
-import { AdminStackParamList } from '../../navigation/adminStack.types';
+import { researcherStackParamList } from '../../navigation/researcherStack.types';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { API_ENDPOINTS } from '../../api/apiEndpoints';
 
 
-type NavigationProp = NativeStackNavigationProp<AdminStackParamList, 'AddUser'>;
+type NavigationProp = NativeStackNavigationProp<researcherStackParamList, 'AddUser'>;
 
 export default function AddUserScreen() {
     const navigation = useNavigation<NavigationProp>();
@@ -28,7 +28,7 @@ export default function AddUserScreen() {
 
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
-    const [role, setRole] = useState<'USER' | 'RESEARCHER' | 'ADMIN'>('USER');
+    const [role, setRole] = useState<'USER' | 'RESEARCHER' | 'researcher'>('USER');
     const [loading, setLoading] = useState(false);
 
     const handleSubmit = async () => {
@@ -129,7 +129,7 @@ export default function AddUserScreen() {
                     <View style={styles.inputGroup}>
                         <Text style={[styles.label, { color: themeColors.text }]}>Role</Text>
                         <View style={styles.roleContainer}>
-                            {(['USER', 'RESEARCHER', 'ADMIN'] as const).map((r) => (
+                            {(['USER', 'RESEARCHER', 'researcher'] as const).map((r) => (
                                 <TouchableOpacity
                                     key={r}
                                     style={[

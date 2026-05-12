@@ -1,9 +1,9 @@
-// admin screen for managing gold images
+// researcher screen for managing gold images
 import React, { useEffect, useState } from "react";
 import { Alert, FlatList, StyleSheet, Text, View } from "react-native";
 import { Colors } from '../../../constants/theme';
 import { apiFetch } from "../../api/apiFetch";
-import GoldImageCard from "../../components/admin/GoldImageCard";
+import GoldImageCard from "../../components/researcher/GoldImageCard";
 import ScreenHeaderLayout from "../../components/layout/ScreenHeaderLayout";
 import { useThemeStore } from '../../stores/themeStore';
 import { API_ENDPOINTS } from '../../api/apiEndpoints';
@@ -34,7 +34,7 @@ export default function GoldImagesManagementScreen({ navigation }: any) {
                     style: "destructive",
                     onPress: async () => {
                         try {
-                            await apiFetch(API_ENDPOINTS.ADMIN.GOLD_IMAGE_DETAILS(goldImageId), {
+                            await apiFetch(API_ENDPOINTS.researcher.GOLD_IMAGE_DETAILS(goldImageId), {
                                 method: "DELETE",
                             });
                             // Refresh the list

@@ -64,7 +64,7 @@ export default function UserTopBar({
   const formattedScore = typeof displayScore === 'number' ? displayScore.toLocaleString() : displayScore;
 
   const handleSwitchToManager = () => {
-    setMode("ADMIN");
+    setMode("researcher");
   };
 
   // Dynamic styles for dark mode
@@ -96,7 +96,7 @@ export default function UserTopBar({
       </TouchableOpacity>
 
       <View style={styles.rightSection}>
-        {role === 'ADMIN' && (
+        {role === 'RESEARCHER' && (
           <TouchableOpacity onPress={handleSwitchToManager} style={styles.switchBtn}>
             <Ionicons name="briefcase-outline" size={20} color="#0EA5E9" />
             {!isPhone && <Text style={[styles.actionText, dynamicStyles.actionText]}>Manager</Text>}

@@ -5,7 +5,7 @@ import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react
 import { Colors } from '../../../constants/theme';
 import { apiFetch } from "../../api/apiFetch";
 import ScreenHeaderLayout from "../../components/layout/ScreenHeaderLayout/ScreenHeaderLayout";
-import { AdminStackParamList } from "../../navigation/adminStack.types";
+import { researcherStackParamList } from "../../navigation/researcherStack.types";
 import { useThemeStore } from '../../stores/themeStore';
 
 // Images
@@ -16,7 +16,7 @@ import { API_ENDPOINTS } from '../../api/apiEndpoints';
 import { useAdminUsers } from "../../api/queries";
 
 
-type UsersManagementScreenNavigationProp = NativeStackNavigationProp<AdminStackParamList, 'UsersManagement'>;
+type UsersManagementScreenNavigationProp = NativeStackNavigationProp<researcherStackParamList, 'UsersManagement'>;
 
 interface User {
     id: string;

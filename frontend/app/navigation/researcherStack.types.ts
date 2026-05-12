@@ -1,5 +1,5 @@
-export type AdminStackParamList = {
-  AdminDashboard: undefined;
+export type researcherStackParamList = {
+  ResearcherDashboard: undefined;
   TasksManagement: undefined;
   TaskDetails: { taskId: number };
   AddTask: { initialSpecies?: string[] } | undefined;

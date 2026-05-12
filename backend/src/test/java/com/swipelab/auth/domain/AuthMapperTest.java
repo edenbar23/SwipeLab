@@ -13,14 +13,19 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class AuthMapperTest {
 
     private AuthMapper authMapper;
+    private com.swipelab.auth.application.SecurityAuthorizationService securityAuthorizationService;
 
     @BeforeEach
     void setUp() {
-        authMapper = new AuthMapper();
+        securityAuthorizationService = mock(com.swipelab.auth.application.SecurityAuthorizationService.class);
+        authMapper = new AuthMapper(securityAuthorizationService);
     }
 
     @Test
@@ -64,6 +69,8 @@ class AuthMapperTest {
         user.setBadges("badge1,badge2");
         user.setRank("EXPERT");
 
+        when(securityAuthorizationService.isSuperAdmin("testuser")).thenReturn(true);
+
         UserProfileResponse response = authMapper.toUserProfileResponse(user);
 
         assertNotNull(response);
@@ -80,12 +87,15 @@ class AuthMapperTest {
         assertTrue(badges.containsAll(Arrays.asList("badge1", "badge2")));
         
         assertEquals("EXPERT", response.getRank());
+        assertTrue(response.isSuperAdmin());
     }
 
     @Test
     void toUserProfileResponse_ShouldHandleNullsCorrectly() {
         User user = new User();
         user.setUsername("testuser");
+
+        when(securityAuthorizationService.isSuperAdmin("testuser")).thenReturn(false);
 
         UserProfileResponse response = authMapper.toUserProfileResponse(user);
 
@@ -104,6 +114,8 @@ class AuthMapperTest {
     void toAuthResponse_ShouldMapCorrectly() {
         User user = new User();
         user.setUsername("testuser");
+
+        when(securityAuthorizationService.isSuperAdmin("testuser")).thenReturn(false);
 
         AuthResponse response = authMapper.toAuthResponse("access", "refresh", user);
 

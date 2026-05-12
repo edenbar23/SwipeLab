@@ -98,7 +98,7 @@ export default function RecipientGroupDetailsScreen() {
         try {
             // New Endpoint: /api/v1/dashboard/recipients/{id}/update
             // Payload: { addUsernames: [...] }
-            const res = await apiFetch(API_ENDPOINTS.ADMIN.RECIPIENTS_UPDATE(currentGroup.id), {
+            const res = await apiFetch(API_ENDPOINTS.researcher.RECIPIENTS_UPDATE(currentGroup.id), {
                 method: 'PUT',
                 body: JSON.stringify({ addUsernames: finalUsernamesToAdd })
             });
@@ -145,7 +145,7 @@ export default function RecipientGroupDetailsScreen() {
                         try {
                             // New Endpoint: /api/v1/dashboard/recipients/{id}/update
                             // Payload: { removeUsernames: [userId] }
-                            const res = await apiFetch(API_ENDPOINTS.ADMIN.RECIPIENTS_UPDATE(currentGroup.id), {
+                            const res = await apiFetch(API_ENDPOINTS.researcher.RECIPIENTS_UPDATE(currentGroup.id), {
                                 method: 'PUT',
                                 body: JSON.stringify({ removeUsernames: [userId] })
                             });

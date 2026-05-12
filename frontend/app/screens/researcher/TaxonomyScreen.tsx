@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { AdminStackParamList } from "../../navigation/adminStack.types";
+import { researcherStackParamList } from "../../navigation/researcherStack.types";
 import ScreenHeaderLayout from "../../components/layout/ScreenHeaderLayout/ScreenHeaderLayout";
 import { useThemeStore } from '../../stores/themeStore';
 import { Colors } from '../../../constants/theme';
@@ -22,7 +22,7 @@ import { apiFetch } from "../../api/apiFetch";
 import taxonomyImg from "../../../assets/images/taxonomy.png";
 import addTaskImg from "../../../assets/images/add_task.png";
 
-type TaxonomyScreenNavigationProp = NativeStackNavigationProp<AdminStackParamList, 'Taxonomy'>;
+type TaxonomyScreenNavigationProp = NativeStackNavigationProp<researcherStackParamList, 'Taxonomy'>;
 
 export default function TaxonomyScreen() {
     const navigation = useNavigation<TaxonomyScreenNavigationProp>();

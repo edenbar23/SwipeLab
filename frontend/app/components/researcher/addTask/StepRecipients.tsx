@@ -11,6 +11,7 @@ export default function StepRecipients({
   onNext,
   onBack,
   availableOptions,
+  availableResearchers,
   optionsLoading,
 }: StepRecipientsProps) {
   const { theme } = useThemeStore();
@@ -72,6 +73,27 @@ export default function StepRecipients({
           />
         </View>
       )}
+
+      {/* Co-Managers selection */}
+      <View style={[styles.recipientsSection, { marginTop: 24 }]}>
+        <Text style={[styles.sectionLabel, { color: themeColors.text }]}>Share with Co-Managers</Text>
+        <Text style={[styles.subtitle, { color: themeColors.textSecondary, marginBottom: 8 }]}>
+          Select other researchers who can view and manage this task.
+        </Text>
+        <MultiSelect
+          options={availableResearchers}
+          selectedIds={formData.sharedWithResearchers}
+          onToggle={(id) => {
+            const prev = formData.sharedWithResearchers;
+            const updated = prev.includes(id as string)
+              ? prev.filter((rId) => rId !== id)
+              : [...prev, id as string];
+            onUpdate({ sharedWithResearchers: updated });
+          }}
+          placeholder="Search researchers..."
+          loading={optionsLoading}
+        />
+      </View>
 
       <View style={styles.footer}>
         <View style={styles.buttonRow}>

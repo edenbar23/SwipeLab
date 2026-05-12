@@ -8,11 +8,12 @@ import { API_ENDPOINTS } from '../api/apiEndpoints';
 import { jwtDecode } from "jwt-decode";
 
 
-type Role = "USER" | "ADMIN" | null;
+type Role = "USER" | "RESEARCHER" | null;
 
 interface AuthState {
   token: string | null;
   role: Role;
+  isSuperAdmin: boolean;
   authProvider: "LOCAL" | "STARDBI" | null;
   isLoading: boolean;
   setAuth: (token: string, role: Role, refreshToken?: string) => Promise<void>;
@@ -21,15 +22,18 @@ interface AuthState {
   initialize: () => Promise<void>;
   sessionExpiredMessage: boolean;
   setSessionExpiredMessage: (show: boolean) => void;
+  setIsSuperAdmin: (isSuperAdmin: boolean) => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
   token: null,
   role: null,
+  isSuperAdmin: false,
   authProvider: null,
   isLoading: true,
   sessionExpiredMessage: false,
   setSessionExpiredMessage: (show) => set({ sessionExpiredMessage: show }),
+  setIsSuperAdmin: (isSuperAdmin) => set({ isSuperAdmin }),
 
   setAuth: async (token, role, refreshToken) => {
     set({ token, role, authProvider: "LOCAL" });
@@ -45,32 +49,32 @@ export const useAuthStore = create<AuthState>((set) => ({
       if (refreshToken) await SecureStore.setItemAsync("refreshToken", refreshToken);
     }
 
-    // Automatically set admin mode if role is ADMIN
-    if (role === "ADMIN") {
-      useModeStore.getState().setMode("ADMIN");
+    // Automatically set researcher mode if role is RESEARCHER
+    if (role === "RESEARCHER") {
+      useModeStore.getState().setMode("researcher"); // keeping mode string same for now if modeStore uses researcher, but we'll update modeStore next
     } else {
       useModeStore.getState().setMode("USER");
     }
   },
 
   setExternalAuth: async (token, refreshToken, lifetime, username) => {
-    set({ token, role: "ADMIN", authProvider: "STARDBI" });
+    set({ token, role: "RESEARCHER", authProvider: "STARDBI" });
     if (Platform.OS === 'web') {
       localStorage.setItem("token", token);
-      localStorage.setItem("role", "ADMIN");
+      localStorage.setItem("role", "RESEARCHER");
       localStorage.setItem("authProvider", "STARDBI");
       localStorage.setItem("refreshToken", refreshToken);
       localStorage.setItem("username", username);
       localStorage.setItem("lifetime", lifetime.toString());
     } else {
       await SecureStore.setItemAsync("token", token);
-      await SecureStore.setItemAsync("role", "ADMIN");
+      await SecureStore.setItemAsync("role", "RESEARCHER");
       await SecureStore.setItemAsync("authProvider", "STARDBI");
       await SecureStore.setItemAsync("refreshToken", refreshToken);
       await SecureStore.setItemAsync("username", username);
       await SecureStore.setItemAsync("lifetime", lifetime.toString());
     }
-    useModeStore.getState().setMode("ADMIN");
+    useModeStore.getState().setMode("researcher");
   },
 
   logout: async () => {
@@ -90,7 +94,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     }
 
     // 2. Clear frontend state immediately to prevent re-entry
-    set({ token: null, role: null, authProvider: null });
+    set({ token: null, role: null, authProvider: null, isSuperAdmin: false });
     if (Platform.OS === 'web') {
       localStorage.removeItem("token");
       localStorage.removeItem("role");
@@ -164,13 +168,13 @@ export const useAuthStore = create<AuthState>((set) => ({
               await SecureStore.deleteItemAsync("refreshToken");
               await SecureStore.deleteItemAsync("authProvider");
             }
-            set({ token: null, role: null, authProvider: null, sessionExpiredMessage: false });
+            set({ token: null, role: null, authProvider: null, isSuperAdmin: false, sessionExpiredMessage: false });
           }, 2000);
         } else {
           set({ token, role, authProvider });
 
-          if (role === "ADMIN") {
-            useModeStore.getState().setMode("ADMIN");
+          if (role === "RESEARCHER") {
+            useModeStore.getState().setMode("researcher");
           } else {
             useModeStore.getState().setMode("USER");
           }

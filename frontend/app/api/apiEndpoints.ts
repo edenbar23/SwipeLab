@@ -48,17 +48,17 @@ export const API_ENDPOINTS = {
         CHALLENGES: '/api/v1/gamification/challenges',
         MY_BADGES: '/api/v1/gamification/me/badges',
     },
-    ADMIN: {
+    researcher: {
         //ANALYTICS
         ANALYTICS_TASKS: (taskId: string | number) => `/api/v1/analytics/tasks/${taskId}`,
         ANALYTICS_EXPORTS: '/api/v1/analytics/exports',
         ANALYTICS_USERS: (taskId: string | number) => `/api/v1/analytics/users?taskId=${taskId}`,
         ANALYTICS_TOP: (limit: number = 5) => `/api/v1/analytics/top-performers?limit=${limit}`,
         //GOLD IMAGES
-        GOLD_IMAGES: '/api/admin/gold-images',
-        GOLD_IMAGES_GET_ALL: '/api/admin/gold-images/get-all',
-        GOLD_IMAGES_UPLOAD: '/api/admin/gold-images/upload',
-        GOLD_IMAGE_DETAILS: (goldImageId: string | number) => `/api/admin/gold-images/${goldImageId}`,
+        GOLD_IMAGES: '/api/researcher/gold-images',
+        GOLD_IMAGES_GET_ALL: '/api/researcher/gold-images/get-all',
+        GOLD_IMAGES_UPLOAD: '/api/researcher/gold-images/upload',
+        GOLD_IMAGE_DETAILS: (goldImageId: string | number) => `/api/researcher/gold-images/${goldImageId}`,
         //RECIPIENTS
         RECIPIENTS: '/api/v1/dashboard/recipients',
         RECIPIENTS_CREATE: '/api/v1/dashboard/recipients',

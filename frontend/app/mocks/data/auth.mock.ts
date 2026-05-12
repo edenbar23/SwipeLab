@@ -14,9 +14,9 @@ export const authMock = {
     },
     {
       username: 'admin_user',
-      email: 'admin@swipelab.com',
+      email: 'researcher@swipelab.com',
       password: '1234', //not part of the contract only for mock
-      role: 'ADMIN'
+      role: 'researcher'
     }
   ],
   profile: {

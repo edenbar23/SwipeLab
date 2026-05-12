@@ -9,14 +9,14 @@ import { useQueryClient } from "@tanstack/react-query";
 import StepIndicator from "../../components/ui/StepIndicator";
 import { useThemeStore } from '../../stores/themeStore';
 
-import { AddTaskFormData } from "../../components/admin/addTask/addTaskTypes";
-import StepConfirm from "../../components/admin/addTask/StepConfirm";
-import StepDescription from "../../components/admin/addTask/StepDescription";
+import { AddTaskFormData } from "../../components/researcher/addTask/addTaskTypes";
+import StepConfirm from "../../components/researcher/addTask/StepConfirm";
+import StepDescription from "../../components/researcher/addTask/StepDescription";
 import { useAuthStore } from "../../stores/authStore";
-import StepName from "../../components/admin/addTask/StepName";
-import StepRecipients from "../../components/admin/addTask/StepRecipients";
-import StepSpecies from "../../components/admin/addTask/StepSpecies";
-import StepExperiments from "../../components/admin/addTask/StepExperiments";
+import StepName from "../../components/researcher/addTask/StepName";
+import StepRecipients from "../../components/researcher/addTask/StepRecipients";
+import StepSpecies from "../../components/researcher/addTask/StepSpecies";
+import StepExperiments from "../../components/researcher/addTask/StepExperiments";
 
 const STEPS = ["Name", "Description", "Experiments", "Species", "Recipients", "Confirm"];
 
@@ -34,9 +34,11 @@ export default function AddTaskScreen({ route, navigation }: any) {
     speciesList: route?.params?.initialSpecies || [],
     isPublic: false,
     selectedRecipients: [],
+    sharedWithResearchers: [],
   });
 
   const [availableOptions, setAvailableOptions] = useState<{ id: string; label: string }[]>([]);
+  const [availableResearchers, setAvailableResearchers] = useState<{ id: string; label: string }[]>([]);
   const [availableExperiments, setAvailableExperiments] = useState<{ id: string; label: string }[]>([]);
   const [availableSpecies, setAvailableSpecies] = useState<{ id: string; label: string }[]>([]);
   const [optionsLoading, setOptionsLoading] = useState(false);
@@ -46,11 +48,12 @@ export default function AddTaskScreen({ route, navigation }: any) {
     const fetchOptions = async () => {
       setOptionsLoading(true);
       try {
-        const [groupsRes, usersRes, experimentsRes, speciesRes] = await Promise.all([
-          apiFetch(API_ENDPOINTS.ADMIN.RECIPIENTS),
+        const [groupsRes, usersRes, experimentsRes, speciesRes, researchersRes] = await Promise.all([
+          apiFetch(API_ENDPOINTS.researcher.RECIPIENTS),
           apiFetch(API_ENDPOINTS.USERS.GET_ALL),
           apiFetch(API_ENDPOINTS.TASKS.EXPERIMENTS),
-          apiFetch('/api/v1/metadata/species')
+          apiFetch('/api/v1/metadata/species'),
+          apiFetch('/api/v1/users/roles/RESEARCHER')
         ]);
 
         let loaded: { id: string, label: string }[] = [];
@@ -73,6 +76,10 @@ export default function AddTaskScreen({ route, navigation }: any) {
             label: String(s.label),
             searchTerms: String(s.searchTerms || "") 
           })));
+        }
+        if (researchersRes.ok) {
+          const researchers = await researchersRes.json();
+          setAvailableResearchers(researchers.map((r: any) => ({ id: r.username, label: r.displayName || r.username })));
         }
         setAvailableOptions(loaded);
       } catch (error) {
@@ -114,6 +121,7 @@ export default function AddTaskScreen({ route, navigation }: any) {
       isPublic: formData.isPublic,
       recipientGroups: formData.selectedRecipients.filter(id => id.startsWith("G-")).map(id => Number(id.replace("G-", ""))),
       assignedUsernames: formData.selectedRecipients.filter(id => id.startsWith("U-")).map(id => id.replace("U-", "")),
+      sharedWithResearchers: formData.sharedWithResearchers,
     };
 
     try {
@@ -176,6 +184,7 @@ export default function AddTaskScreen({ route, navigation }: any) {
                   speciesList: [],
                   isPublic: false,
                   selectedRecipients: [],
+                  sharedWithResearchers: [],
                 });
               }}
             >
@@ -227,6 +236,7 @@ export default function AddTaskScreen({ route, navigation }: any) {
             onNext={nextStep}
             onBack={prevStep}
             availableOptions={availableOptions}
+            availableResearchers={availableResearchers}
             optionsLoading={optionsLoading}
           />
         );

@@ -1,4 +1,4 @@
-// admin screen for adding gold images
+// researcher screen for adding gold images
 import React, { useState, useEffect } from "react";
 import {
     Alert,
@@ -128,7 +128,7 @@ export default function AddGoldImageScreen({ navigation }: any) {
 
         try {
             setLoading(true);
-            const res = await apiFetch(API_ENDPOINTS.ADMIN.GOLD_IMAGES_UPLOAD, {
+            const res = await apiFetch(API_ENDPOINTS.researcher.GOLD_IMAGES_UPLOAD, {
                 method: "POST",
                 body: formData,
             });
@@ -142,7 +142,7 @@ export default function AddGoldImageScreen({ navigation }: any) {
             console.log("AddGoldImage response:", data);
 
             // Invalidate the cache for gold images so the list updates
-            queryClient.invalidateQueries({ queryKey: ['admin', 'goldImages'] });
+            queryClient.invalidateQueries({ queryKey: ['researcher', 'goldImages'] });
 
             setStatusMessage({ type: 'success', text: "Gold image created successfully! Redirecting..." });
             

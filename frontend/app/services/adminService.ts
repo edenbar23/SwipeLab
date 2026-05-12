@@ -1,1 +1,0 @@
-// API requests for admin's service

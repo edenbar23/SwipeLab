@@ -7,6 +7,7 @@ export interface AddTaskFormData {
   isPublic: boolean;
   selectedRecipients: string[];
   selectedExperiments: string[];
+  sharedWithResearchers: string[];
 }
 
 export interface StepProps {
@@ -18,6 +19,7 @@ export interface StepProps {
 
 export interface StepRecipientsProps extends StepProps {
   availableOptions: MultiSelectOption[];
+  availableResearchers: MultiSelectOption[];
   optionsLoading: boolean;
 }
 

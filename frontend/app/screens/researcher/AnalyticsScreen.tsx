@@ -1,4 +1,4 @@
-// admin screen for viewing analytics
+// researcher screen for viewing analytics
 import React, { useEffect, useState } from "react";
 import {
     Alert,
@@ -12,7 +12,7 @@ import {
 import { Colors } from '../../../constants/theme';
 import { API_ENDPOINTS } from '../../api/apiEndpoints';
 import { apiFetch } from "../../api/apiFetch";
-import MetricCard from "../../components/admin/MetricCard";
+import MetricCard from "../../components/researcher/MetricCard";
 import ScreenHeaderLayout from "../../components/layout/ScreenHeaderLayout";
 import { useQueryClient } from "@tanstack/react-query";
 import { useThemeStore } from '../../stores/themeStore';

@@ -16,12 +16,12 @@ import { apiFetch } from "../../api/apiFetch";
 import ScreenHeaderLayout from "../../components/layout/ScreenHeaderLayout";
 import { useQueryClient } from "@tanstack/react-query";
 import MultiSelect from "../../components/ui/MultiSelect";
-import { AdminStackParamList } from "../../navigation/adminStack.types";
+import { researcherStackParamList } from "../../navigation/researcherStack.types";
 import { useThemeStore } from '../../stores/themeStore';
 
 
 type Props = NativeStackScreenProps<
-  AdminStackParamList,
+  researcherStackParamList,
   "EditTask"
 >;
 
@@ -33,8 +33,10 @@ export default function EditTaskScreen({ route, navigation }: Props) {
   const [description, setDescription] = useState("");
   const [targetSpecies, setTargetSpecies] = useState<string[]>([]);
   const [selectedRecipients, setSelectedRecipients] = useState<string[]>([]);
+  const [sharedWithResearchers, setSharedWithResearchers] = useState<string[]>([]);
   const [selectedExperiments, setSelectedExperiments] = useState<string[]>([]);
   const [availableOptions, setAvailableOptions] = useState<{ id: string; label: string }[]>([]);
+  const [availableResearchers, setAvailableResearchers] = useState<{ id: string; label: string }[]>([]);
   const [availableExperiments, setAvailableExperiments] = useState<{ id: string; label: string }[]>([]);
   const [availableSpecies, setAvailableSpecies] = useState<{ id: string; label: string }[]>([]);
   const [optionsLoading, setOptionsLoading] = useState(false);
@@ -47,11 +49,12 @@ export default function EditTaskScreen({ route, navigation }: Props) {
     const fetchOptions = async () => {
       setOptionsLoading(true);
       try {
-        const [groupsRes, usersRes, experimentsRes, speciesRes] = await Promise.all([
-          apiFetch(API_ENDPOINTS.ADMIN.RECIPIENTS),
+        const [groupsRes, usersRes, experimentsRes, speciesRes, researchersRes] = await Promise.all([
+          apiFetch(API_ENDPOINTS.researcher.RECIPIENTS),
           apiFetch(API_ENDPOINTS.USERS.GET_ALL),
           apiFetch(API_ENDPOINTS.TASKS.EXPERIMENTS),
-          apiFetch('/api/v1/metadata/species')
+          apiFetch('/api/v1/metadata/species'),
+          apiFetch('/api/v1/users/roles/RESEARCHER')
         ]);
 
         let loaded: { id: string, label: string }[] = [];
@@ -70,6 +73,10 @@ export default function EditTaskScreen({ route, navigation }: Props) {
         if (speciesRes.ok) {
           const sps = await speciesRes.json();
           setAvailableSpecies(sps.map((s: any) => ({ id: String(s.id), label: String(s.label) })));
+        }
+        if (researchersRes.ok) {
+          const researchers = await researchersRes.json();
+          setAvailableResearchers(researchers.map((r: any) => ({ id: r.username, label: r.displayName || r.username })));
         }
         setAvailableOptions(loaded);
       } catch (error) {
@@ -102,6 +109,7 @@ export default function EditTaskScreen({ route, navigation }: Props) {
         const loadedGroups = data.recipientGroups?.map((id: number) => `G-${id}`) || [];
         const loadedUsers = data.assignedUsernames?.map((un: string) => `U-${un}`) || [];
         setSelectedRecipients([...loadedGroups, ...loadedUsers]);
+        setSharedWithResearchers(data.sharedWithResearchers || []);
       })
       .catch(() => {
         Alert.alert("Error", "Failed to load task data");
@@ -126,6 +134,7 @@ export default function EditTaskScreen({ route, navigation }: Props) {
       isPublic,
       recipientGroups: selectedRecipients.filter(id => id.startsWith("G-")).map(id => Number(id.replace("G-", ""))),
       assignedUsernames: selectedRecipients.filter(id => id.startsWith("U-")).map(id => id.replace("U-", "")),
+      sharedWithResearchers,
     };
 
     try {
@@ -245,6 +254,19 @@ export default function EditTaskScreen({ route, navigation }: Props) {
             />
           </>
         )}
+
+        <Text style={[styles.label, { color: themeColors.text }]}>Share with Co-Managers</Text>
+        <MultiSelect
+          options={availableResearchers}
+          selectedIds={sharedWithResearchers || []}
+          onToggle={(id) => {
+            setSharedWithResearchers((prev) =>
+              (prev || []).includes(id as string) ? prev.filter((rid) => rid !== id) : [...(prev || []), id as string]
+            );
+          }}
+          placeholder="Search researchers..."
+          loading={optionsLoading}
+        />
 
         <TouchableOpacity
           style={[styles.button, loading && styles.buttonDisabled]}

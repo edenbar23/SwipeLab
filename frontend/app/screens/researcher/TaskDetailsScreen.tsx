@@ -5,12 +5,12 @@ import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "rea
 
 import { Colors } from '../../../constants/theme';
 import { apiFetch } from "../../api/apiFetch";
-import { AdminStackParamList } from "../../navigation/adminStack.types";
+import { researcherStackParamList } from "../../navigation/researcherStack.types";
 import { useThemeStore } from '../../stores/themeStore';
 import { useTaskDetails, useExperiments, useUpdateTaskStatus } from "../../api/queries";
 
 
-type Props = NativeStackScreenProps<AdminStackParamList, "TaskDetails">;
+type Props = NativeStackScreenProps<researcherStackParamList, "TaskDetails">;
 
 type TaskDetails = {
   taskId: number;

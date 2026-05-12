@@ -7,7 +7,7 @@
  *
  * maxWidth prop controls the container width:
  *   - "user"  → 840px  (portrait-ish, game feel)
- *   - "admin" → 1200px (dashboard, information-dense)
+ *   - "researcher" → 1200px (dashboard, information-dense)
  */
 
 import React from 'react';
@@ -17,13 +17,13 @@ import { Colors } from '../../../constants/theme';
 
 interface Props {
   children: React.ReactNode;
-  variant?: 'user' | 'admin';
+  variant?: 'user' | 'researcher';
   style?: ViewStyle;
 }
 
-const MAX_WIDTH: Record<'user' | 'admin', number> = {
+const MAX_WIDTH: Record<'user' | 'researcher', number> = {
   user: 840,
-  admin: 1200,
+  researcher: 1200,
 };
 
 export default function WebAppShell({ children, variant = 'user', style }: Props) {

@@ -11,6 +11,7 @@ import {
 import useResponsive from "../../hooks/useResponsive";
 import { useThemeStore } from '../../stores/themeStore';
 import { Colors } from '../../../constants/theme';
+import { useAuthStore } from "../../stores/authStore";
 
 // Images
 import addGoldImg from "../../../assets/images/add_gold_image.png";
@@ -20,19 +21,22 @@ import recipientsImg from "../../../assets/images/recipients_lists.png";
 import tasksImg from "../../../assets/images/tasks_mgmt.png";
 import taxonomyImg from "../../../assets/images/taxonomy.png";
 
-const buttons = [
-  { title: "Tasks", image: tasksImg, screen: "TasksManagement" },
-  { title: "Add Task", image: addTaskImg, screen: "AddTask" },
-  { title: "Taxonomy", image: taxonomyImg, screen: "Taxonomy" },
-  { title: "Gold Images", image: goldImagesImg, screen: "GoldImagesManagement" },
-  { title: "Add Gold Image", image: addGoldImg, screen: "AddGoldImage" },
-  { title: "Recipients List", image: recipientsImg, screen: "RecipientsList" },
-];
-
-export default function AdminDashboard({ navigation }: any) {
+export default function ResearcherDashboard({ navigation }: any) {
   const { isPhone, isDesktop } = useResponsive();
+  const { isSuperAdmin } = useAuthStore();
   const { theme } = useThemeStore();
   const themeColors = Colors[theme as keyof typeof Colors];
+
+  const buttons = [
+    { title: "Tasks", image: tasksImg, screen: "TasksManagement" },
+    { title: "Add Task", image: addTaskImg, screen: "AddTask" },
+    { title: "Recipients List", image: recipientsImg, screen: "RecipientsList" },
+    ...(isSuperAdmin ? [
+      { title: "Taxonomy", image: taxonomyImg, screen: "Taxonomy" },
+      { title: "Gold Images", image: goldImagesImg, screen: "GoldImagesManagement" },
+      { title: "Add Gold Image", image: addGoldImg, screen: "AddGoldImage" },
+    ] : []),
+  ];
 
   // 🔹 Tile sizing
   const tileSize = isDesktop ? 180 : isPhone ? 140 : 150;

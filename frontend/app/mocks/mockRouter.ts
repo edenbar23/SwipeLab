@@ -1,7 +1,7 @@
 import { authMock } from './data/auth.mock'
 import { classificationMock } from './data/classification.mock'
 import { addToCollection, getCollection, getCollectionStats } from './data/collection.mock'
-import { dashboardAdminMock } from './data/dashboard.admin.mock'
+import { dashboardAdminMock } from './data/dashboard.researcher.mock'
 import { dashboardUserMock } from './data/dashboard.user.mock'
 
 import { getTaskAnalytics, getUserPerformance } from './data/analytics.mock'
@@ -153,7 +153,7 @@ export async function mockRouter(
     return jsonResponse(dashboardUserMock.play)
   }
 
-  // ---------- DASHBOARD (ADMIN) ----------
+  // ---------- DASHBOARD (researcher) ----------
   if (method === 'GET' && url.endsWith('/api/v1/dashboard/tasks')) {
     return jsonResponse(dashboardAdminMock.tasks)
   }
@@ -285,7 +285,7 @@ export async function mockRouter(
   }
 
   // Exports
-  if (method === 'POST' && url.includes(API_ENDPOINTS.ADMIN.ANALYTICS_EXPORTS)) {
+  if (method === 'POST' && url.includes(API_ENDPOINTS.researcher.ANALYTICS_EXPORTS)) {
     return jsonResponse({
       exportId: "exp_" + Date.now().toString(),
       status: "QUEUED",
@@ -300,11 +300,11 @@ export async function mockRouter(
   }
 
   // ---------- MANAGER / RECIPIENTS ----------
-  if (method === 'GET' && url.endsWith(API_ENDPOINTS.ADMIN.RECIPIENTS)) {
+  if (method === 'GET' && url.endsWith(API_ENDPOINTS.researcher.RECIPIENTS)) {
     // Note: User provided API used 'dashboard/recipients/*' but list endpoint wasn't explicitly changed. 
     // Assuming standard REST pattern or keeping existing GET but moving to dashboard/recipients if consistent.
     // For now, let's support both or just the existing GET if not specified. 
-    // Wait, let's align with the new path API_ENDPOINTS.ADMIN.RECIPIENTS for consistency.
+    // Wait, let's align with the new path API_ENDPOINTS.researcher.RECIPIENTS for consistency.
     return jsonResponse(getRecipientGroups())
   }
 
@@ -314,7 +314,7 @@ export async function mockRouter(
   }
 
   // 4.3 Create Recipients List
-  if (method === 'POST' && url.endsWith(API_ENDPOINTS.ADMIN.RECIPIENTS_CREATE)) {
+  if (method === 'POST' && url.endsWith(API_ENDPOINTS.researcher.RECIPIENTS_CREATE)) {
     const { name, usernames } = body as { name: string, usernames: string[] };
     const newGroup = addRecipientGroup(name);
 
@@ -395,11 +395,11 @@ export async function mockRouter(
   }
 
   // ---------- GOLD IMAGES ----------
-  if (method === 'GET' && url.split('?')[0].endsWith(API_ENDPOINTS.ADMIN.GOLD_IMAGES_GET_ALL)) {
+  if (method === 'GET' && url.split('?')[0].endsWith(API_ENDPOINTS.researcher.GOLD_IMAGES_GET_ALL)) {
     return jsonResponse(MOCK_GOLD_IMAGES)
   }
 
-  if (method === 'GET' && url.split('?')[0].endsWith(API_ENDPOINTS.ADMIN.GOLD_IMAGES)) {
+  if (method === 'GET' && url.split('?')[0].endsWith(API_ENDPOINTS.researcher.GOLD_IMAGES)) {
     const urlObj = new URL(url, 'http://localhost');
     const taskIdParam = urlObj.searchParams.get('taskId');
     if (taskIdParam) {
@@ -409,7 +409,7 @@ export async function mockRouter(
     return jsonResponse(MOCK_GOLD_IMAGES);
   }
 
-  if (method === 'DELETE' && url.includes('/api/admin/gold-images/')) {
+  if (method === 'DELETE' && url.includes('/api/researcher/gold-images/')) {
     return jsonResponse({ message: 'Gold image deleted' });
   }
 

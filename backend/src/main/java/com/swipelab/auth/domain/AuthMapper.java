@@ -6,13 +6,18 @@ import com.swipelab.dto.response.AuthResponse;
 import com.swipelab.dto.response.UserProfileResponse;
 import com.swipelab.users.domain.User;
 import com.swipelab.model.enums.UserRole;
+import com.swipelab.auth.application.SecurityAuthorizationService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
 @Component
+@RequiredArgsConstructor
 public class AuthMapper {
+
+    private final SecurityAuthorizationService securityAuthorizationService;
 
     public User toUser(RegisterRequest request) {
         if (request == null) {
@@ -51,6 +56,7 @@ public class AuthMapper {
                         ? Arrays.asList(user.getBadges().split(","))
                         : new ArrayList<>())
                 .rank(user.getRank() != null ? user.getRank() : "UNRANKED")
+                .isSuperAdmin(securityAuthorizationService.isSuperAdmin(user.getUsername()))
                 .build();
     }
 

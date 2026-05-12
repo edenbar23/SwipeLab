@@ -41,7 +41,7 @@ export default function AdminTopBar() {
           <View style={[styles.avatar, { backgroundColor: isDarkMode ? '#374151' : '#e8f0fe' }]}>
             <Ionicons name="person" size={24} color={isDarkMode ? '#9ca3af' : '#666'} />
           </View>
-          <Text style={[styles.username, dynamicStyles.username]}>{"Admin"}</Text>
+          <Text style={[styles.username, dynamicStyles.username]}>{"researcher"}</Text>
         </View>
       </TouchableOpacity>
 

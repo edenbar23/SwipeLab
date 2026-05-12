@@ -37,7 +37,7 @@ export const dashboardAdminMock = {
     taskId: 8,
     status: 'ACTIVE',
     name: 'New Identification Task',
-    description: 'New task created by admin',
+    description: 'New task created by researcher',
     experiments: [201],
     recipientGroups: [5],
     progress: {

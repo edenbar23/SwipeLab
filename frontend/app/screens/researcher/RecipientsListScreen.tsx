@@ -20,12 +20,12 @@ import ScreenHeaderLayout from '../../components/layout/ScreenHeaderLayout/Scree
 import useResponsive from '../../hooks/useResponsive';
 import { RecipientGroup } from '../../mocks/data/recipients.mock';
 import { User } from '../../mocks/data/users.mock';
-import { AdminStackParamList } from '../../navigation/adminStack.types';
+import { researcherStackParamList } from '../../navigation/researcherStack.types';
 import { useThemeStore } from '../../stores/themeStore';
 import { useAdminUsers, useRecipients } from '../../api/queries';
 
 
-type NavigationProp = NativeStackNavigationProp<AdminStackParamList, 'RecipientsList'>;
+type NavigationProp = NativeStackNavigationProp<researcherStackParamList, 'RecipientsList'>;
 
 export default function RecipientsListScreen() {
     const navigation = useNavigation<NavigationProp>();
@@ -94,7 +94,7 @@ export default function RecipientsListScreen() {
         try {
             // New Endpoint: /api/v1/dashboard/recipients/create
             // Payload: { name, usernames: [...] }
-            const res = await apiFetch(API_ENDPOINTS.ADMIN.RECIPIENTS_CREATE, {
+            const res = await apiFetch(API_ENDPOINTS.researcher.RECIPIENTS_CREATE, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

@@ -30,7 +30,7 @@ export default function LoginScreen() {
     if (response?.type === "success") {
       const { authentication } = response;
       const token = "mock-jwt-token";
-      const role = "ADMIN";
+      const role = "RESEARCHER";
 
       // Needs async wrapper
       (async () => {
@@ -71,9 +71,11 @@ export default function LoginScreen() {
 
       const data = await res.json();
       const role = data.user.role;
+      const isSuperAdmin = data.user.isSuperAdmin;
 
       // data comes from auth.mock.ts
       await setAuth(data.accessToken, role, data.refreshToken);
+      useAuthStore.getState().setIsSuperAdmin(isSuperAdmin);
 
       // Blocking prefetch before navigate
       await preloadAfterLogin(role);
@@ -135,10 +137,13 @@ export default function LoginScreen() {
 
       // 3. Store authentication context locally
       await setExternalAuth(stardbiData.access, stardbiData.refresh, stardbiData.lifetime || 0, stardbiData.username || username);
+      
+      const backendData = await backendRes.json();
+      useAuthStore.getState().setIsSuperAdmin(backendData.user?.isSuperAdmin || false);
 
       // Blocking prefetch before navigate
-      // Role can be assumed RESEARCHER or ADMIN for external
-      await preloadAfterLogin("ADMIN");
+      // Role can be assumed RESEARCHER for external
+      await preloadAfterLogin("RESEARCHER");
     } catch (e) {
       console.error("[LoginScreen] Network/Fetch Exception Caught:", e);
       setError("Something went wrong. Please try again.");

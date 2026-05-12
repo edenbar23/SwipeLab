@@ -1,9 +1,9 @@
-// admin screen for managing tasks
+// researcher screen for managing tasks
 import React, { useEffect, useState } from "react";
 import { FlatList, View } from "react-native";
 import { Colors } from '../../../constants/theme';
 import { apiFetch } from "../../api/apiFetch";
-import TaskCard from "../../components/admin/TaskCard";
+import TaskCard from "../../components/researcher/TaskCard";
 import ScreenHeaderLayout from "../../components/layout/ScreenHeaderLayout";
 import { useThemeStore } from '../../stores/themeStore';
 import { API_ENDPOINTS } from '../../api/apiEndpoints';

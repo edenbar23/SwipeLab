@@ -11,15 +11,15 @@ import { useAuthStore } from "../stores/authStore";
 import { useModeStore } from "../stores/modeStore";
 
 // navigators
-import AdminNavigator from "./AdminNavigator";
+import ResearcherNavigator from "./ResearcherNavigator";
 import UserNavigator from "./UserNavigator";
 
 // screens
 import LoginScreen from "../screens/shared/LoginScreen";
 
 export default function RootNavigator() {
-  const { token, role, isLoading, sessionExpiredMessage } = useAuthStore();       // "USER" | "ADMIN" | null
-  const { mode } = useModeStore();              // "USER" | "ADMIN"
+  const { token, role, isLoading, sessionExpiredMessage } = useAuthStore();       // "USER" | "researcher" | null
+  const { mode } = useModeStore();              // "USER" | "researcher"
   const Stack = createNativeStackNavigator();
 
   if (sessionExpiredMessage) {
@@ -55,13 +55,13 @@ export default function RootNavigator() {
     );
   }
 
-  const isAdmin = role === "ADMIN";
+  const isAdmin = role === "RESEARCHER";
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <NavigationContainer key={mode}>
-        {isAdmin ? mode === "ADMIN"
-          ? <AdminNavigator />
+        {isAdmin ? mode === "researcher"
+          ? <ResearcherNavigator />
           : <UserNavigator />
           : <UserNavigator />}
       </NavigationContainer>

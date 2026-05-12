@@ -14,7 +14,7 @@ export const QUERY_KEYS = {
   userProfile: ['user', 'profile'],
   allUsers: ['user', 'all'],
   
-  // Analytics & Admin
+  // Analytics & researcher
   analyticsTasks: (id: string | number) => ['analytics', 'tasks', id],
   analyticsUsers: (id: string | number) => ['analytics', 'users', id],
   analyticsTop: ['analytics', 'top'],
@@ -102,7 +102,7 @@ export const useTaskDetails = (taskId: string | number) => {
 export const useAnalyticsTask = (taskId: string | number) => {
   return useQuery({
     queryKey: QUERY_KEYS.analyticsTasks(taskId),
-    queryFn: () => fetchJson(API_ENDPOINTS.ADMIN.ANALYTICS_TASKS(taskId)),
+    queryFn: () => fetchJson(API_ENDPOINTS.researcher.ANALYTICS_TASKS(taskId)),
     staleTime: 2 * 60 * 1000,
   });
 };
@@ -118,7 +118,7 @@ export const useExperiments = () => {
 export const useAnalyticsUsers = (taskId: string | number) => {
   return useQuery({
     queryKey: QUERY_KEYS.analyticsUsers(taskId),
-    queryFn: () => fetchJson(API_ENDPOINTS.ADMIN.ANALYTICS_USERS(taskId)),
+    queryFn: () => fetchJson(API_ENDPOINTS.researcher.ANALYTICS_USERS(taskId)),
     staleTime: 2 * 60 * 1000,
   });
 };
@@ -126,7 +126,7 @@ export const useAnalyticsUsers = (taskId: string | number) => {
 export const useAnalyticsTop = (limit: number = 5) => {
   return useQuery({
     queryKey: [...QUERY_KEYS.analyticsTop, limit],
-    queryFn: () => fetchJson(API_ENDPOINTS.ADMIN.ANALYTICS_TOP(limit)),
+    queryFn: () => fetchJson(API_ENDPOINTS.researcher.ANALYTICS_TOP(limit)),
     staleTime: 2 * 60 * 1000,
   });
 };
@@ -189,16 +189,16 @@ export const useAdminUsers = () => {
 
 export const useRecipients = () => {
   return useQuery({
-    queryKey: ['admin', 'recipients'],
-    queryFn: () => fetchJson(API_ENDPOINTS.ADMIN.RECIPIENTS),
+    queryKey: ['researcher', 'recipients'],
+    queryFn: () => fetchJson(API_ENDPOINTS.researcher.RECIPIENTS),
     staleTime: 5 * 60 * 1000,
   });
 };
 
 export const useGoldImages = () => {
   return useQuery({
-    queryKey: ['admin', 'goldImages'],
-    queryFn: () => fetchJson(API_ENDPOINTS.ADMIN.GOLD_IMAGES_GET_ALL),
+    queryKey: ['researcher', 'goldImages'],
+    queryFn: () => fetchJson(API_ENDPOINTS.researcher.GOLD_IMAGES_GET_ALL),
     staleTime: 5 * 60 * 1000,
   });
 };
@@ -268,15 +268,15 @@ export const preloadAfterLogin = async (role: string) => {
       queryFn: () => fetchJson('/api/v1/metadata/species').catch(() => [])
     });
 
-    if (role === 'ADMIN') {
+    if (role === 'researcher') {
       const defaultTaskId = 1;
       queryClient.prefetchQuery({
         queryKey: QUERY_KEYS.analyticsTasks(defaultTaskId),
-        queryFn: () => fetchJson(API_ENDPOINTS.ADMIN.ANALYTICS_TASKS(defaultTaskId))
+        queryFn: () => fetchJson(API_ENDPOINTS.researcher.ANALYTICS_TASKS(defaultTaskId))
       });
       queryClient.prefetchQuery({
         queryKey: [...QUERY_KEYS.analyticsTop, 5],
-        queryFn: () => fetchJson(API_ENDPOINTS.ADMIN.ANALYTICS_TOP(5))
+        queryFn: () => fetchJson(API_ENDPOINTS.researcher.ANALYTICS_TOP(5))
       });
     }
   } catch (error) {
