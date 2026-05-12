@@ -5,6 +5,7 @@ import RootNavigator from "./app/navigation/RootNavigator";
 import { useAuthStore } from "./app/stores/authStore";
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from './app/queryClient';
+import { useSessionHeartbeat } from "./app/hooks/useSessionHeartbeat";
 
 export default function App() {
   console.log("App.tsx IS LOADING!");
@@ -12,6 +13,8 @@ export default function App() {
   React.useEffect(() => {
     useAuthStore.getState().initialize();
   }, []);
+
+  useSessionHeartbeat();
 
   return (
     <QueryClientProvider client={queryClient}>

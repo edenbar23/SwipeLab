@@ -17,6 +17,7 @@ interface AuthState {
   isLoading: boolean;
   setAuth: (token: string, role: Role, refreshToken?: string) => Promise<void>;
   setExternalAuth: (token: string, refreshToken: string, lifetime: number, username: string) => Promise<void>;
+  updateTokens: (token: string, refreshToken: string) => Promise<void>;
   logout: () => Promise<void>;
   initialize: () => Promise<void>;
   sessionExpiredMessage: boolean;
@@ -71,6 +72,17 @@ export const useAuthStore = create<AuthState>((set) => ({
       await SecureStore.setItemAsync("lifetime", lifetime.toString());
     }
     useModeStore.getState().setMode("ADMIN");
+  },
+
+  updateTokens: async (token, refreshToken) => {
+    set({ token });
+    if (Platform.OS === 'web') {
+      localStorage.setItem("token", token);
+      localStorage.setItem("refreshToken", refreshToken);
+    } else {
+      await SecureStore.setItemAsync("token", token);
+      await SecureStore.setItemAsync("refreshToken", refreshToken);
+    }
   },
 
   logout: async () => {
