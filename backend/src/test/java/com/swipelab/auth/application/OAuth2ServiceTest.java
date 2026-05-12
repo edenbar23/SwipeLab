@@ -28,6 +28,9 @@ class OAuth2ServiceTest {
     @Mock
     private OAuth2User oAuth2User;
 
+    @Mock
+    private SecurityAuthorizationService securityAuthorizationService;
+
     @InjectMocks
     private OAuth2Service oAuth2Service;
 
