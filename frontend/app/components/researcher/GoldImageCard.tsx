@@ -32,9 +32,18 @@ export default function GoldImageCard({ goldImage, onDelete }: Props) {
 
     let imageUrl = goldImage.imageUrl;
     if (imageUrl) {
-        if (imageUrl.startsWith('/')) {
-            imageUrl = `${BACKEND_BASE_URL}${imageUrl}`;
-        } else if (/^[A-Za-z0-9+/]/.test(imageUrl) && !imageUrl.startsWith('http') && !imageUrl.startsWith('data:')) {
+        if (imageUrl.startsWith('http') || imageUrl.startsWith('data:')) {
+            // Already a valid URL or data URI
+        } else if (imageUrl.startsWith('/uploads/') || imageUrl.startsWith('uploads/')) {
+            const baseUrl = BACKEND_BASE_URL.endsWith('/') ? BACKEND_BASE_URL.slice(0, -1) : BACKEND_BASE_URL;
+            const path = imageUrl.startsWith('uploads/') ? `/${imageUrl}` : imageUrl;
+            imageUrl = `${baseUrl}${path}`;
+        } else if (imageUrl.match(/\.(jpeg|jpg|gif|png|webp)$/i)) {
+            // Filename missing /uploads/ prefix
+            const baseUrl = BACKEND_BASE_URL.endsWith('/') ? BACKEND_BASE_URL.slice(0, -1) : BACKEND_BASE_URL;
+            imageUrl = `${baseUrl}/uploads/${imageUrl}`;
+        } else if (/^[A-Za-z0-9+/]/.test(imageUrl)) {
+            // Base64 string fallback
             imageUrl = `data:image/jpeg;base64,${imageUrl}`;
         }
     }

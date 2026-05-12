@@ -18,6 +18,7 @@ interface AuthState {
   isLoading: boolean;
   setAuth: (token: string, role: Role, refreshToken?: string) => Promise<void>;
   setExternalAuth: (token: string, refreshToken: string, lifetime: number, username: string) => Promise<void>;
+  updateTokens: (token: string, refreshToken: string) => Promise<void>;
   logout: () => Promise<void>;
   initialize: () => Promise<void>;
   sessionExpiredMessage: boolean;
@@ -77,6 +78,17 @@ export const useAuthStore = create<AuthState>((set) => ({
     useModeStore.getState().setMode("researcher");
   },
 
+  updateTokens: async (token, refreshToken) => {
+    set({ token });
+    if (Platform.OS === 'web') {
+      localStorage.setItem("token", token);
+      localStorage.setItem("refreshToken", refreshToken);
+    } else {
+      await SecureStore.setItemAsync("token", token);
+      await SecureStore.setItemAsync("refreshToken", refreshToken);
+    }
+  },
+
   logout: async () => {
     // Guard against duplicate logout calls (React Strict Mode / 401 race)
     const state = useAuthStore.getState();
@@ -119,7 +131,13 @@ export const useAuthStore = create<AuthState>((set) => ({
         headers: {
           "Authorization": `Bearer ${refreshToken}`
         }
-      }).catch(e => console.error("Logout request failed", e));
+      })
+      .then(res => {
+        if (res.status === 401) {
+          console.warn("[logout] Server returned 401 on logout, but local cleanup is already complete.");
+        }
+      })
+      .catch(e => console.error("Logout request failed", e));
     }
 
     // 4. Clear mode and query cache
