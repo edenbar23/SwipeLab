@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.Arrays;
+import org.springframework.core.env.Environment;
 
 @Slf4j
 @RestController
@@ -23,10 +25,22 @@ import java.util.stream.Collectors;
 public class MetadataController {
 
     private final StardbiClient stardbiClient;
+    private final Environment environment;
 
     @GetMapping("/species")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> getSpecies() {
+        if (Arrays.asList(environment.getActiveProfiles()).contains("mock")) {
+            List<Map<String, Object>> mockOptions = List.of(
+                Map.of("id", "BEE", "label", "Bee", "searchTerms", "bee insect apis"),
+                Map.of("id", "WASP", "label", "Wasp", "searchTerms", "wasp insect vespidae"),
+                Map.of("id", "BUTTERFLY", "label", "Butterfly", "searchTerms", "butterfly insect lepidoptera"),
+                Map.of("id", "CAT", "label", "Cat", "searchTerms", "cat mammal feline"),
+                Map.of("id", "DOG", "label", "Dog", "searchTerms", "dog mammal canine")
+            );
+            return ResponseEntity.ok(mockOptions);
+        }
+
         try {
             // Retrieves target species taxonomy directly from Stardbi
             List<ExternalTaxonomyDto> taxonomy = stardbiClient.getTaxonomy();

@@ -13,6 +13,7 @@ Architecture: Modular Hexagonal/DDD.
 * Frontend: Integrated pause and archive buttons with the backend task API (PR #207).
 * Backend: Decoupled gold image logic by creating GoldImagePolicy and GoldImageEvaluatorService.
 * Database: Schema migrations updated (V1-V8) including gamification and challenges.
+* Frontend: Fixed frontend rendering for uploaded Gold Images by correcting the static path base parsing logic (Issue #216).
 * Security/Validation: Implemented comprehensive input validation, stored XSS protection, and username normalization (Issue #227).
 
 ## Current Focus (Active GitHub Issues)
@@ -31,7 +32,6 @@ Architecture: Modular Hexagonal/DDD.
 * Issue #219: [Frontend] Add to UsersScreen ONLY for Admin role control buttons.
 * Issue #218: [Frontend] adding sort by credibility score in UsersScreen.
 * Issue #217: [Frontend] adding search bar for users in the UsersScreen.
-* Issue #216: [Frontend] fix render of gold images from files upload.
 
 ## Architecture & Design Decisions
 * Backend: Strictly modular. No direct calls from API to Infrastructure. Use Application services.
