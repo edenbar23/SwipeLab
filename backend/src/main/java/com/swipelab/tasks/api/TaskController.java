@@ -59,7 +59,7 @@ public class TaskController {
     }
 
     @PostMapping("/{taskId}/assign")
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('USER', 'RESEARCHER') or @securityAuthorizationService.isSuperAdmin(authentication.name)")
     public ResponseEntity<TaskResponse> assignTask(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable Long taskId) {
