@@ -10,6 +10,8 @@ export const API_ENDPOINTS = {
         ME: '/api/v1/users/me',
         GET_ALL: '/api/v1/users/get-all',
         INVITE: '/api/v1/manager/users/invite',
+        BAN: (username: string) => `/api/v1/users/ban/${username}`,
+        UNBAN: (username: string) => `/api/v1/users/unban/${username}`,
     },
     TASKS: {
         MY_TASKS: '/api/v1/tasks/my-tasks',

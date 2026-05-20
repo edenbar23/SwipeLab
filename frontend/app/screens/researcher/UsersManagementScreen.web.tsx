@@ -36,7 +36,7 @@ export default function UsersManagementScreen() {
     const { data: profile } = useProfile();
     const [searchQuery, setSearchQuery] = useState('');
 
-    const filteredUsers = users.filter(user => 
+    const filteredUsers = users.filter((user: User) => 
         user.username.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
@@ -86,7 +86,7 @@ export default function UsersManagementScreen() {
 
                         {/* Table Body */}
                         <ScrollView style={styles.tableBody}>
-                            {filteredUsers.map((item, index) => (
+                            {filteredUsers.map((item: User, index: number) => (
                                 <View 
                                     key={item.id} 
                                     style={[

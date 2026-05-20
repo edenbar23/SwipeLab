@@ -36,13 +36,13 @@ export default function UsersManagementScreen() {
     const { data: profile } = useProfile();
     const [searchQuery, setSearchQuery] = useState('');
 
-    const filteredUsers = users.filter(user => 
+    const filteredUsers = users.filter((user: User) => 
         user.username.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     const toggleBanStatus = useMutation({
         mutationFn: async ({ username, isBanned }: { username: string, isBanned: boolean }) => {
-            const endpoint = isBanned ? `/api/v1/users/unban/${username}` : `/api/v1/users/ban/${username}`;
+            const endpoint = isBanned ? API_ENDPOINTS.USERS.UNBAN(username) : API_ENDPOINTS.USERS.BAN(username);
             const res = await apiFetch(endpoint, { method: 'POST' });
             if (!res.ok) throw new Error('Failed to toggle ban status');
             return res.json();
