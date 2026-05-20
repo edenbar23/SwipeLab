@@ -12,8 +12,8 @@ interface TaskCardProps {
     progress: number; // 0 to 100
     onPlay: () => void;
     actionType?: 'play' | 'add';
-    onPress?: () => void; // For card detail navigation
-    onRemove?: () => void; // For removing task
+    onPress?: () => void;
+    onRemove?: () => void;
 }
 
 const TaskCard: React.FC<TaskCardProps> = ({
@@ -25,58 +25,82 @@ const TaskCard: React.FC<TaskCardProps> = ({
     onPlay,
     actionType = 'play',
     onPress,
-    onRemove
+    onRemove,
 }) => {
     const { theme } = useThemeStore();
     const themeColors = Colors[theme as keyof typeof Colors];
+    const isDark = theme === 'dark';
+
+    const cardBg    = isDark ? themeColors.card : '#F0F7FF';
+    const borderCol = isDark ? themeColors.border : '#BFDBFE';
+    const stripeColor = actionType === 'add' ? '#10B981' : '#3B82F6';
+    const actionColor = actionType === 'add' ? '#10B981' : '#3B82F6';
 
     return (
-        <TouchableOpacity style={[styles.card, { backgroundColor: themeColors.card, borderColor: themeColors.border }]} onPress={onPress} activeOpacity={0.9}>
-            <View style={styles.headerRow}>
-                <Text style={[styles.title, { color: themeColors.text }]} numberOfLines={1}>{title}</Text>
+        <TouchableOpacity
+            style={[styles.card, { backgroundColor: cardBg, borderColor: borderCol }]}
+            onPress={onPress}
+            activeOpacity={0.85}
+        >
+            {/* Left accent stripe */}
+            <View style={[styles.stripe, { backgroundColor: stripeColor }]} />
 
-                <View style={styles.actionsRow}>
-                    {/* Remove Button (Only if onRemove provided) */}
-                    {onRemove && (
-                        <TouchableOpacity style={styles.removeButton} onPress={onRemove}>
-                            <Ionicons name="trash-outline" size={20} color="#EF4444" />
-                        </TouchableOpacity>
-                    )}
-
-                    {/* Main Action Button */}
-                    <TouchableOpacity style={styles.playButton} onPress={onPlay}>
-                        {actionType === 'play' ? (
-                            <Ionicons name="play-circle" size={32} color="#4B7BE5" />
-                        ) : (
-                            <Ionicons name="add-circle" size={32} color="#10B981" />
+            <View style={styles.body}>
+                {/* Header row: title + actions */}
+                <View style={styles.headerRow}>
+                    <Text style={[styles.title, { color: themeColors.text }]} numberOfLines={1}>
+                        {title}
+                    </Text>
+                    <View style={styles.actionsRow}>
+                        {onRemove && (
+                            <TouchableOpacity style={styles.iconBtn} onPress={onRemove}>
+                                <Ionicons name="trash-outline" size={18} color="#EF4444" />
+                            </TouchableOpacity>
                         )}
-                    </TouchableOpacity>
+                        <TouchableOpacity style={styles.iconBtn} onPress={onPlay}>
+                            <Ionicons
+                                name={actionType === 'play' ? 'play-circle' : 'add-circle'}
+                                size={34}
+                                color={actionColor}
+                            />
+                        </TouchableOpacity>
+                    </View>
                 </View>
-            </View>
 
-            <View style={styles.contentRow}>
-                <Text style={[styles.label, { color: themeColors.textSecondary }]}>Species: </Text>
-                <View style={styles.speciesContainer}>
-                    {Array.isArray(species) ? species.map((s, index) => (
-                        <View key={index} style={styles.speciesItem}>
-                            <Text style={[styles.speciesText, { color: themeColors.text }]}>{s}</Text>
-                            <Ionicons name="image-outline" size={14} color={themeColors.icon} />
-                        </View>
-                    )) : null}
-                </View>
-            </View>
+                {/* Description */}
+                {!!description && (
+                    <Text style={[styles.description, { color: themeColors.textSecondary }]} numberOfLines={2}>
+                        {description}
+                    </Text>
+                )}
 
-            <Text style={[styles.description, { color: themeColors.textSecondary }]} numberOfLines={2}>
-                Description: {description}
-            </Text>
+                {/* Species chips */}
+                {species.length > 0 && (
+                    <View style={styles.speciesRow}>
+                        <Ionicons name="leaf-outline" size={12} color={actionColor} style={{ marginRight: 4 }} />
+                        {species.map((s, i) => (
+                            <View key={i} style={[styles.speciesChip, { backgroundColor: isDark ? '#1e3a5f' : '#DBEAFE', borderColor: borderCol }]}>
+                                <Text style={[styles.speciesChipText, { color: actionColor }]}>{s}</Text>
+                            </View>
+                        ))}
+                    </View>
+                )}
 
-            <Text style={[styles.statsText, { color: themeColors.text }]}>Images Classified: {imagesClassified}</Text>
-
-            <View style={styles.progressContainer}>
-                <Text style={[styles.statsText, { color: themeColors.text }]}>Progression: {progress}%</Text>
-                {/* Simple Progress Bar */}
-                <View style={styles.progressBarBg}>
-                    <View style={[styles.progressBarFill, { width: `${progress}%` }]} />
+                {/* Progress section */}
+                <View style={styles.progressSection}>
+                    <View style={styles.progressLabelRow}>
+                        <Ionicons name="stats-chart-outline" size={12} color={actionColor} style={{ marginRight: 4 }} />
+                        <Text style={[styles.progressLabel, { color: themeColors.textSecondary }]}>
+                            Progress
+                        </Text>
+                        <Text style={[styles.progressPct, { color: actionColor }]}>{progress}%</Text>
+                    </View>
+                    <View style={[styles.progressTrack, { backgroundColor: isDark ? '#3a3a5a' : '#DBEAFE' }]}>
+                        <View style={[styles.progressFill, { width: `${progress}%` as any, backgroundColor: stripeColor }]} />
+                    </View>
+                    <Text style={[styles.progressSub, { color: themeColors.textSecondary }]}>
+                        {imagesClassified} images classified
+                    </Text>
                 </View>
             </View>
         </TouchableOpacity>
@@ -85,91 +109,98 @@ const TaskCard: React.FC<TaskCardProps> = ({
 
 const styles = StyleSheet.create({
     card: {
-        backgroundColor: '#fff',
+        flexDirection: 'row',
         borderRadius: 16,
-        padding: 16,
-        marginBottom: 16,
         borderWidth: 1,
-        borderColor: '#e0e0e0',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 4,
-        elevation: 2,
+        overflow: 'hidden',
+        marginBottom: 14,
+        shadowColor: '#3B82F6',
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 0.08,
+        shadowRadius: 8,
+        elevation: 3,
+    },
+    stripe: {
+        width: 5,
+    },
+    body: {
+        flex: 1,
+        padding: 14,
     },
     headerRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 8,
+        marginBottom: 6,
     },
     actionsRow: {
         flexDirection: 'row',
         alignItems: 'center',
+        gap: 4,
+    },
+    iconBtn: {
+        padding: 2,
     },
     title: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: '#000',
+        fontSize: 17,
+        fontWeight: '800',
         flex: 1,
-    },
-    playButton: {
-        marginLeft: 8,
-    },
-    removeButton: {
-        padding: 4,
-        marginRight: 4,
-    },
-    contentRow: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        marginBottom: 8,
-    },
-    label: {
-        fontSize: 14,
-        color: '#333',
-    },
-    speciesContainer: {
-        flex: 1,
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-    },
-    speciesItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginRight: 12,
-        marginBottom: 4,
-    },
-    speciesText: {
-        fontSize: 14,
-        fontWeight: '600',
-        marginRight: 4,
+        marginRight: 8,
+        lineHeight: 22,
     },
     description: {
         fontSize: 13,
-        color: '#444',
-        marginBottom: 12,
+        lineHeight: 18,
+        marginBottom: 10,
         fontStyle: 'italic',
     },
-    statsText: {
-        fontSize: 13,
-        color: '#333',
+    speciesRow: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        alignItems: 'center',
+        marginBottom: 10,
+        gap: 6,
+    },
+    speciesChip: {
+        paddingHorizontal: 8,
+        paddingVertical: 3,
+        borderRadius: 12,
+        borderWidth: 1,
+    },
+    speciesChipText: {
+        fontSize: 11,
+        fontWeight: '600',
+    },
+    progressSection: {
+        marginTop: 2,
+    },
+    progressLabelRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 5,
+    },
+    progressLabel: {
+        fontSize: 12,
+        flex: 1,
+    },
+    progressPct: {
+        fontSize: 12,
+        fontWeight: '700',
+    },
+    progressTrack: {
+        height: 7,
+        borderRadius: 4,
+        overflow: 'hidden',
         marginBottom: 4,
     },
-    progressContainer: {
-        marginTop: 4,
-    },
-    progressBarBg: {
-        height: 6,
-        backgroundColor: '#E0E0E0',
-        borderRadius: 3,
-        marginTop: 4,
-        overflow: 'hidden',
-    },
-    progressBarFill: {
+    progressFill: {
         height: '100%',
-        backgroundColor: '#4CAF50', // Green for progress
-    }
+        borderRadius: 4,
+    },
+    progressSub: {
+        fontSize: 11,
+        textAlign: 'right',
+    },
 });
 
 export default TaskCard;
