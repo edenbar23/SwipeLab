@@ -33,6 +33,6 @@ export default function App() {
 const styles = StyleSheet.create({
   rootBackground: {
     flex: 1,
-    backgroundColor: Platform.OS === 'web' ? '#f3f4f6' : '#fff', // Keeps the global web background gray, but child is full width
+    backgroundColor: '#fff',
   }
 });
