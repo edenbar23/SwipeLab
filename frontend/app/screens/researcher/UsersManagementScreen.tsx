@@ -1,7 +1,7 @@
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import React, { useState } from 'react';
-import { FlatList, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { FlatList, Image, StyleSheet, Text, TextInput, TouchableOpacity, View, Platform } from 'react-native';
 import { Colors } from '../../../constants/theme';
 import { apiFetch } from "../../api/apiFetch";
 import ScreenHeaderLayout from "../../components/layout/ScreenHeaderLayout/ScreenHeaderLayout";
@@ -97,7 +97,8 @@ export default function UsersManagementScreen() {
                         data={filteredUsers}
                         renderItem={renderItem}
                         keyExtractor={item => item.id}
-                        numColumns={3}
+                        key={Platform.OS === 'web' ? 'web-4' : 'mobile-3'} // Key must change when numColumns changes
+                        numColumns={Platform.OS === 'web' ? 4 : 3}
                         contentContainerStyle={styles.listContent}
                         columnWrapperStyle={styles.columnWrapper}
                     />
@@ -134,7 +135,6 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         padding: 12,
         alignItems: 'center',
-        width: '30%', // Approx 1/3 minus spacing
         shadowColor: "#000",
         shadowOffset: {
             width: 0,
@@ -145,6 +145,14 @@ const styles = StyleSheet.create({
         elevation: 3,
         borderWidth: 1,
         borderColor: '#e0e0e0',
+        ...Platform.select({
+            web: {
+                width: '23%', // 4 columns on web
+            },
+            default: {
+                width: '30%', // 3 columns on mobile
+            }
+        }),
     },
     avatarContainer: {
         width: 50,

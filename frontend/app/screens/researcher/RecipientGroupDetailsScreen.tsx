@@ -354,17 +354,54 @@ const styles = StyleSheet.create({
     dot: { width: 10, height: 10, borderRadius: 5, marginRight: 4 },
     legendText: { fontSize: 12, color: '#555' },
 
-    list: {},
-    userRow: { flexDirection: 'row', justifyContent: 'space-between', padding: 12, backgroundColor: '#f9f9f9', borderRadius: 8, marginBottom: 8, alignItems: 'center' },
+    list: {
+        ...Platform.select({
+            web: {
+                flexDirection: 'row',
+                flexWrap: 'wrap',
+                justifyContent: 'space-between',
+            },
+            default: {},
+        }),
+    },
+    userRow: { 
+        flexDirection: 'row', 
+        justifyContent: 'space-between', 
+        padding: 12, 
+        backgroundColor: '#f9f9f9', 
+        borderRadius: 8, 
+        marginBottom: 8, 
+        alignItems: 'center',
+        ...Platform.select({
+            web: {
+                width: '49%', // Grid view on web (2 columns)
+            },
+            default: {
+                width: '100%',
+            }
+        }),
+    },
     username: { fontSize: 16, fontWeight: '600', color: '#333' },
     userDesc: { fontSize: 12, color: '#666' },
-    emptyText: { textAlign: 'center', color: '#888', marginTop: 20 },
+    emptyText: { textAlign: 'center', color: '#888', marginTop: 20, width: '100%' },
     deleteBtn: { padding: 4 },
     deleteText: { fontSize: 18 },
 
     // Modal Styles
     modalContainer: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', padding: 20 },
-    modalContent: { backgroundColor: '#fff', borderRadius: 12, padding: 20, maxHeight: '80%' },
+    modalContent: { 
+        backgroundColor: '#fff', 
+        borderRadius: 12, 
+        padding: 20, 
+        maxHeight: '80%',
+        ...Platform.select({
+            web: {
+                width: '100%',
+                maxWidth: 500, // Make modals look better on web
+                alignSelf: 'center',
+            },
+        }),
+    },
     modalTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 16, textAlign: 'center' },
 
     tabsContainer: { flexDirection: 'row', marginBottom: 16, borderBottomWidth: 1, borderColor: '#eee' },
