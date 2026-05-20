@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View, ScrollView } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View, ScrollView, Platform } from 'react-native';
 import { Colors } from '../../../../constants/theme';
 import { useThemeStore } from '../../../stores/themeStore';
 import MultiSelect from '../../ui/MultiSelect';
@@ -15,12 +15,13 @@ export default function StepExperiments({
 }: StepExperimentsProps) {
   const { theme } = useThemeStore();
   const themeColors = Colors[theme as keyof typeof Colors];
+  const isWeb = Platform.OS === 'web';
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, isWeb && styles.containerWeb]}>
       <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        <Text style={[styles.heading, { color: themeColors.text }]}>Select Experiments</Text>
-        <Text style={[styles.subtitle, { color: themeColors.textSecondary }]}>
+        <Text style={[styles.heading, { color: themeColors.text }, isWeb && styles.headingWeb]}>Select Experiments</Text>
+        <Text style={[styles.subtitle, { color: themeColors.textSecondary }, isWeb && styles.subtitleWeb]}>
           Choose one or more experiments that this task will classify images for.
         </Text>
 
@@ -42,7 +43,7 @@ export default function StepExperiments({
       </View>
       </ScrollView>
 
-      <View style={styles.footer}>
+      <View style={[styles.footer, isWeb && styles.footerWeb]}>
         <View style={styles.buttonRow}>
           <TouchableOpacity style={[styles.backButton, { borderColor: themeColors.border }]} onPress={onBack}>
             <Text style={[styles.backButtonText, { color: themeColors.text }]}>← Back</Text>
@@ -58,12 +59,16 @@ export default function StepExperiments({
 
 const styles = StyleSheet.create({
   container: { flex: 1, paddingVertical: 16 },
-  scrollContent: { paddingBottom: 24 },
+  containerWeb: { paddingVertical: 8 },
+  scrollContent: { paddingBottom: 16 },
   heading: { fontSize: 22, fontWeight: '700', marginBottom: 8 },
+  headingWeb: { fontSize: 20, marginBottom: 6 },
   subtitle: { fontSize: 14, marginBottom: 24, lineHeight: 20 },
+  subtitleWeb: { marginBottom: 16 },
   recipientsSection: { marginTop: 4 },
   sectionLabel: { fontWeight: '600', marginBottom: 8, fontSize: 15 },
   footer: { paddingTop: 16 },
+  footerWeb: { paddingTop: 12 },
   buttonRow: { flexDirection: 'row', gap: 12 },
   backButton: {
     flex: 1,

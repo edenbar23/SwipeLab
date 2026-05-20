@@ -8,6 +8,7 @@ import ScreenHeaderLayout from "../../components/layout/ScreenHeaderLayout";
 import { useQueryClient } from "@tanstack/react-query";
 import StepIndicator from "../../components/ui/StepIndicator";
 import { useThemeStore } from '../../stores/themeStore';
+import useResponsive from '../../hooks/useResponsive';
 
 import { AddTaskFormData } from "../../components/researcher/addTask/addTaskTypes";
 import StepConfirm from "../../components/researcher/addTask/StepConfirm";
@@ -24,6 +25,7 @@ export default function AddTaskScreen({ route, navigation }: any) {
   const { theme } = useThemeStore();
   const themeColors = Colors[theme as keyof typeof Colors];
   const queryClient = useQueryClient();
+  const { isDesktop } = useResponsive();
 
   const [currentStep, setCurrentStep] = useState(0);
   const [createdTaskId, setCreatedTaskId] = useState<string | null>(null);
@@ -257,6 +259,49 @@ export default function AddTaskScreen({ route, navigation }: any) {
     }
   };
 
+  const speciesBanner = formData.speciesList.length > 0 && currentStep < 3 && (
+    <View style={[styles.banner, { backgroundColor: themeColors.card, borderColor: '#10B981' }]}>
+      <Ionicons name="leaf" size={18} color="#10B981" />
+      <Text style={[styles.bannerText, { color: themeColors.text }]}>
+        {formData.speciesList.length} species selected for this task
+      </Text>
+    </View>
+  );
+
+  // Desktop: two-column layout with vertical step sidebar
+  if (isDesktop && Platform.OS === 'web') {
+    return (
+      <ScreenHeaderLayout
+        leftIcon={require("../../../assets/images/add_task.png")}
+        leftTitle="Add Task"
+        rightIcon={require("../../../assets/images/tasks_mgmt.png")}
+        rightTitle="Tasks"
+        onRightPress={() => navigation.navigate("TasksManagement")}
+      >
+        <View style={styles.desktopOuterContainer}>
+          <View style={[styles.desktopContainer, { backgroundColor: themeColors.background }]}>
+            {/* Left sidebar — vertical step indicator */}
+            {!createdTaskId && (
+              <View style={[styles.sidebarContainer, { borderColor: themeColors.border }]}>
+                <Text style={[styles.sidebarTitle, { color: themeColors.textSecondary }]}>STEPS</Text>
+                <StepIndicator steps={STEPS} currentStep={currentStep} layout="vertical" />
+              </View>
+            )}
+
+            {/* Right — step content */}
+            <View style={styles.desktopContentContainer}>
+              {speciesBanner}
+              <View style={styles.contentContainer}>
+                {renderStepContent()}
+              </View>
+            </View>
+          </View>
+        </View>
+      </ScreenHeaderLayout>
+    );
+  }
+
+  // Mobile: original vertical stack layout
   return (
     <ScreenHeaderLayout
       leftIcon={require("../../../assets/images/add_task.png")}
@@ -273,14 +318,7 @@ export default function AddTaskScreen({ route, navigation }: any) {
         {!createdTaskId && <StepIndicator steps={STEPS} currentStep={currentStep} />}
 
         {/* Selected Species Banner */}
-        {formData.speciesList.length > 0 && currentStep < 3 && (
-          <View style={[styles.banner, { backgroundColor: themeColors.card, borderColor: '#10B981' }]}>
-            <Ionicons name="leaf" size={20} color="#10B981" />
-            <Text style={[styles.bannerText, { color: themeColors.text }]}>
-              {formData.speciesList.length} species selected for this task
-            </Text>
-          </View>
-        )}
+        {speciesBanner}
 
         {/* Current Step Content */}
         <View style={styles.contentContainer}>
@@ -304,14 +342,43 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginHorizontal: 16,
-    marginBottom: 16,
-    padding: 12,
+    marginBottom: 12,
+    padding: 10,
     borderRadius: 8,
     borderWidth: 1,
     gap: 8,
   },
   bannerText: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '600',
+  },
+
+  // Desktop two-column styles
+  desktopOuterContainer: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  desktopContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    width: '100%',
+    maxWidth: 960,
+  },
+  sidebarContainer: {
+    width: 170,
+    paddingTop: 16,
+    paddingRight: 8,
+    borderRightWidth: 1,
+  },
+  sidebarTitle: {
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 1,
+    paddingHorizontal: 12,
+    marginBottom: 4,
+  },
+  desktopContentContainer: {
+    flex: 1,
+    paddingTop: 8,
   },
 });

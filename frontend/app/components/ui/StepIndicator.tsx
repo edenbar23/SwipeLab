@@ -6,38 +6,109 @@ import { useThemeStore } from '../../stores/themeStore';
 interface StepIndicatorProps {
   steps: string[];
   currentStep: number; // 0-indexed
+  layout?: 'horizontal' | 'vertical';
 }
 
-export default function StepIndicator({ steps, currentStep }: StepIndicatorProps) {
+const ACTIVE_GREEN = '#10B981';
+
+export default function StepIndicator({ steps, currentStep, layout = 'horizontal' }: StepIndicatorProps) {
   const { theme } = useThemeStore();
   const themeColors = Colors[theme as keyof typeof Colors];
 
+  if (layout === 'vertical') {
+    return (
+      <View style={verticalStyles.container}>
+        {steps.map((label, index) => {
+          const isCompleted = index < currentStep;
+          const isActive = index === currentStep;
+          const isLast = index === steps.length - 1;
+
+          return (
+            <View key={index} style={verticalStyles.stepWrapper}>
+              {/* Circle + Label row */}
+              <View style={verticalStyles.stepRow}>
+                <View
+                  style={[
+                    verticalStyles.circle,
+                    isCompleted && verticalStyles.circleCompleted,
+                    isActive && verticalStyles.circleActive,
+                    !isCompleted && !isActive && { borderColor: themeColors.border },
+                  ]}
+                >
+                  {isCompleted ? (
+                    <Text style={verticalStyles.checkmark}>✓</Text>
+                  ) : (
+                    <Text
+                      style={[
+                        verticalStyles.circleText,
+                        isActive && verticalStyles.circleTextActive,
+                        !isActive && { color: themeColors.textSecondary },
+                      ]}
+                    >
+                      {index + 1}
+                    </Text>
+                  )}
+                </View>
+                <Text
+                  style={[
+                    verticalStyles.label,
+                    isActive && verticalStyles.labelActive,
+                    isCompleted && verticalStyles.labelCompleted,
+                    !isActive && !isCompleted && { color: themeColors.textSecondary },
+                  ]}
+                  numberOfLines={1}
+                >
+                  {label}
+                </Text>
+              </View>
+
+              {/* Vertical connector */}
+              {!isLast && (
+                <View style={verticalStyles.connectorWrapper}>
+                  <View
+                    style={[
+                      verticalStyles.connector,
+                      isCompleted
+                        ? verticalStyles.connectorCompleted
+                        : { backgroundColor: themeColors.border },
+                    ]}
+                  />
+                </View>
+              )}
+            </View>
+          );
+        })}
+      </View>
+    );
+  }
+
+  // Horizontal layout (default — unchanged)
   return (
-    <View style={styles.container}>
+    <View style={horizontalStyles.container}>
       {steps.map((label, index) => {
         const isCompleted = index < currentStep;
         const isActive = index === currentStep;
         const isLast = index === steps.length - 1;
 
         return (
-          <View key={index} style={styles.stepWrapper}>
+          <View key={index} style={horizontalStyles.stepWrapper}>
             {/* Circle + Label */}
-            <View style={styles.stepItem}>
+            <View style={horizontalStyles.stepItem}>
               <View
                 style={[
-                  styles.circle,
-                  isCompleted && styles.circleCompleted,
-                  isActive && styles.circleActive,
+                  horizontalStyles.circle,
+                  isCompleted && horizontalStyles.circleCompleted,
+                  isActive && horizontalStyles.circleActive,
                   !isCompleted && !isActive && { borderColor: themeColors.border },
                 ]}
               >
                 {isCompleted ? (
-                  <Text style={styles.checkmark}>✓</Text>
+                  <Text style={horizontalStyles.checkmark}>✓</Text>
                 ) : (
                   <Text
                     style={[
-                      styles.circleText,
-                      isActive && styles.circleTextActive,
+                      horizontalStyles.circleText,
+                      isActive && horizontalStyles.circleTextActive,
                       !isActive && { color: themeColors.textSecondary },
                     ]}
                   >
@@ -47,8 +118,8 @@ export default function StepIndicator({ steps, currentStep }: StepIndicatorProps
               </View>
               <Text
                 style={[
-                  styles.label,
-                  isActive && styles.labelActive,
+                  horizontalStyles.label,
+                  isActive && horizontalStyles.labelActive,
                   !isActive && { color: themeColors.textSecondary },
                 ]}
               >
@@ -60,9 +131,9 @@ export default function StepIndicator({ steps, currentStep }: StepIndicatorProps
             {!isLast && (
               <View
                 style={[
-                  styles.connector,
+                  horizontalStyles.connector,
                   isCompleted
-                    ? styles.connectorCompleted
+                    ? horizontalStyles.connectorCompleted
                     : { backgroundColor: themeColors.border },
                 ]}
               />
@@ -74,16 +145,84 @@ export default function StepIndicator({ steps, currentStep }: StepIndicatorProps
   );
 }
 
-const ACTIVE_GREEN = '#10B981';
+const verticalStyles = StyleSheet.create({
+  container: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+  },
+  stepWrapper: {},
+  stepRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 4,
+  },
+  circle: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    borderWidth: 2,
+    borderColor: '#e5e7eb',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'transparent',
+  },
+  circleActive: {
+    borderColor: ACTIVE_GREEN,
+    backgroundColor: ACTIVE_GREEN,
+  },
+  circleCompleted: {
+    borderColor: ACTIVE_GREEN,
+    backgroundColor: ACTIVE_GREEN,
+  },
+  circleText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#6b7280',
+  },
+  circleTextActive: {
+    color: '#fff',
+  },
+  checkmark: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  label: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: '#6b7280',
+  },
+  labelActive: {
+    color: ACTIVE_GREEN,
+    fontWeight: '700',
+  },
+  labelCompleted: {
+    color: ACTIVE_GREEN,
+    fontWeight: '600',
+  },
+  connectorWrapper: {
+    paddingLeft: 14, // center under the circle (30/2 - 1)
+    height: 16,
+  },
+  connector: {
+    width: 2,
+    flex: 1,
+    backgroundColor: '#e5e7eb',
+  },
+  connectorCompleted: {
+    backgroundColor: ACTIVE_GREEN,
+  },
+});
 
-const styles = StyleSheet.create({
+const horizontalStyles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     justifyContent: 'center',
-    alignSelf: 'center', // Centers the whole bar
+    alignSelf: 'center',
     width: '100%',
-    maxWidth: 600, // Prevents it from stretching infinitely on wide screens
+    maxWidth: 600,
     paddingVertical: 16,
     paddingHorizontal: 8,
   },
@@ -94,7 +233,7 @@ const styles = StyleSheet.create({
   },
   stepItem: {
     alignItems: 'center',
-    width: 76, // Increased to allow "Description" and "Recipients" to fit without wrapping
+    width: 76,
   },
   circle: {
     width: 32,
@@ -143,7 +282,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 2,
     backgroundColor: '#e5e7eb',
-    marginTop: 15, // vertically center with circle
+    marginTop: 15,
     marginHorizontal: -4,
   },
   connectorCompleted: {

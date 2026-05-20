@@ -11,11 +11,12 @@ export default function StepName({ formData, onUpdate, onNext }: StepProps) {
   const isValidLength = trimmedName.length >= 3 && trimmedName.length <= 100;
   const showWarning = formData.name.length > 0 && !isValidLength;
   const canProceed = isValidLength;
+  const isWeb = Platform.OS === 'web';
 
   return (
-      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled" bounces={false}>
-      <Text style={[styles.heading, { color: themeColors.text }]}>What's the name of your task?</Text>
-      <Text style={[styles.subtitle, { color: themeColors.textSecondary }]}>
+      <ScrollView contentContainerStyle={[styles.container, isWeb && styles.containerWeb]} keyboardShouldPersistTaps="handled" bounces={false}>
+      <Text style={[styles.heading, { color: themeColors.text }, isWeb && styles.headingWeb]}>What's the name of your task?</Text>
+      <Text style={[styles.subtitle, { color: themeColors.textSecondary }, isWeb && styles.subtitleWeb]}>
         Choose a clear, descriptive name for the classification task.
       </Text>
 
@@ -31,7 +32,7 @@ export default function StepName({ formData, onUpdate, onNext }: StepProps) {
         Task name must be between 3 and 100 characters.
       </Text>
 
-      <View style={styles.footer}>
+      <View style={[styles.footer, isWeb && styles.footerWeb]}>
         <TouchableOpacity
           style={[styles.nextButton, !canProceed && styles.buttonDisabled]}
           onPress={onNext}
@@ -46,8 +47,11 @@ export default function StepName({ formData, onUpdate, onNext }: StepProps) {
 
 const styles = StyleSheet.create({
   container: { flexGrow: 1, paddingVertical: 16 },
+  containerWeb: { paddingVertical: 8 },
   heading: { fontSize: 22, fontWeight: '700', marginBottom: 8 },
+  headingWeb: { fontSize: 20, marginBottom: 6 },
   subtitle: { fontSize: 14, marginBottom: 24, lineHeight: 20 },
+  subtitleWeb: { marginBottom: 16 },
   input: {
     borderWidth: 1,
     borderRadius: 12,
@@ -55,6 +59,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   footer: { marginTop: 'auto', paddingTop: 24 },
+  footerWeb: { paddingTop: 16 },
   nextButton: {
     backgroundColor: '#10B981',
     paddingVertical: 14,
