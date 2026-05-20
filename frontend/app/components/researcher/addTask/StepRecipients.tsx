@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View, ScrollView } from 'react-native';
 import { Colors } from '../../../../constants/theme';
 import { useThemeStore } from '../../../stores/themeStore';
 import MultiSelect from '../../ui/MultiSelect';
@@ -19,10 +19,11 @@ export default function StepRecipients({
 
   return (
     <View style={styles.container}>
-      <Text style={[styles.heading, { color: themeColors.text }]}>Who should see this task?</Text>
-      <Text style={[styles.subtitle, { color: themeColors.textSecondary }]}>
-        Make the task public for all users, or restrict it to specific groups and users.
-      </Text>
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <Text style={[styles.heading, { color: themeColors.text }]}>Who should see this task?</Text>
+        <Text style={[styles.subtitle, { color: themeColors.textSecondary }]}>
+          Make the task public for all users, or restrict it to specific groups and users.
+        </Text>
 
       {/* Public/Restricted toggle */}
       <View style={styles.toggleRow}>
@@ -93,7 +94,8 @@ export default function StepRecipients({
           placeholder="Search researchers..."
           loading={optionsLoading}
         />
-      </View>
+        </View>
+      </ScrollView>
 
       <View style={styles.footer}>
         <View style={styles.buttonRow}>
@@ -111,6 +113,7 @@ export default function StepRecipients({
 
 const styles = StyleSheet.create({
   container: { flex: 1, paddingVertical: 16 },
+  scrollContent: { paddingBottom: 24 },
   heading: { fontSize: 22, fontWeight: '700', marginBottom: 8 },
   subtitle: { fontSize: 14, marginBottom: 24, lineHeight: 20 },
   toggleRow: { flexDirection: 'row', gap: 12, marginBottom: 20 },
@@ -132,7 +135,7 @@ const styles = StyleSheet.create({
   toggleTextActive: { color: '#065f46' },
   recipientsSection: { marginTop: 4 },
   sectionLabel: { fontWeight: '600', marginBottom: 8, fontSize: 15 },
-  footer: { marginTop: 'auto', paddingTop: 24 },
+  footer: { paddingTop: 16 },
   buttonRow: { flexDirection: 'row', gap: 12 },
   backButton: {
     flex: 1,

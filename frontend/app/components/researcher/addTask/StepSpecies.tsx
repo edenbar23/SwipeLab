@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View, ScrollView } from 'react-native';
 import { Colors } from '../../../../constants/theme';
 import { useThemeStore } from '../../../stores/themeStore';
 import { StepSpeciesProps } from './addTaskTypes';
@@ -12,10 +12,11 @@ export default function StepSpecies({ formData, onUpdate, onNext, onBack, availa
 
   return (
     <View style={styles.container}>
-      <Text style={[styles.heading, { color: themeColors.text }]}>Choose species to label</Text>
-      <Text style={[styles.subtitle, { color: themeColors.textSecondary }]}>
-        Add the species that classifiers will identify in images.
-      </Text>
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <Text style={[styles.heading, { color: themeColors.text }]}>Choose species to label</Text>
+        <Text style={[styles.subtitle, { color: themeColors.textSecondary }]}>
+          Add the species that classifiers will identify in images.
+        </Text>
 
       <MultiSelect
         options={availableSpecies}
@@ -30,6 +31,7 @@ export default function StepSpecies({ formData, onUpdate, onNext, onBack, availa
         loading={optionsLoading}
         emptyOnNoSearch={true}
       />
+      </ScrollView>
 
       <View style={styles.footer}>
         <View style={styles.buttonRow}>
@@ -51,9 +53,10 @@ export default function StepSpecies({ formData, onUpdate, onNext, onBack, availa
 
 const styles = StyleSheet.create({
   container: { flex: 1, paddingVertical: 16 },
+  scrollContent: { paddingBottom: 24 },
   heading: { fontSize: 22, fontWeight: '700', marginBottom: 8 },
   subtitle: { fontSize: 14, marginBottom: 24, lineHeight: 20 },
-  footer: { paddingTop: 24, flex: 1, justifyContent: 'flex-end' },
+  footer: { paddingTop: 16 },
   buttonRow: { flexDirection: 'row', gap: 12 },
   backButton: {
     flex: 1,

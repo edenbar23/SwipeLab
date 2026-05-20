@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View, ScrollView } from 'react-native';
 import { Colors } from '../../../../constants/theme';
 import { useThemeStore } from '../../../stores/themeStore';
 import MultiSelect from '../../ui/MultiSelect';
@@ -18,10 +18,11 @@ export default function StepExperiments({
 
   return (
     <View style={styles.container}>
-      <Text style={[styles.heading, { color: themeColors.text }]}>Select Experiments</Text>
-      <Text style={[styles.subtitle, { color: themeColors.textSecondary }]}>
-        Choose one or more experiments that this task will classify images for.
-      </Text>
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <Text style={[styles.heading, { color: themeColors.text }]}>Select Experiments</Text>
+        <Text style={[styles.subtitle, { color: themeColors.textSecondary }]}>
+          Choose one or more experiments that this task will classify images for.
+        </Text>
 
       <View style={styles.recipientsSection}>
         <Text style={[styles.sectionLabel, { color: themeColors.text }]}>Experiments</Text>
@@ -39,6 +40,7 @@ export default function StepExperiments({
           loading={optionsLoading}
         />
       </View>
+      </ScrollView>
 
       <View style={styles.footer}>
         <View style={styles.buttonRow}>
@@ -56,11 +58,12 @@ export default function StepExperiments({
 
 const styles = StyleSheet.create({
   container: { flex: 1, paddingVertical: 16 },
+  scrollContent: { paddingBottom: 24 },
   heading: { fontSize: 22, fontWeight: '700', marginBottom: 8 },
   subtitle: { fontSize: 14, marginBottom: 24, lineHeight: 20 },
   recipientsSection: { marginTop: 4 },
   sectionLabel: { fontWeight: '600', marginBottom: 8, fontSize: 15 },
-  footer: { marginTop: 'auto', paddingTop: 24 },
+  footer: { paddingTop: 16 },
   buttonRow: { flexDirection: 'row', gap: 12 },
   backButton: {
     flex: 1,
