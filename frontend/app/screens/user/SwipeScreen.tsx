@@ -118,6 +118,8 @@ export default function SwipeScreen() {
           if (res.ok) {
             queryClient.invalidateQueries({ queryKey: QUERY_KEYS.challenges });
             queryClient.invalidateQueries({ queryKey: QUERY_KEYS.myBadges });
+            // Refresh top-bar stats (score, rank, streak) after each classification
+            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.userProfile });
           }
         })
         .catch((e) => console.error('Submit error:', e));

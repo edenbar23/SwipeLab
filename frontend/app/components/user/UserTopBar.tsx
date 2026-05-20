@@ -1,9 +1,8 @@
 import { Ionicons as VectorIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { API_ENDPOINTS } from '../../api/apiEndpoints';
-import { apiFetch } from "../../api/apiFetch";
+import { useProfile } from '../../api/queries';
 import { useAuthStore } from "../../stores/authStore";
 import { useModeStore } from "../../stores/modeStore";
 import { useThemeStore } from "../../stores/themeStore";
@@ -35,26 +34,9 @@ export default function UserTopBar({
 
   const isDarkMode = theme === 'dark';
 
-  const [stats, setStats] = useState<any>(null);
-
-  useEffect(() => {
-    let isMounted = true;
-    const fetchStats = async () => {
-      try {
-        const res = await apiFetch(API_ENDPOINTS.USERS.ME);
-        if (res.ok) {
-          const data = await res.json();
-          if (isMounted) setStats(data);
-        }
-      } catch (err) {
-        console.error("Failed to fetch user top bar stats", err);
-      }
-    };
-    fetchStats();
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+  // Uses React Query so the stats refresh whenever userProfile is invalidated
+  // (e.g. after each classification in SwipeScreen)
+  const { data: stats } = useProfile();
 
   const displayUsername = stats?.displayName || stats?.username || propUsername || "Player";
   const displayScore = propScore !== undefined ? propScore : (stats?.score || 0);
