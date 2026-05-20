@@ -19,6 +19,7 @@ import { useThemeStore } from '../../stores/themeStore';
 import { API_ENDPOINTS } from '../../api/apiEndpoints';
 import { useAdminUsers, useRecipients } from '../../api/queries';
 import { useQueryClient } from '@tanstack/react-query';
+import ResponsiveContainer from '../../components/layout/ResponsiveContainer';
 
 
 // Utility for colors
@@ -185,151 +186,153 @@ export default function RecipientGroupDetailsScreen() {
     const composition = getComposition();
 
     return (
-        <View style={[styles.container, { backgroundColor: themeColors.background }]}>
-            <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-                <Text style={[styles.backButtonText, { color: '#4B7BE5' }]}>← Back to Lists</Text>
-            </TouchableOpacity>
-
-            <View style={styles.header}>
-                <Text style={[styles.title, { color: themeColors.text }]}>{currentGroup.name}</Text>
-                <TouchableOpacity onPress={() => setAddMemberModalVisible(true)} style={styles.addBtn}>
-                    <Image source={require('../../../assets/images/users.png')} style={{ width: 24, height: 24, tintColor: '#fff' }} />
-                    <Text style={styles.addBtnText}>+</Text>
+        <ResponsiveContainer maxWidth={900} style={{ backgroundColor: themeColors.background }}>
+            <View style={[styles.container, { backgroundColor: themeColors.background }]}>
+                <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+                    <Text style={[styles.backButtonText, { color: '#4B7BE5' }]}>← Back to Lists</Text>
                 </TouchableOpacity>
-            </View>
 
-            {/* Composition Bar */}
-            {composition.length > 0 && (
-                <View style={styles.compositionContainer}>
-                    <Text style={styles.compTitle}>Group Composition:</Text>
-                    <View style={styles.barContainer}>
-                        {composition.map((comp) => (
-                            <View key={comp.type} style={[styles.barSegment, { flex: comp.percent, backgroundColor: comp.color }]}>
-                                {comp.percent > 10 && <Text style={styles.barText}>{comp.percent}%</Text>}
-                            </View>
-                        ))}
-                    </View>
-                    <View style={styles.legendContainer}>
-                        {composition.map(comp => (
-                            <View key={comp.type} style={styles.legendItem}>
-                                <View style={[styles.dot, { backgroundColor: comp.color }]} />
-                                <Text style={styles.legendText}>{comp.type} ({comp.count})</Text>
-                            </View>
-                        ))}
-                    </View>
+                <View style={styles.header}>
+                    <Text style={[styles.title, { color: themeColors.text }]}>{currentGroup.name}</Text>
+                    <TouchableOpacity onPress={() => setAddMemberModalVisible(true)} style={styles.addBtn}>
+                        <Image source={require('../../../assets/images/users.png')} style={{ width: 24, height: 24, tintColor: '#fff' }} />
+                        <Text style={styles.addBtnText}>+</Text>
+                    </TouchableOpacity>
                 </View>
-            )}
 
-            <ScrollView contentContainerStyle={styles.list} showsVerticalScrollIndicator={false}>
-                {!currentGroup || !currentGroup.users || currentGroup.users.length === 0 ? (
-                    <Text style={[styles.emptyText, { color: themeColors.textSecondary }]}>No users in this group.</Text>
-                ) : (
-                    currentGroup.users.map((user: any) => (
-                        <View key={user.id} style={[styles.userRow, { backgroundColor: themeColors.card }]}>
-                            <View>
-                                <Text style={[styles.username, { color: themeColors.text }]}>{user.username}</Text>
-                                <Text style={[styles.userDesc, { color: themeColors.textSecondary }]}>{user.description || 'User'}</Text>
-                            </View>
-                            <TouchableOpacity onPress={() => handleRemoveUser(user.id)} style={styles.deleteBtn}>
-                                <Text style={styles.deleteText}>🗑️</Text>
-                            </TouchableOpacity>
+                {/* Composition Bar */}
+                {composition.length > 0 && (
+                    <View style={styles.compositionContainer}>
+                        <Text style={styles.compTitle}>Group Composition:</Text>
+                        <View style={styles.barContainer}>
+                            {composition.map((comp) => (
+                                <View key={comp.type} style={[styles.barSegment, { flex: comp.percent, backgroundColor: comp.color }]}>
+                                    {comp.percent > 10 && <Text style={styles.barText}>{comp.percent}%</Text>}
+                                </View>
+                            ))}
                         </View>
-                    ))
+                        <View style={styles.legendContainer}>
+                            {composition.map(comp => (
+                                <View key={comp.type} style={styles.legendItem}>
+                                    <View style={[styles.dot, { backgroundColor: comp.color }]} />
+                                    <Text style={styles.legendText}>{comp.type} ({comp.count})</Text>
+                                </View>
+                            ))}
+                        </View>
+                    </View>
                 )}
-            </ScrollView>
 
-            {/* Remove User Confirmation Modal */}
-            <Modal visible={!!userToRemove} animationType="fade" transparent>
-                <View style={styles.modalContainer}>
-                    <View style={[styles.modalContent, { backgroundColor: themeColors.card, alignItems: 'center' }]}>
-                        <Text style={[styles.modalTitle, { color: themeColors.text, marginBottom: 8 }]}>Remove User</Text>
-                        <Text style={{ color: themeColors.textSecondary, marginBottom: 20, textAlign: 'center' }}>
-                            Are you sure you want to remove this user from the group?
-                        </Text>
-                        
-                        <View style={{ flexDirection: 'row', justifyContent: 'center', width: '100%', gap: 16 }}>
-                            <TouchableOpacity 
-                                style={[styles.closeBtn, { backgroundColor: '#f0f0f0', borderRadius: 8, paddingHorizontal: 24 }]} 
-                                onPress={() => setUserToRemove(null)}
-                            >
-                                <Text style={{ color: '#333', fontWeight: 'bold' }}>Cancel</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity 
-                                style={[styles.confirmBtn, { backgroundColor: '#FF6B6B' }]} 
-                                onPress={confirmRemoveUser}
-                            >
-                                <Text style={styles.confirmText}>Remove</Text>
-                            </TouchableOpacity>
+                <ScrollView contentContainerStyle={styles.list} showsVerticalScrollIndicator={false}>
+                    {!currentGroup || !currentGroup.users || currentGroup.users.length === 0 ? (
+                        <Text style={[styles.emptyText, { color: themeColors.textSecondary }]}>No users in this group.</Text>
+                    ) : (
+                        currentGroup.users.map((user: any) => (
+                            <View key={user.id} style={[styles.userRow, { backgroundColor: themeColors.card }]}>
+                                <View>
+                                    <Text style={[styles.username, { color: themeColors.text }]}>{user.username}</Text>
+                                    <Text style={[styles.userDesc, { color: themeColors.textSecondary }]}>{user.description || 'User'}</Text>
+                                </View>
+                                <TouchableOpacity onPress={() => handleRemoveUser(user.id)} style={styles.deleteBtn}>
+                                    <Text style={styles.deleteText}>🗑️</Text>
+                                </TouchableOpacity>
+                            </View>
+                        ))
+                    )}
+                </ScrollView>
+
+                {/* Remove User Confirmation Modal */}
+                <Modal visible={!!userToRemove} animationType="fade" transparent>
+                    <View style={styles.modalContainer}>
+                        <View style={[styles.modalContent, { backgroundColor: themeColors.card, alignItems: 'center' }]}>
+                            <Text style={[styles.modalTitle, { color: themeColors.text, marginBottom: 8 }]}>Remove User</Text>
+                            <Text style={{ color: themeColors.textSecondary, marginBottom: 20, textAlign: 'center' }}>
+                                Are you sure you want to remove this user from the group?
+                            </Text>
+                            
+                            <View style={{ flexDirection: 'row', justifyContent: 'center', width: '100%', gap: 16 }}>
+                                <TouchableOpacity 
+                                    style={[styles.closeBtn, { backgroundColor: '#f0f0f0', borderRadius: 8, paddingHorizontal: 24 }]} 
+                                    onPress={() => setUserToRemove(null)}
+                                >
+                                    <Text style={{ color: '#333', fontWeight: 'bold' }}>Cancel</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity 
+                                    style={[styles.confirmBtn, { backgroundColor: '#FF6B6B' }]} 
+                                    onPress={confirmRemoveUser}
+                                >
+                                    <Text style={styles.confirmText}>Remove</Text>
+                                </TouchableOpacity>
+                            </View>
                         </View>
                     </View>
-                </View>
-            </Modal>
+                </Modal>
 
-            {/* Advanced Add Member Modal */}
-            <Modal visible={addMemberModalVisible} animationType="slide" transparent>
-                <View style={styles.modalContainer}>
-                    <View style={[styles.modalContent, { backgroundColor: themeColors.card }]}>
-                        <Text style={[styles.modalTitle, { color: themeColors.text }]}>Add Members</Text>
+                {/* Advanced Add Member Modal */}
+                <Modal visible={addMemberModalVisible} animationType="slide" transparent>
+                    <View style={styles.modalContainer}>
+                        <View style={[styles.modalContent, { backgroundColor: themeColors.card }]}>
+                            <Text style={[styles.modalTitle, { color: themeColors.text }]}>Add Members</Text>
 
-                        {/* Tabs */}
-                        <View style={[styles.tabsContainer, { borderColor: themeColors.border }]}>
-                            <TouchableOpacity
-                                style={[styles.tab, activeTab === 'USERS' && styles.activeTab]}
-                                onPress={() => setActiveTab('USERS')}
-                            >
-                                <Text style={[styles.tabText, activeTab === 'USERS' && styles.activeTabText]}>Users</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                style={[styles.tab, activeTab === 'GROUPS' && styles.activeTab]}
-                                onPress={() => setActiveTab('GROUPS')}
-                            >
-                                <Text style={[styles.tabText, activeTab === 'GROUPS' && styles.activeTabText]}>Groups</Text>
-                            </TouchableOpacity>
-                        </View>
+                            {/* Tabs */}
+                            <View style={[styles.tabsContainer, { borderColor: themeColors.border }]}>
+                                <TouchableOpacity
+                                    style={[styles.tab, activeTab === 'USERS' && styles.activeTab]}
+                                    onPress={() => setActiveTab('USERS')}
+                                >
+                                    <Text style={[styles.tabText, activeTab === 'USERS' && styles.activeTabText]}>Users</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={[styles.tab, activeTab === 'GROUPS' && styles.activeTab]}
+                                    onPress={() => setActiveTab('GROUPS')}
+                                >
+                                    <Text style={[styles.tabText, activeTab === 'GROUPS' && styles.activeTabText]}>Groups</Text>
+                                </TouchableOpacity>
+                            </View>
 
-                        <ScrollView style={{ maxHeight: 300 }} showsVerticalScrollIndicator={false}>
-                            {activeTab === 'USERS' ? (
-                                // Users List
-                                allUsers.map((u: any) => {
-                                    const isAlreadyIn = currentGroup && currentGroup.users ? currentGroup.users.some((existing: any) => existing.id === u.id) : false;
-                                    if (isAlreadyIn) return null;
-                                    const isSelected = selectedUserIds.includes(u.id);
-                                    return (
-                                        <TouchableOpacity key={u.id} style={[styles.selectRow, isSelected && styles.selectedRow, { borderBottomColor: themeColors.border }]} onPress={() => toggleUserSelection(u.id)}>
-                                            <Text style={[styles.selectText, { color: themeColors.text }]}>{isSelected ? '☑' : '☐'} {u.username}</Text>
-                                            <Text style={[styles.subText, { color: themeColors.textSecondary }]}>{u.description}</Text>
-                                        </TouchableOpacity>
-                                    );
-                                })
-                            ) : (
-                                // Groups List
-                                allGroups.map((g: any) => {
-                                    if (currentGroup && g.id === currentGroup.id) return null; // Don't add self
-                                    const isSelected = selectedGroupIds.includes(g.id);
-                                    return (
-                                        <TouchableOpacity key={g.id} style={[styles.selectRow, isSelected && styles.selectedRow, { borderBottomColor: themeColors.border }]} onPress={() => toggleGroupSelection(g.id)}>
-                                            <Text style={[styles.selectText, { color: themeColors.text }]}>{isSelected ? '☑' : '☐'} {g.name}</Text>
-                                            <Text style={[styles.subText, { color: themeColors.textSecondary }]}>{g.usersCount} users</Text>
-                                        </TouchableOpacity>
-                                    );
-                                })
-                            )}
-                        </ScrollView>
+                            <ScrollView style={{ maxHeight: 300 }} showsVerticalScrollIndicator={false}>
+                                {activeTab === 'USERS' ? (
+                                    // Users List
+                                    allUsers.map((u: any) => {
+                                        const isAlreadyIn = currentGroup && currentGroup.users ? currentGroup.users.some((existing: any) => existing.id === u.id) : false;
+                                        if (isAlreadyIn) return null;
+                                        const isSelected = selectedUserIds.includes(u.id);
+                                        return (
+                                            <TouchableOpacity key={u.id} style={[styles.selectRow, isSelected && styles.selectedRow, { borderBottomColor: themeColors.border }]} onPress={() => toggleUserSelection(u.id)}>
+                                                <Text style={[styles.selectText, { color: themeColors.text }]}>{isSelected ? '☑' : '☐'} {u.username}</Text>
+                                                <Text style={[styles.subText, { color: themeColors.textSecondary }]}>{u.description}</Text>
+                                            </TouchableOpacity>
+                                        );
+                                    })
+                                ) : (
+                                    // Groups List
+                                    allGroups.map((g: any) => {
+                                        if (currentGroup && g.id === currentGroup.id) return null; // Don't add self
+                                        const isSelected = selectedGroupIds.includes(g.id);
+                                        return (
+                                            <TouchableOpacity key={g.id} style={[styles.selectRow, isSelected && styles.selectedRow, { borderBottomColor: themeColors.border }]} onPress={() => toggleGroupSelection(g.id)}>
+                                                <Text style={[styles.selectText, { color: themeColors.text }]}>{isSelected ? '☑' : '☐'} {g.name}</Text>
+                                                <Text style={[styles.subText, { color: themeColors.textSecondary }]}>{g.usersCount} users</Text>
+                                            </TouchableOpacity>
+                                        );
+                                    })
+                                )}
+                            </ScrollView>
 
-                        <View style={styles.modalActions}>
-                            <TouchableOpacity style={styles.closeBtn} onPress={() => setAddMemberModalVisible(false)}>
-                                <Text style={[styles.closeText, { color: themeColors.textSecondary }]}>Cancel</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity style={styles.confirmBtn} onPress={handleAddSelected}>
-                                <Text style={styles.confirmText}>
-                                    Add Selected ({activeTab === 'USERS' ? selectedUserIds.length : selectedGroupIds.length})
-                                </Text>
-                            </TouchableOpacity>
+                            <View style={styles.modalActions}>
+                                <TouchableOpacity style={styles.closeBtn} onPress={() => setAddMemberModalVisible(false)}>
+                                    <Text style={[styles.closeText, { color: themeColors.textSecondary }]}>Cancel</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity style={styles.confirmBtn} onPress={handleAddSelected}>
+                                    <Text style={styles.confirmText}>
+                                        Add Selected ({activeTab === 'USERS' ? selectedUserIds.length : selectedGroupIds.length})
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
                         </View>
                     </View>
-                </View>
-            </Modal>
-        </View>
+                </Modal>
+            </View>
+        </ResponsiveContainer>
     );
 }
 

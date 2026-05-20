@@ -20,13 +20,11 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <View style={styles.rootBackground}>
-        <View style={styles.webContainer}>
-          <GestureHandlerRootView style={{ flex: 1 }}>
-            <SafeAreaProvider style={{ flex: 1 }}>
-              <RootNavigator />
-            </SafeAreaProvider>
-          </GestureHandlerRootView>
-        </View>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <SafeAreaProvider style={{ flex: 1 }}>
+            <RootNavigator />
+          </SafeAreaProvider>
+        </GestureHandlerRootView>
       </View>
     </QueryClientProvider>
   );
@@ -35,19 +33,6 @@ export default function App() {
 const styles = StyleSheet.create({
   rootBackground: {
     flex: 1,
-    backgroundColor: Platform.OS === 'web' ? '#f3f4f6' : '#fff', // light gray background for web
-  },
-  webContainer: {
-    flex: 1,
-    width: '100%',
-    maxWidth: Platform.OS === 'web' ? 768 : '100%',
-    alignSelf: 'center',
-    backgroundColor: '#fff', // white for the app itself
-    // Optional: add a subtle shadow for web
-    ...Platform.select({
-      web: {
-        boxShadow: '0px 0px 20px rgba(0, 0, 0, 0.05)',
-      },
-    }),
-  },
+    backgroundColor: Platform.OS === 'web' ? '#f3f4f6' : '#fff', // Keeps the global web background gray, but child is full width
+  }
 });
