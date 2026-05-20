@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import { 
     StyleSheet, 
     Text, 
@@ -16,7 +16,7 @@ import ScreenHeaderLayout from "../../components/layout/ScreenHeaderLayout/Scree
 import { useThemeStore } from '../../stores/themeStore';
 import { Colors } from '../../../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
-import { apiFetch } from "../../api/apiFetch";
+import { useSpeciesMetadata } from "../../api/queries";
 
 // Images
 import taxonomyImg from "../../../assets/images/taxonomy.png";
@@ -30,33 +30,19 @@ export default function TaxonomyScreen() {
     const themeColors = Colors[theme as keyof typeof Colors];
 
     const [searchQuery, setSearchQuery] = useState("");
-    const [availableSpecies, setAvailableSpecies] = useState<{ id: string; label: string; searchTerms: string }[]>([]);
-    const [loading, setLoading] = useState(true);
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
-    useEffect(() => {
-        const fetchSpecies = async () => {
-            try {
-                const res = await apiFetch('/api/v1/metadata/species');
-                if (res.ok) {
-                    const data = await res.json();
-                    setAvailableSpecies(data.map((s: any) => ({ 
-                        id: String(s.id), 
-                        label: String(s.label),
-                        searchTerms: String(s.searchTerms || "")
-                    })));
-                } else {
-                    Alert.alert("Error", "Failed to fetch species data");
-                }
-            } catch (err) {
-                console.error("Failed to load species:", err);
-                Alert.alert("Error", "Could not connect to the server.");
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchSpecies();
-    }, []);
+    // Species list is static reference data — cache for 24 h via React Query.
+    const { data: rawSpecies = [], isLoading: loading, isError } = useSpeciesMetadata();
+
+    const availableSpecies = useMemo(() =>
+        rawSpecies.map((s: any) => ({
+            id: String(s.id),
+            label: String(s.label),
+            searchTerms: String(s.searchTerms || ""),
+        })),
+        [rawSpecies]
+    );
 
     const filteredSpecies = useMemo(() => {
         if (!searchQuery.trim()) return [];
@@ -141,6 +127,11 @@ export default function TaxonomyScreen() {
                 </View>
 
                 {/* List */}
+                {isError && (
+                    <Text style={[styles.loadingText, { color: '#ef4444', textAlign: 'center', marginTop: 12 }]}>
+                        Failed to load species. Please try again.
+                    </Text>
+                )}
                 {loading ? (
                     <View style={styles.centerContainer}>
                         <ActivityIndicator size="large" color="#10B981" />
