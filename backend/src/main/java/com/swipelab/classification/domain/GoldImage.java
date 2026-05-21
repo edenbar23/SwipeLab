@@ -3,6 +3,7 @@ package com.swipelab.classification.domain;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Builder.Default;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -28,6 +29,11 @@ public class GoldImage {
     @Enumerated(EnumType.STRING)
     @Column(name = "correct_answer", nullable = false)
     private UserResponse correctAnswer;
+
+    // Soft-delete flag — never physically remove rows that are referenced by credibility_records
+    @Default
+    @Column(nullable = false)
+    private Boolean active = true;
 
     public enum UserResponse {
         YES, NO, DONT_KNOW, TRASH

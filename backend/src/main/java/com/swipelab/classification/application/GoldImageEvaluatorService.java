@@ -37,7 +37,7 @@ public class GoldImageEvaluatorService {
             String username,
             Classification.UserResponse decision) {
 
-        Optional<GoldImage> goldImageOpt = goldImageRepository.findByImageId(image.getId());
+        Optional<GoldImage> goldImageOpt = goldImageRepository.findByImageIdAndActiveTrue(image.getId());
         if (goldImageOpt.isEmpty()) {
             return Optional.empty();
         }

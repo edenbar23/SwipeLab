@@ -68,6 +68,7 @@ class GoldImageServiceTest {
         goldImage.setImage(image);
         goldImage.setSpecies("Lion");
         goldImage.setCorrectAnswer(GoldImage.UserResponse.YES);
+        goldImage.setActive(true);
 
         request = new GoldImageRequest();
         request.setImageId(1L);
@@ -209,7 +210,7 @@ class GoldImageServiceTest {
 
     @Test
     void getGoldImagesByTask_ShouldReturnValidList() {
-        when(goldImageRepository.findAll()).thenReturn(Collections.singletonList(goldImage));
+        when(goldImageRepository.findAllByActiveTrue()).thenReturn(Collections.singletonList(goldImage));
 
         List<GoldImageResponse> responses = goldImageService.getGoldImagesByTask(1L);
 
@@ -238,18 +239,33 @@ class GoldImageServiceTest {
     }
 
     @Test
-    void deleteGoldImage_ShouldCallDelete() {
+    void deleteGoldImage_ShouldSoftDelete_WhenExists() {
+        when(goldImageRepository.findById(1L)).thenReturn(Optional.of(goldImage));
+        when(goldImageRepository.save(any(GoldImage.class))).thenReturn(goldImage);
+
         goldImageService.deleteGoldImage(1L);
-        verify(goldImageRepository, times(1)).deleteById(1L);
+
+        assertFalse(goldImage.getActive(), "active flag must be set to false after soft-delete");
+        verify(goldImageRepository).save(goldImage);
+        // Physical DELETE must never be called
+        verify(goldImageRepository, never()).deleteById(any());
+    }
+
+    @Test
+    void deleteGoldImage_ShouldThrow_WhenGoldImageNotFound() {
+        when(goldImageRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> goldImageService.deleteGoldImage(99L));
+        verify(goldImageRepository, never()).save(any());
     }
 
     @Test
     void getAllGoldImages_ShouldReturnList() {
-        when(goldImageRepository.findAll()).thenReturn(Arrays.asList(goldImage, goldImage));
+        when(goldImageRepository.findAllByActiveTrue()).thenReturn(Arrays.asList(goldImage, goldImage));
 
         List<GoldImageResponse> responses = goldImageService.getAllGoldImages();
 
         assertEquals(2, responses.size());
-        verify(goldImageRepository, times(1)).findAll();
+        verify(goldImageRepository, times(1)).findAllByActiveTrue();
     }
 }

@@ -84,8 +84,7 @@ public class GoldImageService {
 
     @Transactional(readOnly = true)
     public List<GoldImageResponse> getGoldImagesByTask(Long taskId) {
-        // Assuming we want all gold images for images belonging to a task
-        return goldImageRepository.findAll().stream()
+        return goldImageRepository.findAllByActiveTrue().stream()
                 .filter(g -> g.getImage().getTaskId().equals(taskId))
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
@@ -112,7 +111,11 @@ public class GoldImageService {
 
     @Transactional
     public void deleteGoldImage(Long id) {
-        goldImageRepository.deleteById(id);
+        GoldImage goldImage = goldImageRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Gold Image not found: " + id));
+        // Soft-delete: preserve the row so credibility_records FK is never violated
+        goldImage.setActive(false);
+        goldImageRepository.save(goldImage);
     }
 
     private GoldImageResponse mapToResponse(GoldImage goldImage) {
@@ -134,7 +137,7 @@ public class GoldImageService {
 
     @Transactional(readOnly = true)
     public List<GoldImageResponse> getAllGoldImages() {
-        return goldImageRepository.findAll().stream()
+        return goldImageRepository.findAllByActiveTrue().stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
