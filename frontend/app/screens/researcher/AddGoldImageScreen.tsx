@@ -328,7 +328,19 @@ export default function AddGoldImageScreen({ navigation }: any) {
                                 <Text style={styles.urlErrorText}>{urlError}</Text>
                             ) : null}
                             {urlValidation === 'valid' ? (
-                                <Text style={styles.urlSuccessText}>✓ Valid image URL</Text>
+                                <>
+                                    <Text style={styles.urlSuccessText}>✓ Valid image URL</Text>
+                                    <View style={styles.previewContainer}>
+                                        <RNImage
+                                            source={{ uri: imageUrl }}
+                                            style={styles.previewImage}
+                                            resizeMode="cover"
+                                        />
+                                        <View style={styles.previewBadge}>
+                                            <Text style={styles.previewBadgeText}>✓ Preview</Text>
+                                        </View>
+                                    </View>
+                                </>
                             ) : null}
                         </View>
                     ) : (
