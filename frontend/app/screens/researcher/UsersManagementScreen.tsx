@@ -4,7 +4,6 @@ import React, { useMemo, useState } from 'react';
 import {
     FlatList,
     Image,
-    Platform,
     ScrollView,
     StyleSheet,
     Text,
@@ -12,6 +11,7 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
+import useResponsive from '../../hooks/useResponsive';
 import { Colors } from '../../../constants/theme';
 import { API_ENDPOINTS } from '../../api/apiEndpoints';
 import { apiFetch } from '../../api/apiFetch';
@@ -55,9 +55,11 @@ const SORT_LABELS: Record<SortOrder, string> = {
     desc: 'Score ↓',
 };
 
-const isWeb = Platform.OS === 'web';
+
 
 export default function UsersManagementScreen() {
+    // Use screen width — not Platform.OS — so mobile browsers get the card layout too
+    const { isPhone } = useResponsive();
     const navigation = useNavigation<UsersManagementScreenNavigationProp>();
     const { theme } = useThemeStore();
     const themeColors = Colors[theme as keyof typeof Colors];
@@ -228,8 +230,8 @@ export default function UsersManagementScreen() {
                         value={searchQuery}
                         onChangeText={setSearchQuery}
                     />
-                    {/* Sort button — on web it's on the Score column header; on mobile keep it here */}
-                    {!isWeb && (
+                    {/* Sort button — on desktop it's on the Score column header; on mobile keep it here */}
+                    {isPhone && (
                         <TouchableOpacity
                             style={[sharedStyles.sortButton, { backgroundColor: themeColors.card, borderColor: themeColors.border }]}
                             onPress={() => setSortOrder(prev => NEXT_SORT[prev])}
@@ -246,7 +248,7 @@ export default function UsersManagementScreen() {
                     <Text style={{ textAlign: 'center', marginTop: 20, color: themeColors.text }}>Loading...</Text>
                 ) : displayedUsers.length === 0 ? (
                     <Text style={{ textAlign: 'center', marginTop: 20, color: themeColors.textSecondary }}>No users found.</Text>
-                ) : isWeb ? (
+                ) : !isPhone ? (
                     renderWebTable()
                 ) : (
                     <FlatList
