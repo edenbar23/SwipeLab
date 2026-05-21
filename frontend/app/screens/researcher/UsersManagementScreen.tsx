@@ -101,7 +101,7 @@ export default function UsersManagementScreen() {
             <View style={[webStyles.tableHeader, { borderBottomColor: themeColors.border }]}>
                 <Text style={[webStyles.headerCell, webStyles.avatarCol, { color: themeColors.textSecondary }]}>Avatar</Text>
                 <TouchableOpacity
-                    style={[webStyles.headerCell, webStyles.usernameCol, { flexDirection: 'row', alignItems: 'center' }]}
+                    style={[webStyles.headerCellBtn, webStyles.usernameCol]}
                     onPress={() => setSortOrder(NEXT_SORT[sortOrder])}
                     accessibilityLabel={`Sort by score, current: ${SORT_LABELS[sortOrder]}`}
                 >

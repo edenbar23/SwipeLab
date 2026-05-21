@@ -32,7 +32,8 @@ export default function GoldImageCard({ goldImage, onDelete }: Props) {
     return (
         <View style={[styles.card, { backgroundColor: themeColors.card, borderColor: themeColors.border }]}>
             {/* Image Thumbnail */}
-            <View style={styles.imageContainer}>
+            {/* pointerEvents on View, not Image — Image doesn't accept this prop */}
+            <View style={styles.imageContainer} pointerEvents="none">
                 <Image
                     source={{ uri: finalUri }}
                     style={styles.thumbnail}
@@ -55,9 +56,8 @@ export default function GoldImageCard({ goldImage, onDelete }: Props) {
             {/* Delete Button */}
             <TouchableOpacity
                 style={styles.deleteButton}
-                onPress={(e) => {
-                    onDelete();
-                }}
+                onPress={onDelete}
+                activeOpacity={0.6}
             >
                 <Ionicons name="trash-outline" size={22} color="#EF4444" />
             </TouchableOpacity>
