@@ -1,7 +1,7 @@
 // researcher screen for adding gold images
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
-    Alert,
+    ActivityIndicator,
     ScrollView,
     StyleSheet,
     Text,
@@ -20,6 +20,8 @@ import { API_ENDPOINTS } from '../../api/apiEndpoints';
 import { useQueryClient } from '@tanstack/react-query';
 import MultiSelect from '../../components/ui/MultiSelect';
 
+type UrlValidationState = 'idle' | 'checking' | 'valid' | 'invalid';
+
 export default function AddGoldImageScreen({ navigation }: any) {
     const queryClient = useQueryClient();
     const [uploadType, setUploadType] = useState<"url" | "file">("file");
@@ -29,12 +31,19 @@ export default function AddGoldImageScreen({ navigation }: any) {
     const [species, setSpecies] = useState("");
     const [difficultyLevel, setDifficultyLevel] = useState("MEDIUM");
     const [loading, setLoading] = useState(false);
-    const [statusMessage, setStatusMessage] = useState<{ type: 'error' | 'success', text: string } | null>(null);
+    const [statusMessage, setStatusMessage] = useState<{ type: 'error' | 'success'; text: string } | null>(null);
     const { theme } = useThemeStore();
     const themeColors = Colors[theme as keyof typeof Colors];
 
     const [availableSpecies, setAvailableSpecies] = useState<{ id: string; label: string }[]>([]);
     const [optionsLoading, setOptionsLoading] = useState(false);
+
+    // URL real-time validation state
+    const [urlValidation, setUrlValidation] = useState<UrlValidationState>('idle');
+    const [urlError, setUrlError] = useState<string>('');
+    const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const isDark = theme === 'dark';
 
     useEffect(() => {
         const fetchOptions = async () => {
@@ -43,10 +52,10 @@ export default function AddGoldImageScreen({ navigation }: any) {
                 const speciesRes = await apiFetch('/api/v1/metadata/species');
                 if (speciesRes.ok) {
                     const sps = await speciesRes.json();
-                    setAvailableSpecies(sps.map((s: any) => ({ 
-                        id: String(s.id), 
+                    setAvailableSpecies(sps.map((s: any) => ({
+                        id: String(s.id),
                         label: String(s.label),
-                        searchTerms: String(s.searchTerms || "") 
+                        searchTerms: String(s.searchTerms || "")
                     })));
                 }
             } catch (error) {
@@ -61,18 +70,6 @@ export default function AddGoldImageScreen({ navigation }: any) {
     // For demo purposes, using taskId = 1. In production, this would come from navigation params
     const taskId = 1;
 
-    const pickImage = async () => {
-        let result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            allowsEditing: true,
-            quality: 1,
-        });
-
-        if (!result.canceled) {
-            setImageFile(result.assets[0]);
-        }
-    };
-
     const validateImageUrl = async (url: string): Promise<string | null> => {
         try {
             // Try HEAD first (cheaper), fall back to GET if server doesn't allow HEAD
@@ -85,45 +82,98 @@ export default function AddGoldImageScreen({ navigation }: any) {
             }
             const contentType = response.headers.get('content-type') || '';
             if (!contentType.toLowerCase().startsWith('image/')) {
-                return `The URL does not point to an image (Content-Type: "${contentType}"). Only image links are accepted.`;
+                return `Not an image (Content-Type: "${contentType}"). Only image links are accepted.`;
             }
             return null; // valid
         } catch {
-            return 'Could not reach the URL. Make sure it is publicly accessible and try again.';
+            return 'Could not reach the URL. Make sure it is publicly accessible.';
+        }
+    };
+
+    // Debounced real-time URL validation — fires 800ms after the user stops typing
+    const handleUrlChange = useCallback((text: string) => {
+        setImageUrl(text);
+
+        if (debounceTimer.current) clearTimeout(debounceTimer.current);
+
+        if (!text.trim()) {
+            setUrlValidation('idle');
+            setUrlError('');
+            return;
+        }
+
+        // Basic format check before even hitting the network
+        try {
+            new URL(text);
+        } catch {
+            setUrlValidation('invalid');
+            setUrlError('Enter a valid URL (e.g. https://example.com/image.jpg)');
+            return;
+        }
+
+        setUrlValidation('checking');
+        setUrlError('');
+
+        debounceTimer.current = setTimeout(async () => {
+            const err = await validateImageUrl(text);
+            if (err) {
+                setUrlValidation('invalid');
+                setUrlError(err);
+            } else {
+                setUrlValidation('valid');
+                setUrlError('');
+            }
+        }, 800);
+    }, []);
+
+    const pickImage = async () => {
+        let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            quality: 1,
+        });
+        if (!result.canceled) {
+            setImageFile(result.assets[0]);
         }
     };
 
     const handleSubmit = async () => {
-        setStatusMessage(null); // Clear previous status
-        
-        // Validation
+        setStatusMessage(null);
+
         if (!taskId) {
-            setStatusMessage({ type: 'error', text: "Validation Error: Task ID is required" });
+            setStatusMessage({ type: 'error', text: "Task ID is required" });
             return;
         }
         if (uploadType === "url" && !imageUrl) {
-            setStatusMessage({ type: 'error', text: "Validation Error: Image URL is required" });
+            setStatusMessage({ type: 'error', text: "Image URL is required" });
+            return;
+        }
+        if (uploadType === "url" && urlValidation === 'invalid') {
+            setStatusMessage({ type: 'error', text: urlError || "The image URL is not valid." });
             return;
         }
         if (uploadType === "file" && !imageFile) {
-            setStatusMessage({ type: 'error', text: "Validation Error: An image file is required" });
+            setStatusMessage({ type: 'error', text: "An image file is required" });
             return;
         }
         if (!species) {
-            setStatusMessage({ type: 'error', text: "Validation Error: Species is required" });
+            setStatusMessage({ type: 'error', text: "Species is required" });
             return;
         }
 
-        // Validate URL points to a real image before sending to backend
-        if (uploadType === "url") {
+        // If URL hasn't been verified yet (still checking or idle), run validation now
+        if (uploadType === "url" && urlValidation !== 'valid') {
             setLoading(true);
-            setStatusMessage({ type: 'error', text: 'Validating image URL...' });
-            const urlError = await validateImageUrl(imageUrl);
+            setStatusMessage({ type: 'error', text: 'Validating image URL…' });
+            const err = await validateImageUrl(imageUrl);
             setLoading(false);
-            if (urlError) {
-                setStatusMessage({ type: 'error', text: urlError });
+            if (err) {
+                setUrlValidation('invalid');
+                setUrlError(err);
+                setStatusMessage({ type: 'error', text: err });
                 return;
             }
+            setUrlValidation('valid');
             setStatusMessage(null);
         }
 
@@ -134,8 +184,6 @@ export default function AddGoldImageScreen({ navigation }: any) {
 
         if (uploadType === "file" && imageFile) {
             if (Platform.OS === 'web') {
-                // On Web, imageFile.uri is a blob URL. We need to fetch it to get a Blob,
-                // or use imageFile.file if it exists in newer expo-image-picker versions.
                 if (imageFile.file) {
                     formData.append("file", imageFile.file);
                 } else {
@@ -148,12 +196,7 @@ export default function AddGoldImageScreen({ navigation }: any) {
                 const filename = imageFile.fileName || localUri.split('/').pop() || 'image.jpg';
                 const match = /\.(\w+)$/.exec(filename);
                 const type = match ? `image/${match[1]}` : `image`;
-
-                formData.append("file", {
-                    uri: localUri,
-                    name: filename,
-                    type,
-                } as any);
+                formData.append("file", { uri: localUri, name: filename, type } as any);
             }
         } else if (uploadType === "url") {
             formData.append("imageUrl", imageUrl);
@@ -168,34 +211,40 @@ export default function AddGoldImageScreen({ navigation }: any) {
 
             if (!res.ok) {
                 const errorText = await res.text();
-                throw new Error(`HTTP error! status: ${res.status} - ${errorText}`);
+                throw new Error(`HTTP ${res.status} – ${errorText}`);
             }
 
-            const data = await res.json();
-            console.log("AddGoldImage response:", data);
+            await res.json();
 
-            // Invalidate the cache for gold images so the list updates
             queryClient.invalidateQueries({ queryKey: ['researcher', 'goldImages'] });
 
-            setStatusMessage({ type: 'success', text: "Gold image created successfully! Redirecting..." });
-            
-            // Wait 1.5 seconds for the user to read the success message before navigating away
-            setTimeout(() => {
-                navigation.navigate("AdminDashboard");
-            }, 1500);
+            setStatusMessage({ type: 'success', text: "Gold image created successfully! Redirecting…" });
 
+            // Navigate to the Gold Images list after a brief success message
+            setTimeout(() => {
+                navigation.navigate("GoldImagesManagement");
+            }, 1500);
         } catch (err: any) {
             console.error("Error creating gold image:", err);
-            const errMsg = "Failed to create gold image: " + (err.message || "Check fields.");
-            setStatusMessage({ type: 'error', text: errMsg });
+            setStatusMessage({ type: 'error', text: "Failed to create gold image: " + (err.message || "Check fields.") });
         } finally {
             setLoading(false);
         }
     };
 
-    const handleCancel = () => {
-        navigation.goBack();
-    };
+    // Derived border color for URL input
+    const urlBorderColor =
+        urlValidation === 'valid' ? '#10B981' :
+        urlValidation === 'invalid' ? '#EF4444' :
+        themeColors.border;
+
+    const urlBgColor =
+        urlValidation === 'valid' ? (isDark ? 'rgba(16,185,129,0.1)' : '#F0FDF4') :
+        urlValidation === 'invalid' ? (isDark ? 'rgba(239,68,68,0.1)' : '#FEF2F2') :
+        themeColors.card;
+
+    const cardBg = isDark ? 'rgba(255,255,255,0.05)' : '#FFFFFF';
+    const cardBorder = isDark ? 'rgba(255,255,255,0.08)' : '#E5E7EB';
 
     return (
         <ScreenHeaderLayout
@@ -205,27 +254,33 @@ export default function AddGoldImageScreen({ navigation }: any) {
             rightTitle="Gold Images"
             onRightPress={() => navigation.navigate("GoldImagesManagement")}
         >
-            <ScrollView contentContainerStyle={[styles.container, { backgroundColor: themeColors.background }]} showsVerticalScrollIndicator={false}>
-                {/* Upload Mode Selection */}
-                <View style={styles.toggleSection}>
-                    <Text style={[styles.sectionTitle, { color: themeColors.text }]}>Upload Type</Text>
+            <ScrollView
+                contentContainerStyle={[styles.container, { backgroundColor: themeColors.background }]}
+                showsVerticalScrollIndicator={false}
+            >
+                {/* ── Upload Type ── */}
+                <View style={[styles.card, { backgroundColor: cardBg, borderColor: cardBorder }]}>
+                    <Text style={[styles.cardLabel, { color: themeColors.textSecondary }]}>UPLOAD TYPE</Text>
+                    <Text style={[styles.sectionTitle, { color: themeColors.text }]}>How would you like to add the image?</Text>
                     <View style={styles.toggleButtons}>
                         {(['file', 'url'] as const).map((type) => (
                             <TouchableOpacity
                                 key={type}
                                 style={[
                                     styles.toggleButton,
-                                    { backgroundColor: themeColors.card, borderColor: themeColors.border },
+                                    { borderColor: cardBorder, backgroundColor: themeColors.background },
                                     uploadType === type && styles.toggleButtonActive,
                                 ]}
-                                onPress={() => setUploadType(type)}
+                                onPress={() => {
+                                    setUploadType(type);
+                                    setUrlValidation('idle');
+                                    setUrlError('');
+                                }}
                             >
-                                <Text
-                                    style={[
-                                        styles.toggleText,
-                                        uploadType === type && styles.toggleTextActive,
-                                    ]}
-                                >
+                                <Text style={[styles.toggleIcon]}>
+                                    {type === 'file' ? '📁' : '🔗'}
+                                </Text>
+                                <Text style={[styles.toggleText, uploadType === type && styles.toggleTextActive]}>
                                     {type === 'file' ? 'Upload File' : 'Image URL'}
                                 </Text>
                             </TouchableOpacity>
@@ -233,121 +288,168 @@ export default function AddGoldImageScreen({ navigation }: any) {
                     </View>
                 </View>
 
-                {/* Upload Section */}
-                <View style={styles.uploadSection}>
+                {/* ── Image Input ── */}
+                <View style={[styles.card, { backgroundColor: cardBg, borderColor: cardBorder }]}>
+                    <Text style={[styles.cardLabel, { color: themeColors.textSecondary }]}>IMAGE SOURCE</Text>
                     {uploadType === "url" ? (
-                        <TextInput
-                            style={[styles.input, { backgroundColor: themeColors.background, borderColor: themeColors.border, color: themeColors.text }]}
-                            value={imageUrl}
-                            onChangeText={setImageUrl}
-                            placeholder="Enter image URL"
-                            placeholderTextColor={themeColors.textSecondary}
-                        />
+                        <View>
+                            <Text style={[styles.sectionTitle, { color: themeColors.text }]}>Image URL</Text>
+                            <View style={styles.urlInputRow}>
+                                <TextInput
+                                    style={[
+                                        styles.input,
+                                        styles.urlInput,
+                                        {
+                                            backgroundColor: urlBgColor,
+                                            borderColor: urlBorderColor,
+                                            color: themeColors.text,
+                                        },
+                                    ]}
+                                    value={imageUrl}
+                                    onChangeText={handleUrlChange}
+                                    placeholder="https://example.com/image.jpg"
+                                    placeholderTextColor={themeColors.textSecondary}
+                                    autoCapitalize="none"
+                                    keyboardType="url"
+                                />
+                                <View style={styles.urlIndicator}>
+                                    {urlValidation === 'checking' && (
+                                        <ActivityIndicator size="small" color="#3B82F6" />
+                                    )}
+                                    {urlValidation === 'valid' && (
+                                        <Text style={styles.validIcon}>✓</Text>
+                                    )}
+                                    {urlValidation === 'invalid' && (
+                                        <Text style={styles.invalidIcon}>✗</Text>
+                                    )}
+                                </View>
+                            </View>
+                            {urlValidation === 'invalid' && urlError ? (
+                                <Text style={styles.urlErrorText}>{urlError}</Text>
+                            ) : null}
+                            {urlValidation === 'valid' ? (
+                                <Text style={styles.urlSuccessText}>✓ Valid image URL</Text>
+                            ) : null}
+                        </View>
                     ) : (
-                        <View style={styles.filePickerContainer}>
-                            <TouchableOpacity style={styles.pickButton} onPress={pickImage}>
-                                <Text style={styles.pickButtonText}>Select Image From Device</Text>
+                        <View>
+                            <Text style={[styles.sectionTitle, { color: themeColors.text }]}>Select from Device</Text>
+                            <TouchableOpacity
+                                style={[styles.pickButton, { backgroundColor: themeColors.background, borderColor: cardBorder }]}
+                                onPress={pickImage}
+                            >
+                                <Text style={styles.pickButtonIcon}>📷</Text>
+                                <Text style={[styles.pickButtonText, { color: themeColors.text }]}>
+                                    {imageFile ? 'Change Image' : 'Browse & Select Image'}
+                                </Text>
                             </TouchableOpacity>
                             {imageFile && (
-                                <RNImage
-                                    source={{ uri: imageFile.uri }}
-                                    style={styles.previewImage}
-                                />
+                                <View style={styles.previewContainer}>
+                                    <RNImage source={{ uri: imageFile.uri }} style={styles.previewImage} />
+                                    <View style={styles.previewBadge}>
+                                        <Text style={styles.previewBadgeText}>✓ Ready</Text>
+                                    </View>
+                                </View>
                             )}
                         </View>
                     )}
                 </View>
 
-                {/* Is Valid Requested Species? Toggle */}
-                <View style={styles.toggleSection}>
-                    <Text style={[styles.sectionTitle, { color: themeColors.text }]}>Is this picture actually the requested species?</Text>
-                    <View style={styles.toggleButtons}>
-                        {(['YES', 'NO'] as const).map((ans) => (
-                            <TouchableOpacity
-                                key={ans}
-                                style={[
-                                    styles.toggleButton,
-                                    { backgroundColor: themeColors.card, borderColor: themeColors.border },
-                                    correctAnswer === ans && styles.toggleButtonActive,
-                                ]}
-                                onPress={() => setCorrectAnswer(ans)}
-                            >
-                                <Text
-                                    style={[
-                                        styles.toggleText,
-                                        correctAnswer === ans && styles.toggleTextActive,
-                                    ]}
-                                >
-                                    {ans}
-                                </Text>
-                            </TouchableOpacity>
-                        ))}
-                    </View>
-                </View>
-
-                {/* Taxonomy Fields */}
-                <View style={styles.taxonomySection}>
+                {/* ── Species ── */}
+                <View style={[styles.card, { backgroundColor: cardBg, borderColor: cardBorder, zIndex: 10 }]}>
+                    <Text style={[styles.cardLabel, { color: themeColors.textSecondary }]}>TAXONOMY</Text>
                     <Text style={[styles.sectionTitle, { color: themeColors.text }]}>Species</Text>
-                    <Text style={{ color: themeColors.textSecondary, marginBottom: 8, fontSize: 13 }}>
+                    <Text style={[styles.sectionHint, { color: themeColors.textSecondary }]}>
                         Search and select the relevant species from the taxonomy.
                     </Text>
                     <MultiSelect
                         options={availableSpecies}
                         selectedIds={species ? [species] : []}
                         onToggle={(id) => {
-                            if (species === id) {
-                                setSpecies(""); // deselect
-                            } else {
-                                setSpecies(id as string);
-                            }
+                            setSpecies(species === id ? "" : id as string);
                         }}
-                        placeholder="Search for species..."
+                        placeholder="Search for species…"
                         loading={optionsLoading}
                         emptyOnNoSearch={true}
                     />
                 </View>
 
-                {/* Difficulty Level */}
-                <View style={styles.difficultySection}>
-                    <Text style={[styles.sectionTitle, { color: themeColors.text }]}>Difficulty Level</Text>
+                {/* ── Correct Answer ── */}
+                <View style={[styles.card, { backgroundColor: cardBg, borderColor: cardBorder }]}>
+                    <Text style={[styles.cardLabel, { color: themeColors.textSecondary }]}>CLASSIFICATION</Text>
+                    <Text style={[styles.sectionTitle, { color: themeColors.text }]}>
+                        Is this picture actually the requested species?
+                    </Text>
                     <View style={styles.toggleButtons}>
-                        {["EASY", "MEDIUM", "HARD"].map((level) => (
+                        {(['YES', 'NO'] as const).map((ans) => (
                             <TouchableOpacity
-                                key={level}
+                                key={ans}
                                 style={[
                                     styles.toggleButton,
-                                    { backgroundColor: themeColors.card, borderColor: themeColors.border },
-                                    difficultyLevel === level && styles.toggleButtonActive,
+                                    { borderColor: cardBorder, backgroundColor: themeColors.background },
+                                    correctAnswer === ans && (ans === 'YES' ? styles.toggleButtonYes : styles.toggleButtonNo),
                                 ]}
-                                onPress={() => setDifficultyLevel(level)}
+                                onPress={() => setCorrectAnswer(ans)}
                             >
-                                <Text
-                                    style={[
-                                        styles.toggleText,
-                                        difficultyLevel === level && styles.toggleTextActive,
-                                    ]}
-                                >
-                                    {level}
+                                <Text style={styles.toggleIcon}>{ans === 'YES' ? '✓' : '✗'}</Text>
+                                <Text style={[
+                                    styles.toggleText,
+                                    correctAnswer === ans && styles.toggleTextActive,
+                                ]}>
+                                    {ans === 'YES' ? 'Yes' : 'No'}
                                 </Text>
                             </TouchableOpacity>
                         ))}
                     </View>
                 </View>
 
-                {/* Status Message Display */}
+                {/* ── Difficulty ── */}
+                <View style={[styles.card, { backgroundColor: cardBg, borderColor: cardBorder }]}>
+                    <Text style={[styles.cardLabel, { color: themeColors.textSecondary }]}>DIFFICULTY</Text>
+                    <Text style={[styles.sectionTitle, { color: themeColors.text }]}>Difficulty Level</Text>
+                    <View style={styles.toggleButtons}>
+                        {(["EASY", "MEDIUM", "HARD"] as const).map((level) => (
+                            <TouchableOpacity
+                                key={level}
+                                style={[
+                                    styles.toggleButton,
+                                    { borderColor: cardBorder, backgroundColor: themeColors.background },
+                                    difficultyLevel === level && difficultyStyles[level],
+                                ]}
+                                onPress={() => setDifficultyLevel(level)}
+                            >
+                                <Text style={styles.toggleIcon}>{level === 'EASY' ? '🟢' : level === 'MEDIUM' ? '🟡' : '🔴'}</Text>
+                                <Text style={[
+                                    styles.toggleText,
+                                    difficultyLevel === level && styles.toggleTextActive,
+                                ]}>
+                                    {level.charAt(0) + level.slice(1).toLowerCase()}
+                                </Text>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+                </View>
+
+                {/* ── Status Message ── */}
                 {statusMessage && (
-                    <View style={[styles.statusContainer, { backgroundColor: statusMessage.type === 'error' ? '#FEE2E2' : '#DCFCE7' }]}>
-                        <Text style={[styles.statusText, { color: statusMessage.type === 'error' ? '#B91C1C' : '#15803D' }]}>
+                    <View style={[
+                        styles.statusContainer,
+                        { backgroundColor: statusMessage.type === 'error' ? '#FEE2E2' : '#DCFCE7' },
+                    ]}>
+                        <Text style={[
+                            styles.statusText,
+                            { color: statusMessage.type === 'error' ? '#B91C1C' : '#15803D' },
+                        ]}>
                             {statusMessage.text}
                         </Text>
                     </View>
                 )}
 
-                {/* Action Buttons */}
+                {/* ── Action Buttons ── */}
                 <View style={styles.actionButtons}>
                     <TouchableOpacity
                         style={styles.cancelButton}
-                        onPress={handleCancel}
+                        onPress={() => navigation.goBack()}
                         disabled={loading}
                     >
                         <Text style={styles.cancelButtonText}>✕</Text>
@@ -358,9 +460,10 @@ export default function AddGoldImageScreen({ navigation }: any) {
                         onPress={handleSubmit}
                         disabled={loading}
                     >
-                        <Text style={styles.submitButtonText}>
-                            {loading ? "..." : "➔"}
-                        </Text>
+                        {loading
+                            ? <ActivityIndicator size="small" color="#fff" />
+                            : <Text style={styles.submitButtonText}>➔</Text>
+                        }
                     </TouchableOpacity>
                 </View>
             </ScrollView>
@@ -368,32 +471,75 @@ export default function AddGoldImageScreen({ navigation }: any) {
     );
 }
 
+const difficultyStyles: Record<string, object> = {
+    EASY:   { backgroundColor: '#10B981', borderColor: '#10B981' },
+    MEDIUM: { backgroundColor: '#F59E0B', borderColor: '#F59E0B' },
+    HARD:   { backgroundColor: '#EF4444', borderColor: '#EF4444' },
+};
+
 const styles = StyleSheet.create({
     container: {
         padding: 16,
+        gap: 16,
     },
-    toggleSection: {
-        marginBottom: 20,
+    // ── Card ──
+    card: {
+        borderRadius: 14,
+        borderWidth: 1,
+        padding: 18,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.06,
+        shadowRadius: 6,
+        elevation: 2,
+    },
+    cardLabel: {
+        fontSize: 11,
+        fontWeight: '700',
+        letterSpacing: 1.2,
+        marginBottom: 4,
+        textTransform: 'uppercase',
     },
     sectionTitle: {
-        fontSize: 14,
-        fontWeight: "600",
-        marginBottom: 12,
+        fontSize: 15,
+        fontWeight: '700',
+        marginBottom: 14,
     },
+    sectionHint: {
+        fontSize: 13,
+        marginBottom: 10,
+        marginTop: -8,
+    },
+    // ── Toggle Pills ──
     toggleButtons: {
         flexDirection: "row",
-        gap: 12,
+        gap: 10,
     },
     toggleButton: {
         flex: 1,
-        paddingVertical: 12,
-        borderRadius: 8,
-        alignItems: "center",
-        borderWidth: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 6,
+        paddingVertical: 11,
+        paddingHorizontal: 8,
+        borderRadius: 10,
+        borderWidth: 1.5,
     },
     toggleButtonActive: {
         backgroundColor: "#3B82F6",
         borderColor: "#3B82F6",
+    },
+    toggleButtonYes: {
+        backgroundColor: "#10B981",
+        borderColor: "#10B981",
+    },
+    toggleButtonNo: {
+        backgroundColor: "#EF4444",
+        borderColor: "#EF4444",
+    },
+    toggleIcon: {
+        fontSize: 15,
     },
     toggleText: {
         fontSize: 14,
@@ -403,47 +549,108 @@ const styles = StyleSheet.create({
     toggleTextActive: {
         color: "#fff",
     },
-    uploadSection: {
-        marginBottom: 24,
+    // ── URL Input ──
+    urlInputRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
     },
     input: {
-        borderWidth: 1,
+        borderWidth: 1.5,
         borderRadius: 10,
         padding: 12,
         fontSize: 14,
     },
-    filePickerContainer: {
-        alignItems: "center",
-        gap: 16,
+    urlInput: {
+        flex: 1,
     },
+    urlIndicator: {
+        width: 28,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    validIcon: {
+        fontSize: 20,
+        color: '#10B981',
+        fontWeight: 'bold',
+    },
+    invalidIcon: {
+        fontSize: 20,
+        color: '#EF4444',
+        fontWeight: 'bold',
+    },
+    urlErrorText: {
+        color: '#DC2626',
+        fontSize: 12,
+        marginTop: 6,
+        lineHeight: 16,
+    },
+    urlSuccessText: {
+        color: '#059669',
+        fontSize: 12,
+        marginTop: 6,
+        fontWeight: '600',
+    },
+    // ── File Picker ──
     pickButton: {
-        backgroundColor: "#E5E7EB",
-        padding: 12,
-        borderRadius: 8,
-        width: "100%",
-        alignItems: "center",
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 10,
+        padding: 14,
+        borderRadius: 10,
+        borderWidth: 1.5,
+        borderStyle: 'dashed',
+    },
+    pickButtonIcon: {
+        fontSize: 20,
     },
     pickButtonText: {
-        color: "#374151",
         fontWeight: "600",
+        fontSize: 14,
+    },
+    previewContainer: {
+        alignItems: 'center',
+        marginTop: 14,
+        position: 'relative',
     },
     previewImage: {
         width: 200,
         height: 200,
         borderRadius: 12,
     },
-    taxonomySection: {
-        marginBottom: 24,
-        zIndex: 10,
+    previewBadge: {
+        position: 'absolute',
+        bottom: 8,
+        right: 'auto',
+        backgroundColor: '#10B981',
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+        borderRadius: 20,
     },
-    difficultySection: {
-        marginBottom: 24,
+    previewBadgeText: {
+        color: '#fff',
+        fontWeight: '700',
+        fontSize: 12,
     },
+    // ── Status ──
+    statusContainer: {
+        padding: 14,
+        borderRadius: 10,
+        alignItems: 'center',
+    },
+    statusText: {
+        fontSize: 14,
+        fontWeight: '500',
+        textAlign: 'center',
+    },
+    // ── Action Buttons ──
     actionButtons: {
         flexDirection: "row",
         justifyContent: "center",
         gap: 24,
-        marginTop: 12,
+        marginTop: 4,
+        marginBottom: 8,
     },
     cancelButton: {
         width: 60,
@@ -452,9 +659,14 @@ const styles = StyleSheet.create({
         backgroundColor: "#EF4444",
         justifyContent: "center",
         alignItems: "center",
+        shadowColor: '#EF4444',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+        elevation: 4,
     },
     cancelButtonText: {
-        fontSize: 28,
+        fontSize: 22,
         color: "#fff",
         fontWeight: "bold",
     },
@@ -465,24 +677,19 @@ const styles = StyleSheet.create({
         backgroundColor: "#3B82F6",
         justifyContent: "center",
         alignItems: "center",
+        shadowColor: '#3B82F6',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+        elevation: 4,
     },
     submitButtonText: {
-        fontSize: 28,
+        fontSize: 26,
         color: "#fff",
         fontWeight: "bold",
     },
     buttonDisabled: {
         backgroundColor: "#94A3B8",
-    },
-    statusContainer: {
-        padding: 12,
-        borderRadius: 8,
-        marginBottom: 16,
-        alignItems: 'center',
-    },
-    statusText: {
-        fontSize: 14,
-        fontWeight: '500',
-        textAlign: 'center',
+        shadowColor: 'transparent',
     },
 });
