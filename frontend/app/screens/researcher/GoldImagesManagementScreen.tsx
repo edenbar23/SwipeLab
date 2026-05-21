@@ -1,6 +1,14 @@
 // researcher screen for managing gold images
-import React from "react";
-import { Alert, FlatList, StyleSheet, Text, View } from "react-native";
+import React, { useState } from "react";
+import {
+    FlatList,
+    Modal,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    TouchableWithoutFeedback,
+    View,
+} from "react-native";
 import { useQueryClient } from '@tanstack/react-query';
 import { Colors } from '../../../constants/theme';
 import { apiFetch } from "../../api/apiFetch";
@@ -25,36 +33,31 @@ export default function GoldImagesManagementScreen({ navigation }: any) {
     const queryClient = useQueryClient();
     const { data: goldImages = [], isLoading: loading } = useGoldImages();
 
+    // ID of the gold image pending deletion; null means modal is closed
+    const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
+
     const handleDelete = (goldImageId: number) => {
-        Alert.alert(
-            "Delete Gold Image",
-            "Are you sure you want to delete this gold image?",
-            [
-                { text: "Cancel", style: "cancel" },
-                {
-                    text: "Delete",
-                    style: "destructive",
-                    onPress: async () => {
-                        try {
-                            const response = await apiFetch(
-                                API_ENDPOINTS.researcher.GOLD_IMAGE_DETAILS(goldImageId),
-                                { method: "DELETE" }
-                            );
-                            if (!response.ok) {
-                                const body = await response.json().catch(() => ({}));
-                                throw new Error((body as any).message ?? `Server error ${response.status}`);
-                            }
-                            // Invalidate cache so the list re-fetches with the item removed
-                            queryClient.invalidateQueries({ queryKey: ['researcher', 'goldImages'] });
-                            Alert.alert("Success", "Gold image deleted successfully");
-                        } catch (err: any) {
-                            console.error("Delete error:", err);
-                            Alert.alert("Error", err?.message ?? "Failed to delete gold image");
-                        }
-                    },
-                },
-            ]
-        );
+        setPendingDeleteId(goldImageId);
+    };
+
+    const confirmDelete = async () => {
+        if (pendingDeleteId === null) return;
+        const id = pendingDeleteId;
+        setPendingDeleteId(null);
+
+        try {
+            const response = await apiFetch(
+                API_ENDPOINTS.researcher.GOLD_IMAGE_DETAILS(id),
+                { method: "DELETE" }
+            );
+            if (!response.ok) {
+                const body = await response.json().catch(() => ({}));
+                throw new Error((body as any).message ?? `Server error ${response.status}`);
+            }
+            queryClient.invalidateQueries({ queryKey: ['researcher', 'goldImages'] });
+        } catch (err: any) {
+            console.error("Delete error:", err);
+        }
     };
 
     return (
@@ -89,6 +92,38 @@ export default function GoldImagesManagementScreen({ navigation }: any) {
                     )}
                 />
             )}
+
+            {/* Delete Confirmation Modal */}
+            <Modal visible={pendingDeleteId !== null} animationType="fade" transparent>
+                <TouchableWithoutFeedback onPress={() => setPendingDeleteId(null)}>
+                    <View style={styles.modalOverlay}>
+                        <TouchableWithoutFeedback onPress={() => {}}>
+                            <View style={[styles.modalContent, { backgroundColor: themeColors.card }]}>
+                                <Text style={[styles.modalTitle, { color: themeColors.text }]}>
+                                    Delete Gold Image
+                                </Text>
+                                <Text style={[styles.modalMessage, { color: themeColors.textSecondary }]}>
+                                    Are you sure you want to delete this gold image? This action cannot be undone.
+                                </Text>
+                                <View style={styles.modalActions}>
+                                    <TouchableOpacity
+                                        style={[styles.actionBtn, styles.cancelBtn]}
+                                        onPress={() => setPendingDeleteId(null)}
+                                    >
+                                        <Text style={styles.cancelText}>Cancel</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        style={[styles.actionBtn, styles.deleteBtn]}
+                                        onPress={confirmDelete}
+                                    >
+                                        <Text style={styles.deleteText}>Delete</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                        </TouchableWithoutFeedback>
+                    </View>
+                </TouchableWithoutFeedback>
+            </Modal>
         </ScreenHeaderLayout>
     );
 }
@@ -102,11 +137,61 @@ const styles = StyleSheet.create({
     emptyText: {
         fontSize: 16,
         fontWeight: "600",
-        color: "#6B7280",
     },
     emptySubtext: {
         fontSize: 14,
-        color: "#9CA3AF",
         marginTop: 8,
+    },
+
+    // Modal
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modalContent: {
+        width: 320,
+        borderRadius: 12,
+        padding: 24,
+        alignItems: 'center',
+    },
+    modalTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginBottom: 10,
+        textAlign: 'center',
+    },
+    modalMessage: {
+        fontSize: 14,
+        textAlign: 'center',
+        marginBottom: 24,
+        lineHeight: 20,
+    },
+    modalActions: {
+        flexDirection: 'row',
+        gap: 12,
+        width: '100%',
+        justifyContent: 'center',
+    },
+    actionBtn: {
+        flex: 1,
+        paddingVertical: 12,
+        borderRadius: 8,
+        alignItems: 'center',
+    },
+    cancelBtn: {
+        backgroundColor: '#F1F5F9',
+    },
+    cancelText: {
+        color: '#374151',
+        fontWeight: '600',
+    },
+    deleteBtn: {
+        backgroundColor: '#EF4444',
+    },
+    deleteText: {
+        color: '#fff',
+        fontWeight: '600',
     },
 });
