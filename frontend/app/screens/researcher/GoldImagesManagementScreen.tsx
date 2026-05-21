@@ -1,6 +1,7 @@
 // researcher screen for managing gold images
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Alert, FlatList, StyleSheet, Text, View } from "react-native";
+import { useQueryClient } from '@tanstack/react-query';
 import { Colors } from '../../../constants/theme';
 import { apiFetch } from "../../api/apiFetch";
 import GoldImageCard from "../../components/researcher/GoldImageCard";
@@ -21,7 +22,8 @@ type GoldImageResponse = {
 export default function GoldImagesManagementScreen({ navigation }: any) {
     const { theme } = useThemeStore();
     const themeColors = Colors[theme as keyof typeof Colors];
-    const { data: goldImages = [], isLoading: loading, refetch: fetchGoldImages } = useGoldImages();
+    const queryClient = useQueryClient();
+    const { data: goldImages = [], isLoading: loading } = useGoldImages();
 
     const handleDelete = (goldImageId: number) => {
         Alert.alert(
@@ -34,15 +36,20 @@ export default function GoldImagesManagementScreen({ navigation }: any) {
                     style: "destructive",
                     onPress: async () => {
                         try {
-                            await apiFetch(API_ENDPOINTS.researcher.GOLD_IMAGE_DETAILS(goldImageId), {
-                                method: "DELETE",
-                            });
-                            // Refresh the list
-                            fetchGoldImages();
+                            const response = await apiFetch(
+                                API_ENDPOINTS.researcher.GOLD_IMAGE_DETAILS(goldImageId),
+                                { method: "DELETE" }
+                            );
+                            if (!response.ok) {
+                                const body = await response.json().catch(() => ({}));
+                                throw new Error((body as any).message ?? `Server error ${response.status}`);
+                            }
+                            // Invalidate cache so the list re-fetches with the item removed
+                            queryClient.invalidateQueries({ queryKey: ['researcher', 'goldImages'] });
                             Alert.alert("Success", "Gold image deleted successfully");
-                        } catch (err) {
+                        } catch (err: any) {
                             console.error("Delete error:", err);
-                            Alert.alert("Error", "Failed to delete gold image");
+                            Alert.alert("Error", err?.message ?? "Failed to delete gold image");
                         }
                     },
                 },
