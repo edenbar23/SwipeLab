@@ -73,6 +73,26 @@ export default function AddGoldImageScreen({ navigation }: any) {
         }
     };
 
+    const validateImageUrl = async (url: string): Promise<string | null> => {
+        try {
+            // Try HEAD first (cheaper), fall back to GET if server doesn't allow HEAD
+            let response = await fetch(url, { method: 'HEAD' });
+            if (response.status === 405) {
+                response = await fetch(url, { method: 'GET' });
+            }
+            if (!response.ok) {
+                return `URL returned HTTP ${response.status}. Check the link is correct and publicly accessible.`;
+            }
+            const contentType = response.headers.get('content-type') || '';
+            if (!contentType.toLowerCase().startsWith('image/')) {
+                return `The URL does not point to an image (Content-Type: "${contentType}"). Only image links are accepted.`;
+            }
+            return null; // valid
+        } catch {
+            return 'Could not reach the URL. Make sure it is publicly accessible and try again.';
+        }
+    };
+
     const handleSubmit = async () => {
         setStatusMessage(null); // Clear previous status
         
@@ -92,6 +112,19 @@ export default function AddGoldImageScreen({ navigation }: any) {
         if (!species) {
             setStatusMessage({ type: 'error', text: "Validation Error: Species is required" });
             return;
+        }
+
+        // Validate URL points to a real image before sending to backend
+        if (uploadType === "url") {
+            setLoading(true);
+            setStatusMessage({ type: 'error', text: 'Validating image URL...' });
+            const urlError = await validateImageUrl(imageUrl);
+            setLoading(false);
+            if (urlError) {
+                setStatusMessage({ type: 'error', text: urlError });
+                return;
+            }
+            setStatusMessage(null);
         }
 
         const formData = new FormData();

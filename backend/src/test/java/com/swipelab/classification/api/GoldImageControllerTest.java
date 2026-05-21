@@ -10,6 +10,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -21,8 +23,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
 class GoldImageControllerTest {
@@ -111,4 +112,36 @@ class GoldImageControllerTest {
 
         verify(goldImageService, times(1)).deleteGoldImage(1L);
     }
+
+    // ── serveImage ─────────────────────────────────────────────────────────
+
+    @Test
+    void serveImage_ShouldReturnImageBytes_WithCorrectContentType() throws Exception {
+        byte[] imageBytes = new byte[]{(byte) 0x89, 0x50, 0x4E, 0x47}; // PNG magic bytes
+        Resource resource = new ByteArrayResource(imageBytes) {
+            @Override
+            public String getFilename() { return "test-uuid.png"; }
+        };
+        when(goldImageService.getImageResource(1L)).thenReturn(resource);
+
+        mockMvc.perform(get("/api/admin/gold-images/1/image"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.IMAGE_PNG))
+                .andExpect(header().string("Cache-Control", "max-age=86400, public"));
+
+        verify(goldImageService).getImageResource(1L);
+    }
+
+    @Test
+    void serveImage_ShouldPropagateException_WhenResourceNotFound() {
+        // Standalone MockMvc wraps unhandled RuntimeExceptions in a ServletException,
+        // so we assert the exception propagates rather than checking the HTTP status.
+        when(goldImageService.getImageResource(99L))
+                .thenThrow(new RuntimeException("File not found or not readable: missing.jpg"));
+
+        org.junit.jupiter.api.Assertions.assertThrows(Exception.class,
+                () -> mockMvc.perform(get("/api/admin/gold-images/99/image")));
+    }
 }
+
+

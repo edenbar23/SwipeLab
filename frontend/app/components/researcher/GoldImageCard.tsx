@@ -2,7 +2,6 @@ import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import {
     Image,
-    Platform,
     StyleSheet,
     Text,
     TouchableOpacity,
@@ -10,9 +9,6 @@ import {
 } from "react-native";
 import { Colors } from '../../../constants/theme';
 import { useThemeStore } from '../../stores/themeStore';
-
-const BACKEND_BASE_URL = process.env.EXPO_PUBLIC_API_URL ||
-  (Platform.OS === 'web' ? 'http://localhost:8080' : 'http://192.168.1.133:8080');
 
 type GoldImageData = {
     id: number;
@@ -30,24 +26,8 @@ export default function GoldImageCard({ goldImage, onDelete }: Props) {
     const { theme } = useThemeStore();
     const themeColors = Colors[theme as keyof typeof Colors];
 
-    let imageUrl = goldImage.imageUrl;
-    if (imageUrl) {
-        if (imageUrl.startsWith('http') || imageUrl.startsWith('data:')) {
-            // Already a valid URL or data URI
-        } else if (imageUrl.startsWith('/uploads/') || imageUrl.startsWith('uploads/')) {
-            const baseUrl = BACKEND_BASE_URL.endsWith('/') ? BACKEND_BASE_URL.slice(0, -1) : BACKEND_BASE_URL;
-            const path = imageUrl.startsWith('uploads/') ? `/${imageUrl}` : imageUrl;
-            imageUrl = `${baseUrl}${path}`;
-        } else if (imageUrl.match(/\.(jpeg|jpg|gif|png|webp)$/i)) {
-            // Filename missing /uploads/ prefix
-            const baseUrl = BACKEND_BASE_URL.endsWith('/') ? BACKEND_BASE_URL.slice(0, -1) : BACKEND_BASE_URL;
-            imageUrl = `${baseUrl}/uploads/${imageUrl}`;
-        } else if (/^[A-Za-z0-9+/]/.test(imageUrl)) {
-            // Base64 string fallback
-            imageUrl = `data:image/jpeg;base64,${imageUrl}`;
-        }
-    }
-    const finalUri = imageUrl || `https://via.placeholder.com/300/E2E8F0/64748B?text=${goldImage.species || 'Image'}`;
+    const finalUri = goldImage.imageUrl
+        || `https://via.placeholder.com/300/E2E8F0/64748B?text=${goldImage.species || 'Image'}`;
 
     return (
         <View style={[styles.card, { backgroundColor: themeColors.card, borderColor: themeColors.border }]}>
