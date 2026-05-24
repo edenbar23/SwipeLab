@@ -258,6 +258,18 @@ export default function AddGoldImageScreen({ navigation }: any) {
                 contentContainerStyle={[styles.container, { backgroundColor: themeColors.background }]}
                 showsVerticalScrollIndicator={false}
             >
+                {/* ── Info Banner ── */}
+                <View style={[styles.infoBanner, { backgroundColor: isDark ? 'rgba(59, 130, 246, 0.1)' : '#EFF6FF', borderColor: isDark ? 'rgba(59, 130, 246, 0.2)' : '#BFDBFE' }]}>
+                    <Text style={[styles.infoBannerTitle, { color: isDark ? '#60A5FA' : '#1D4ED8' }]}>
+                        ℹ️ Gold Image Guidelines
+                    </Text>
+                    <Text style={[styles.infoBannerText, { color: themeColors.text }]}>
+                        • Used as a hidden quality control mechanism to calculate user credibility.{"\n"}
+                        • They contain pre-verified labels and are mixed into regular tasks to test accuracy.{"\n"}
+                        • Must look identical to standard experiment photos (e.g., yellow sticky traps) so users cannot tell they are being tested.
+                    </Text>
+                </View>
+
                 {/* ── Upload Type ── */}
                 <View style={[styles.card, { backgroundColor: cardBg, borderColor: cardBorder }]}>
                     <Text style={[styles.cardLabel, { color: themeColors.textSecondary }]}>UPLOAD TYPE</Text>
@@ -493,6 +505,21 @@ const styles = StyleSheet.create({
     container: {
         padding: 16,
         gap: 16,
+    },
+    // ── Info Banner ──
+    infoBanner: {
+        padding: 16,
+        borderRadius: 12,
+        borderWidth: 1,
+    },
+    infoBannerTitle: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        marginBottom: 8,
+    },
+    infoBannerText: {
+        fontSize: 14,
+        lineHeight: 22,
     },
     // ── Card ──
     card: {

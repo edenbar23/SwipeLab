@@ -29,6 +29,7 @@ type GoldImageResponse = {
 
 export default function GoldImagesManagementScreen({ navigation }: any) {
     const { theme } = useThemeStore();
+    const isDark = theme === 'dark';
     const themeColors = Colors[theme as keyof typeof Colors];
     const queryClient = useQueryClient();
     const { data: goldImages = [], isLoading: loading } = useGoldImages();
@@ -68,6 +69,17 @@ export default function GoldImagesManagementScreen({ navigation }: any) {
             rightTitle="Add Image"
             onRightPress={() => navigation.navigate("AddGoldImage")}
         >
+            <View style={[styles.infoBanner, { backgroundColor: isDark ? 'rgba(59, 130, 246, 0.1)' : '#EFF6FF', borderColor: isDark ? 'rgba(59, 130, 246, 0.2)' : '#BFDBFE' }]}>
+                <Text style={[styles.infoBannerTitle, { color: isDark ? '#60A5FA' : '#1D4ED8' }]}>
+                    ℹ️ Gold Image Guidelines
+                </Text>
+                <Text style={[styles.infoBannerText, { color: themeColors.text }]}>
+                    • Used as a hidden quality control mechanism to calculate user credibility.{"\n"}
+                    • They contain pre-verified labels and are mixed into regular tasks to test accuracy.{"\n"}
+                    • Must look identical to standard experiment photos (e.g., yellow sticky traps) so users cannot tell they are being tested.
+                </Text>
+            </View>
+
             {loading ? (
                 <View style={[styles.centerContainer, { backgroundColor: themeColors.background }]}>
                     <Text style={{ color: themeColors.text }}>Loading...</Text>
@@ -76,7 +88,7 @@ export default function GoldImagesManagementScreen({ navigation }: any) {
                 <View style={[styles.centerContainer, { backgroundColor: themeColors.background }]}>
                     <Text style={[styles.emptyText, { color: themeColors.textSecondary }]}>No gold images found</Text>
                     <Text style={[styles.emptySubtext, { color: themeColors.textSecondary }]}>
-                        Tap "Add Image" to create your first gold image
+                        Tap &quot;Add Image&quot; to create your first gold image
                     </Text>
                 </View>
             ) : (
@@ -129,6 +141,21 @@ export default function GoldImagesManagementScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
+    infoBanner: {
+        margin: 16,
+        padding: 16,
+        borderRadius: 12,
+        borderWidth: 1,
+    },
+    infoBannerTitle: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        marginBottom: 8,
+    },
+    infoBannerText: {
+        fontSize: 14,
+        lineHeight: 22,
+    },
     centerContainer: {
         flex: 1,
         justifyContent: "center",

@@ -19,6 +19,7 @@ Architecture: Modular Hexagonal/DDD.
 * Frontend: Removed hardcoded mock task (id=1) from SwipeScreen; implemented 3-state Quick Start UI (active swipe / quick-start task picker / true empty state); aligned all task play entry points with swipeStore (Issue #204).
 * Backend/Frontend: Fixed task duplication bug — added `findPublicTasksExcludingAssignedUser` JPQL query, `getExploreTasksForUser` service method, `POST /tasks/{id}/assign` endpoint with duplicate guard (DuplicateResourceException → HTTP 409), and `useAssignTask` mutation in the frontend (Issue #205).
 * Frontend: Added search bar + sort-by-credibility-score toggle to UsersManagementScreen; updated mock data (Issues #217, #218).
+* Frontend: Added information sections to GoldImagesManagementScreen and AddGoldImageScreen to clarify their purpose for researchers (Issue #223).
 
 ## Current Focus (Active GitHub Issues)
 * Issue #201: Refactor Backend roles to include Researchers and Super Admin.
@@ -26,7 +27,6 @@ Architecture: Modular Hexagonal/DDD.
 * Issue #226: [Frontend] fix recipients list not deleting users.
 * Issue #225: [System] fix refresh token for Researcher.
 * Issue #224: [Frontend] Mobile Vs. Web compatibility enhancement.
-* Issue #223: [Frontend] add a small information in the Gold Images Screen & Add Gold Images.
 * Issue #222: [Frontend] fix TasksManagementScreen UI.
 * Issue #221: [Frontend] adapt to changes of analytics new endpoints.
 * Issue #220: [Backend] improve and add analytics new endpoints.
