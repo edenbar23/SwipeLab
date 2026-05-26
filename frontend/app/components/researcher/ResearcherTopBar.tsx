@@ -9,7 +9,7 @@ import { Ionicons as VectorIcons } from '@expo/vector-icons';
 const Ionicons = VectorIcons as any;
 import { useNavigation, CommonActions } from '@react-navigation/native';
 import useResponsive from "../../hooks/useResponsive";
-
+import NotificationBell from "../ui/NotificationBell";
 
 export default function AdminTopBar() {
   const navigation = useNavigation<any>();
@@ -17,6 +17,7 @@ export default function AdminTopBar() {
   const { setMode } = useModeStore();
   const { theme } = useThemeStore();
   const { isPhone } = useResponsive();
+  const isSuperAdmin = useAuthStore((state) => state.isSuperAdmin);
 
   const isDarkMode = theme === 'dark';
 
@@ -53,6 +54,11 @@ export default function AdminTopBar() {
       </View>
 
       <View style={styles.rightSection}>
+        {isSuperAdmin && (
+          <View style={styles.bellBtn}>
+            <NotificationBell />
+          </View>
+        )}
         <TouchableOpacity onPress={handleSwitchToPlayer} style={styles.switchBtn}>
           <Ionicons name="game-controller-outline" size={20} color="#0EA5E9" />
           {!isPhone && <Text style={[styles.logoutText, dynamicStyles.actionText]}>Play</Text>}
@@ -86,6 +92,7 @@ const styles = StyleSheet.create({
   text: { color: "white", fontWeight: "700", fontSize: 13, lineHeight: 18 },
   subText: { color: "white", fontSize: 10, opacity: 0.9 },
   rightSection: { flexDirection: 'row', alignItems: 'center' },
+  bellBtn: { marginRight: 12, alignItems: 'center', justifyContent: 'center' },
   switchBtn: { alignItems: 'center', marginRight: 12 },
   logoutBtn: { alignItems: "center", justifyContent: "center" },
   logoutText: { fontSize: 10, marginTop: 2 },
