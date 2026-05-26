@@ -13,17 +13,19 @@ import { useModeStore } from "../stores/modeStore";
 // navigators
 import ResearcherNavigator from "./ResearcherNavigator";
 import UserNavigator from "./UserNavigator";
+import { useProfile } from "../api/queries";
 
 // screens
 import LoginScreen from "../screens/shared/LoginScreen";
 import BannedScreen from "../screens/shared/BannedScreen";
 
 export default function RootNavigator() {
-  const { token, role, isLoading, sessionExpiredMessage, isSuperAdmin } = useAuthStore();
+  const { token, role, isLoading, sessionExpiredMessage, isSuperAdmin, isBanned: storeIsBanned } = useAuthStore();
   const { mode } = useModeStore();
   const Stack = createNativeStackNavigator();
-  // isBanned is read from the cached profile after login; apiFetch 403 also triggers logout
-  const isBanned = false; // placeholder — wire to useProfile().data?.status === 'BANNED' if needed
+  
+  const { data: profile } = useProfile();
+  const isBanned = storeIsBanned || profile?.status === 'BANNED';
 
   if (sessionExpiredMessage) {
     return (

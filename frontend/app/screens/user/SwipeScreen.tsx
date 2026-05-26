@@ -43,7 +43,7 @@ export default function SwipeScreen() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeWarning, setActiveWarning] = useState<ClassificationWarning | null>(null);
-  const { logout } = useAuthStore();
+  const { logout, setIsBanned } = useAuthStore();
 
   const { isPhone, isDesktop } = useResponsive();
   const { theme } = useThemeStore();
@@ -125,8 +125,8 @@ export default function SwipeScreen() {
         });
 
         if (res.status === 403) {
-          // Account banned — force logout so BannedScreen is shown via RootNavigator
-          await logout();
+          // Account banned — trigger BannedScreen without logging out yet
+          setIsBanned(true);
           setIsSubmitting(false);
           return;
         }

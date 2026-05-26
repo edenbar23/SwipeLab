@@ -14,6 +14,7 @@ interface AuthState {
   token: string | null;
   role: Role;
   isSuperAdmin: boolean;
+  isBanned: boolean;
   authProvider: "LOCAL" | "STARDBI" | null;
   isLoading: boolean;
   setAuth: (token: string, role: Role, refreshToken?: string) => Promise<void>;
@@ -24,15 +25,18 @@ interface AuthState {
   sessionExpiredMessage: boolean;
   setSessionExpiredMessage: (show: boolean) => void;
   setIsSuperAdmin: (isSuperAdmin: boolean) => void;
+  setIsBanned: (isBanned: boolean) => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
   token: null,
   role: null,
   isSuperAdmin: false,
+  isBanned: false,
   authProvider: null,
   isLoading: true,
   sessionExpiredMessage: false,
+  setIsBanned: (isBanned) => set({ isBanned }),
   setSessionExpiredMessage: (show) => set({ sessionExpiredMessage: show }),
   setIsSuperAdmin: (isSuperAdmin) => {
     set({ isSuperAdmin });
@@ -113,7 +117,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     }
 
     // 2. Clear frontend state immediately to prevent re-entry
-    set({ token: null, role: null, authProvider: null, isSuperAdmin: false });
+    set({ token: null, role: null, authProvider: null, isSuperAdmin: false, isBanned: false });
     if (Platform.OS === 'web') {
       localStorage.removeItem("token");
       localStorage.removeItem("role");
@@ -199,7 +203,7 @@ export const useAuthStore = create<AuthState>((set) => ({
               await SecureStore.deleteItemAsync("authProvider");
               await SecureStore.deleteItemAsync("isSuperAdmin");
             }
-            set({ token: null, role: null, authProvider: null, isSuperAdmin: false, sessionExpiredMessage: false });
+            set({ token: null, role: null, authProvider: null, isSuperAdmin: false, isBanned: false, sessionExpiredMessage: false });
           }, 2000);
         } else {
           set({ token, role, authProvider, isSuperAdmin });

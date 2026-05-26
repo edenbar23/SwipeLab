@@ -68,6 +68,21 @@ public class GlobalExceptionHandler {
                 return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
         }
 
+        @ExceptionHandler(UserBannedException.class)
+        public ResponseEntity<ErrorResponse> handleUserBannedException(
+                        UserBannedException ex, HttpServletRequest request) {
+
+                ErrorResponse errorResponse = ErrorResponse.builder()
+                                .timestamp(LocalDateTime.now())
+                                .status(HttpStatus.FORBIDDEN.value())
+                                .error("Forbidden")
+                                .message(ex.getMessage())
+                                .path(request.getRequestURI())
+                                .build();
+
+                return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
+        }
+
         @ExceptionHandler(ResourceNotFoundException.class)
         public ResponseEntity<ErrorResponse> handleResourceNotFoundException(
                         ResourceNotFoundException ex, HttpServletRequest request) {
