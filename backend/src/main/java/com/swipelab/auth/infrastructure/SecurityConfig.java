@@ -2,6 +2,7 @@ package com.swipelab.auth.infrastructure;
 
 import com.swipelab.auth.infrastructure.CustomOAuth2UserService;
 import com.swipelab.auth.infrastructure.JwtAuthenticationFilter;
+import com.swipelab.auth.infrastructure.BannedUserFilter;
 import com.swipelab.auth.external.ExternalAuthFilter;
 import com.swipelab.auth.infrastructure.OAuth2AuthenticationFailureHandler;
 import com.swipelab.auth.infrastructure.OAuth2AuthenticationSuccessHandler;
@@ -42,6 +43,9 @@ public class SecurityConfig {
 
         @Autowired
         private CustomOAuth2UserService customOAuth2UserService;
+
+        @Autowired
+        private BannedUserFilter bannedUserFilter;
 
         @Value("${cors.allowed-origins}")
         private String allowedOrigins;
@@ -93,7 +97,9 @@ public class SecurityConfig {
                                                 .successHandler(oAuth2AuthenticationSuccessHandler)
                                                 .failureHandler(oAuth2AuthenticationFailureHandler))
                                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                                .addFilterAfter(externalAuthFilter, JwtAuthenticationFilter.class);
+                                .addFilterAfter(externalAuthFilter, JwtAuthenticationFilter.class)
+                                // Ban check runs last — after both auth filters have set the SecurityContext
+                                .addFilterAfter(bannedUserFilter, ExternalAuthFilter.class);
 
                 return http.build();
         }
