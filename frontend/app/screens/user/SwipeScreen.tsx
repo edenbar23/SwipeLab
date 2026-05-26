@@ -19,10 +19,13 @@ import { QUERY_KEYS, useMyTasks, useSwipeBatch } from '../../api/queries';
 import ReferenceGallery from '../../components/user/ReferenceGallery';
 import SwipeButtons from '../../components/user/SwipeButtons';
 import SwipeCard, { SwipeCardHandle } from '../../components/user/SwipeCard';
+import WarningToast from '../../components/ui/WarningToast';
 import useResponsive from '../../hooks/useResponsive';
 import { useSwipeStore } from '../../stores/swipeStore';
 import { useThemeStore } from '../../stores/themeStore';
 import { SwipeDirection } from '../../types';
+import { ClassificationWarning } from '../../types/fraudTypes';
+import { useAuthStore } from '../../stores/authStore';
 
 const BACKEND_BASE_URL =
   process.env.EXPO_PUBLIC_API_URL ||
@@ -38,6 +41,8 @@ export default function SwipeScreen() {
     useSwipeStore();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [activeWarning, setActiveWarning] = useState<ClassificationWarning | null>(null);
+  const { logout } = useAuthStore();
 
   const { isPhone, isDesktop } = useResponsive();
   const { theme } = useThemeStore();
@@ -114,11 +119,20 @@ export default function SwipeScreen() {
           responseTimeMs: 0,
         }),
       })
-        .then((res) => {
+        .then(async (res) => {
+          if (res.status === 403) {
+            // Account banned — force logout so BannedScreen is shown via RootNavigator
+            await logout();
+            return;
+          }
           if (res.ok) {
+            const data = await res.json();
+            // Show warning toast if the fraud detection system issued one
+            if (data?.warning) {
+              setActiveWarning(data.warning as ClassificationWarning);
+            }
             queryClient.invalidateQueries({ queryKey: QUERY_KEYS.challenges });
             queryClient.invalidateQueries({ queryKey: QUERY_KEYS.myBadges });
-            // Refresh top-bar stats (score, rank, streak) after each classification
             queryClient.invalidateQueries({ queryKey: QUERY_KEYS.userProfile });
           }
         })
@@ -227,6 +241,14 @@ export default function SwipeScreen() {
 
     return (
       <View style={[styles.container, { backgroundColor: themeColors.background }]}>
+        {/* Warning toast — rendered above everything, non-blocking */}
+        {activeWarning && (
+          <WarningToast
+            warning={activeWarning}
+            onDismiss={() => setActiveWarning(null)}
+          />
+        )}
+
         <View style={[styles.cardSection, { maxWidth: size }]}>
           <SwipeCard
             ref={cardRef}

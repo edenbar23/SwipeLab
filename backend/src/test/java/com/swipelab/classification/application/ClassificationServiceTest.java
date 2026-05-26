@@ -96,7 +96,7 @@ class ClassificationServiceTest {
 
         classificationService.submitClassification("testuser", "USER", 0.8, request);
 
-        verify(fraudDetectionService, times(1)).analyzeClassification("testuser", 1500L);
+        verify(fraudDetectionService, times(1)).analyzeClassification("testuser", "USER", 1500L, 1L);
         verify(goldImageEvaluatorService, times(1)).evaluate(any(), any(), any(), any());
         verify(classificationRepository, never()).save(any());
 
@@ -122,7 +122,7 @@ class ClassificationServiceTest {
 
         classificationService.submitClassification("testuser", "USER", 0.8, request);
 
-        verify(fraudDetectionService, times(1)).analyzeClassification("testuser", 1500L);
+        verify(fraudDetectionService, times(1)).analyzeClassification("testuser", "USER", 1500L, 1L);
         verify(goldImageEvaluatorService, times(1)).evaluate(any(), any(), any(), any());
         verify(classificationRepository, times(1)).save(any());
 

@@ -37,9 +37,10 @@ public class ClassificationService {
     public NextBatchResponse submitClassification(String username, String userRole, Double userCredibility,
             SubmitClassificationRequest request) {
 
-        // 1. Fraud Detection
+        // 1. Fraud Detection — passes role so researchers get a lenient threshold
         if (request.getResponseTimeMs() != null) {
-            fraudDetectionService.analyzeClassification(username, request.getResponseTimeMs());
+            fraudDetectionService.analyzeClassification(
+                    username, userRole, request.getResponseTimeMs(), request.getTaskId());
         }
 
         // 2. Load Image

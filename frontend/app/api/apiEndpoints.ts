@@ -74,4 +74,13 @@ export const API_ENDPOINTS = {
         LOGIN: 'https://stardbi.cs.bgu.ac.il/auth/get_token/',
         REFRESH: 'https://stardbi.cs.bgu.ac.il/auth/token_refresh/',
     },
+    ADMIN: {
+        NOTIFICATIONS: '/api/admin/notifications',
+        NOTIFICATIONS_UNREAD_COUNT: '/api/admin/notifications/unread-count',
+        NOTIFICATION_READ: (id: number) => `/api/admin/notifications/${id}/read`,
+        NOTIFICATIONS_READ_ALL: '/api/admin/notifications/read-all',
+        SUSPICIOUS_ACTIVITY: '/api/admin/suspicious-activity',
+        SUSPICIOUS_ACTIVITY_USER: (username: string) => `/api/admin/suspicious-activity/${username}`,
+        SUSPICIOUS_ACTIVITY_RESET: (username: string) => `/api/admin/suspicious-activity/${username}/reset`,
+    },
 };

@@ -6,6 +6,7 @@ import com.swipelab.classification.domain.GoldImage;
 import com.swipelab.classification.domain.Image;
 import com.swipelab.classification.infrastructure.CredibilityRepository;
 import com.swipelab.classification.infrastructure.GoldImageRepository;
+import com.swipelab.users.application.WarningRecoveryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +17,8 @@ import java.util.Optional;
  *
  * Extracted from ClassificationService to follow the Single Responsibility Principle.
  * If the image is not a gold image, returns empty.
- * If it is, evaluates correctness, persists a CredibilityRecord, and returns the result.
+ * If it is, evaluates correctness, persists a CredibilityRecord, returns the result,
+ * and delegates the recovery check to WarningRecoveryService (only acts on WARNED users).
  */
 @Service
 @RequiredArgsConstructor
@@ -24,6 +26,7 @@ public class GoldImageEvaluatorService {
 
     private final GoldImageRepository goldImageRepository;
     private final CredibilityRepository credibilityRepository;
+    private final WarningRecoveryService warningRecoveryService;
 
     /**
      * Evaluates the user's decision against a gold image (if one exists for the given image).
@@ -54,6 +57,9 @@ public class GoldImageEvaluatorService {
                 .userResponse(decision)
                 .correctAnswer(goldImage.getCorrectAnswer())
                 .build());
+
+        // Check if this gold result contributes to warning recovery (no-op for non-WARNED users).
+        warningRecoveryService.processGoldResult(username, isCorrect);
 
         return Optional.of(new GoldImageEvaluationResult(isCorrect, species));
     }

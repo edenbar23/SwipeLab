@@ -1,6 +1,7 @@
 package com.swipelab.users.application;
 
 import com.swipelab.auth.domain.AuthMapper;
+import com.swipelab.auth.application.SecurityAuthorizationService;
 import com.swipelab.dto.request.UpdateProfileRequest;
 import com.swipelab.dto.response.UserProfileResponse;
 import com.swipelab.exception.ResourceNotFoundException;
@@ -21,6 +22,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final AuthMapper authMapper;
+    private final SecurityAuthorizationService securityAuthorizationService;
 
     public UserProfileResponse getUserProfile(String username) {
         User user = userRepository.findByUsername(username)
@@ -96,6 +98,10 @@ public class UserService {
 
     @Transactional
     public UserProfileResponse banUser(String username) {
+        // Super Admin can never be banned — guard against both manual and automated paths.
+        if (securityAuthorizationService.isSuperAdmin(username)) {
+            throw new IllegalArgumentException("Super Admin cannot be banned.");
+        }
         User currentUser = getCurrentUser();
         if (currentUser.getUsername().equalsIgnoreCase(username)) {
             throw new IllegalArgumentException("You cannot ban yourself.");

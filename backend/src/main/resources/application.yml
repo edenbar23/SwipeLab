@@ -92,6 +92,30 @@ app:
     super-admin:
       username: ${SUPER_ADMIN_USERNAME:superadmin@swipelab.com}
       password: ${SUPER_ADMIN_PASSWORD:superpassword123}
+  fraud-detection:
+    # ── Regular Users ──────────────────────────────────────────────────────────
+    # A single classification faster than this is flagged as suspicious
+    min-response-time-ms: 300
+    # ── Researchers ────────────────────────────────────────────────────────────
+    # Domain experts legitimately swipe faster; a lower threshold prevents false positives
+    researcher-min-response-time-ms: 150
+    # ── Sliding-window strike accumulation ─────────────────────────────────────
+    # How many suspicious classifications within the window produce one STRIKE
+    suspicious-count-for-strike: 3
+    # Duration of the sliding window in minutes
+    sliding-window-minutes: 10
+    # ── Escalation ladder ──────────────────────────────────────────────────────
+    strikes-for-warning-1: 5
+    strikes-for-warning-2: 10
+    strikes-for-ban: 15
+    # ── Credibility penalties (absolute score points, not percentage) ──────────
+    credibility-penalty-warning-1: 5.0
+    credibility-penalty-warning-2: 15.0
+    # ── Warning cooldown (prevents warning spam on a bad session) ──────────────
+    warning-cooldown-minutes: 30
+    # ── Organic recovery ───────────────────────────────────────────────────────
+    # Consecutive correct gold-image answers to remove one strike
+    correct-golds-to-recover-strike: 10
 
 # Stardbi Configuration
 stardbi:

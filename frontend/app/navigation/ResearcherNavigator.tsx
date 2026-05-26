@@ -2,9 +2,9 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import React from "react";
 import { StyleSheet, View } from "react-native";
 
-
 import BottomBar from "./components/BottomBar";
 import TopBar from "./components/TopBar";
+import NotificationBell from "../components/ui/NotificationBell";
 import { useAuthStore } from "../stores/authStore";
 
 import AddTaskScreen from "../screens/researcher/AddTaskScreen";
@@ -40,7 +40,15 @@ export default function ResearcherNavigator() {
 
   return (
     <View style={styles.container}>
-        <TopBar />
+        <View style={styles.topBarRow}>
+          <TopBar />
+          {/* Notification bell — Super Admin only */}
+          {isSuperAdmin && (
+            <View style={styles.bellWrap}>
+              <NotificationBell />
+            </View>
+          )}
+        </View>
         {/* Middle Navigator */}
 
         <View style={styles.content}>
@@ -152,4 +160,16 @@ export default function ResearcherNavigator() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   content: { flex: 1 },
+  topBarRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  bellWrap: {
+    position: 'absolute',
+    right: 12,
+    top: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    zIndex: 10,
+  },
 });

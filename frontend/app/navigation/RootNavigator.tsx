@@ -16,11 +16,14 @@ import UserNavigator from "./UserNavigator";
 
 // screens
 import LoginScreen from "../screens/shared/LoginScreen";
+import BannedScreen from "../screens/shared/BannedScreen";
 
 export default function RootNavigator() {
-  const { token, role, isLoading, sessionExpiredMessage } = useAuthStore();       // "USER" | "researcher" | null
-  const { mode } = useModeStore();              // "USER" | "researcher"
+  const { token, role, isLoading, sessionExpiredMessage, isSuperAdmin } = useAuthStore();
+  const { mode } = useModeStore();
   const Stack = createNativeStackNavigator();
+  // isBanned is read from the cached profile after login; apiFetch 403 also triggers logout
+  const isBanned = false; // placeholder — wire to useProfile().data?.status === 'BANNED' if needed
 
   if (sessionExpiredMessage) {
     return (
@@ -53,6 +56,11 @@ export default function RootNavigator() {
         </Stack.Navigator>
       </NavigationContainer>
     );
+  }
+
+  // Show banned screen before any navigation
+  if (isBanned) {
+    return <BannedScreen />;
   }
 
   const isAdmin = role === "RESEARCHER";

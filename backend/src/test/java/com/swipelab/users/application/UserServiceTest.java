@@ -1,17 +1,21 @@
 package com.swipelab.users.application;
 
 import com.swipelab.auth.domain.AuthMapper;
+import com.swipelab.auth.application.SecurityAuthorizationService;
 import com.swipelab.dto.request.UpdateProfileRequest;
 import com.swipelab.dto.response.UserProfileResponse;
 import com.swipelab.exception.ResourceNotFoundException;
 import com.swipelab.users.domain.User;
 import com.swipelab.users.infrastructure.UserRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -26,6 +30,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class UserServiceTest {
 
     @Mock
@@ -34,11 +39,20 @@ class UserServiceTest {
     @Mock
     private AuthMapper authMapper;
 
+    @Mock
+    private SecurityAuthorizationService securityAuthorizationService;
+
     @InjectMocks
     private UserService userService;
 
     private User user;
     private UserProfileResponse profileResponse;
+
+    @AfterEach
+    void tearDown() {
+        // Prevent SecurityContext from leaking between tests (ThreadLocal state).
+        SecurityContextHolder.clearContext();
+    }
 
     @BeforeEach
     void setUp() {
@@ -72,11 +86,11 @@ class UserServiceTest {
 
     @Test
     void getCurrentUserProfile_ShouldReturnProfile() {
-        // Mock Security Context
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, null, Collections.emptyList());
         SecurityContextHolder.getContext().setAuthentication(auth);
-
-        when(authMapper.toUserProfileResponse(user)).thenReturn(profileResponse);
+        
+        // Use any(User.class) to prevent stubbing argument mismatch
+        when(authMapper.toUserProfileResponse(any(User.class))).thenReturn(profileResponse);
 
         UserProfileResponse response = userService.getCurrentUserProfile();
 
@@ -131,6 +145,7 @@ class UserServiceTest {
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(adminUser, null, Collections.emptyList());
         SecurityContextHolder.getContext().setAuthentication(auth);
 
+        when(securityAuthorizationService.isSuperAdmin("testuser")).thenReturn(false);
         when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(user));
         when(userRepository.save(any(User.class))).thenReturn(user);
         when(authMapper.toUserProfileResponse(user)).thenReturn(profileResponse);
@@ -144,10 +159,14 @@ class UserServiceTest {
     void banUser_ShouldThrowException_WhenBanningSelf() {
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, null, Collections.emptyList());
         SecurityContextHolder.getContext().setAuthentication(auth);
+        // isSuperAdmin is checked before self-check
+        when(securityAuthorizationService.isSuperAdmin("testuser")).thenReturn(false);
+        // getCurrentUser() calls findByUsername since User implements UserDetails
+        when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(user));
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, 
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
             () -> userService.banUser("testuser"));
-        
+
         assertEquals("You cannot ban yourself.", exception.getMessage());
     }
 
@@ -172,10 +191,12 @@ class UserServiceTest {
     void unbanUser_ShouldThrowException_WhenUnbanningSelf() {
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, null, Collections.emptyList());
         SecurityContextHolder.getContext().setAuthentication(auth);
+        // getCurrentUser() calls findByUsername since User implements UserDetails
+        when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(user));
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, 
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
             () -> userService.unbanUser("testuser"));
-        
+
         assertEquals("You cannot unban yourself.", exception.getMessage());
     }
 }

@@ -182,6 +182,37 @@ public class User {
         @Builder.Default
         private Boolean isFlagged = false;
 
+        // ========== SUSPICIOUS ACTIVITY TRACKING ==========
+
+        /**
+         * Total number of fraud-detection warnings issued to this user.
+         * Incremented on WARNING_1 and WARNING_2 events.
+         */
+        @Column(name = "warning_count", nullable = false)
+        @Builder.Default
+        private Integer warningCount = 0;
+
+        /**
+         * Cumulative strike count. Each sliding-window violation increments this.
+         * Drives the WARNING_1 → WARNING_2 → BAN escalation ladder.
+         */
+        @Column(name = "strike_count", nullable = false)
+        @Builder.Default
+        private Integer strikeCount = 0;
+
+        /** Timestamp of the most recent warning issued to this user. */
+        @Column(name = "last_warning_at")
+        private LocalDateTime lastWarningAt;
+
+        /**
+         * Consecutive correct gold-image answers since the last warning or reset.
+         * Used for organic recovery: reaching the configured threshold reduces strikeCount
+         * and may restore ACTIVE status.
+         */
+        @Column(name = "consecutive_correct_golds", nullable = false)
+        @Builder.Default
+        private Integer consecutiveCorrectGolds = 0;
+
 
 
         public Double getCredibilityScore() {

@@ -4,6 +4,7 @@ import com.swipelab.classification.domain.Classification;
 import com.swipelab.classification.domain.util.CredibilityCalculator;
 import com.swipelab.users.domain.User;
 import com.swipelab.model.enums.UserRole;
+import com.swipelab.model.enums.UserStatus;
 import com.swipelab.classification.infrastructure.ClassificationRepository;
 import com.swipelab.users.infrastructure.UserRepository;
 
@@ -99,8 +100,12 @@ public class CredibilityService {
             return;
         }
 
+        // Warned users count for 0.5 weight in majority voting — their credibility
+        // is penalised but not fully removed so they can still contribute data.
+        double userWeight = (user.getStatus() == UserStatus.WARNED) ? 0.5 : 1.0;
+
         int totalComparisons = 0;
-        int agreementCount = 0;
+        double weightedAgreement = 0.0;
 
         for (Classification userClassification : userClassifications) {
             Long imageId = userClassification.getImage().getId();
@@ -122,18 +127,19 @@ public class CredibilityService {
 
             totalComparisons++;
             if (agreementScore == 1.0) {
-                agreementCount++;
+                weightedAgreement += userWeight; // WARNED = 0.5, ACTIVE = 1.0
             }
         }
 
         double majorityAgreementScore = totalComparisons > 0
-                ? (double) agreementCount / totalComparisons
+                ? weightedAgreement / totalComparisons
                 : 0.0;
 
         user.setMajorityAgreementScore(majorityAgreementScore);
 
-        log.debug("Updated majority agreement for user {}: {}/{} agreements ({}%)",
-                user.getUsername(), agreementCount, totalComparisons, majorityAgreementScore * 100);
+        log.debug("Updated majority agreement for user {} (weight={}): {}/{} effective agreements ({}%)",
+                user.getUsername(), userWeight, weightedAgreement, totalComparisons,
+                majorityAgreementScore * 100);
     }
 
     @Transactional(readOnly = true)
