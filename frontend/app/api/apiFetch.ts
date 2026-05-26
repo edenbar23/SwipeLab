@@ -204,5 +204,19 @@ export async function apiFetch(
     }, 2000);
   }
 
+  // Global ban detection — any 403 with ACCOUNT_BANNED triggers BannedScreen
+  if (response.status === 403) {
+    try {
+      const cloned = response.clone();
+      const body = await cloned.json();
+      if (body?.errorCode === 'ACCOUNT_BANNED') {
+        const { useAuthStore } = require("../stores/authStore");
+        useAuthStore.getState().setIsBanned(true);
+      }
+    } catch {
+      // If body parsing fails, it's a regular 403 — pass through
+    }
+  }
+
   return response;
 }

@@ -25,7 +25,6 @@ import { useSwipeStore } from '../../stores/swipeStore';
 import { useThemeStore } from '../../stores/themeStore';
 import { SwipeDirection } from '../../types';
 import { ClassificationWarning } from '../../types/fraudTypes';
-import { useAuthStore } from '../../stores/authStore';
 
 const BACKEND_BASE_URL =
   process.env.EXPO_PUBLIC_API_URL ||
@@ -43,7 +42,6 @@ export default function SwipeScreen() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeWarning, setActiveWarning] = useState<ClassificationWarning | null>(null);
-  const { logout, setIsBanned } = useAuthStore();
 
   const { isPhone, isDesktop } = useResponsive();
   const { theme } = useThemeStore();
@@ -123,13 +121,6 @@ export default function SwipeScreen() {
             responseTimeMs: 0,
           }),
         });
-
-        if (res.status === 403) {
-          // Account banned — trigger BannedScreen without logging out yet
-          setIsBanned(true);
-          setIsSubmitting(false);
-          return;
-        }
 
         if (res.ok) {
           const data = await res.json();
