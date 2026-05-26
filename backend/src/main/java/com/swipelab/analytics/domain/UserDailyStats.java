@@ -10,7 +10,7 @@ import java.time.LocalDate;
 
 @Entity
 @Table(name = "user_daily_stats", indexes = {
-        @Index(name = "idx_uds_user_day", columnList = "user_id, day", unique = true)
+        @Index(name = "idx_uds_user_day", columnList = "user_id, `day`", unique = true)
 })
 @Data
 @Builder
@@ -25,7 +25,7 @@ public class UserDailyStats {
     @Column(name = "user_id", nullable = false)
     private String userId;
 
-    @Column(name = "day", nullable = false)
+    @Column(name = "`day`", nullable = false)
     private LocalDate day;
 
     @Column(name = "total")

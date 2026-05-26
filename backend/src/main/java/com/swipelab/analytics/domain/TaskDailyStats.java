@@ -10,7 +10,7 @@ import java.time.LocalDate;
 
 @Entity
 @Table(name = "task_daily_stats", indexes = {
-        @Index(name = "idx_tds_task_day", columnList = "task_id, day", unique = true)
+        @Index(name = "idx_tds_task_day", columnList = "task_id, `day`", unique = true)
 })
 @Data
 @Builder
@@ -25,7 +25,7 @@ public class TaskDailyStats {
     @Column(name = "task_id", nullable = false)
     private Long taskId;
 
-    @Column(name = "day", nullable = false)
+    @Column(name = "`day`", nullable = false)
     private LocalDate day;
 
     @Column(name = "classifications")

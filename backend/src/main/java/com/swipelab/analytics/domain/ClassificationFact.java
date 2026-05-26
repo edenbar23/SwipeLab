@@ -15,7 +15,7 @@ import java.util.UUID;
 @Table(name = "classification_facts", indexes = {
         @Index(name = "idx_cf_task_id", columnList = "task_id"),
         @Index(name = "idx_cf_user_id", columnList = "user_id"),
-        @Index(name = "idx_cf_day", columnList = "day")
+        @Index(name = "idx_cf_day", columnList = "`day`")
 })
 @Data
 @Builder
@@ -71,6 +71,6 @@ public class ClassificationFact {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "day", nullable = false)
+    @Column(name = "`day`", nullable = false)
     private LocalDate day;
 }
