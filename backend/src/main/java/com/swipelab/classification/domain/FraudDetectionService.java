@@ -2,6 +2,7 @@ package com.swipelab.classification.domain;
 
 import com.swipelab.auth.application.SecurityAuthorizationService;
 import com.swipelab.classification.infrastructure.SuspiciousActivityRepository;
+import com.swipelab.classification.dto.api.ClassificationWarningDto;
 import com.swipelab.model.enums.UserRole;
 import com.swipelab.users.domain.User;
 import com.swipelab.users.events.UserBannedBySystemEvent;
@@ -12,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -79,14 +81,14 @@ public class FraudDetectionService {
      * @param responseTimeMs client-measured time from image display to swipe (ms)
      * @param taskId         task being classified (for the audit record)
      */
-    @Transactional
-    public void analyzeClassification(String username, String userRole,
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public FraudAnalysisResult analyzeClassification(String username, String userRole,
                                       long responseTimeMs, Long taskId) {
 
         // Super Admin is fully immune — never flag platform operators.
         if (securityAuthorizationService.isSuperAdmin(username)) {
             log.debug("Fraud detection skipped for super admin: {}", username);
-            return;
+            return new FraudAnalysisResult(false, null);
         }
 
         // Pick the response-time threshold based on role.
@@ -95,7 +97,7 @@ public class FraudDetectionService {
         long threshold = isResearcher ? researcherMinResponseTimeMs : minResponseTimeMs;
 
         if (responseTimeMs >= threshold) {
-            return; // Response time is within acceptable range — nothing to do.
+            return new FraudAnalysisResult(false, null); // Response time is within acceptable range — nothing to do.
         }
 
         log.debug("Fast response: user={}, role={}, {}ms < threshold {}ms",
@@ -114,11 +116,11 @@ public class FraudDetectionService {
         if (recentCount < suspiciousCountForStrike) {
             log.debug("User {} has {} suspicious events in window (need {}); silent accumulation",
                     username, recentCount, suspiciousCountForStrike);
-            return;
+            return new FraudAnalysisResult(false, null);
         }
 
         // Window threshold crossed — escalate to a formal STRIKE.
-        escalate(username, taskId, responseTimeMs, threshold);
+        return escalate(username, taskId, responseTimeMs, threshold);
     }
 
     // ── Private helpers ───────────────────────────────────────────────────────
@@ -127,7 +129,7 @@ public class FraudDetectionService {
      * Increments the user's cumulative strike count and determines which
      * event (if any) to publish on the escalation ladder.
      */
-    private void escalate(String username, Long taskId, long responseTimeMs, long threshold) {
+    private FraudAnalysisResult escalate(String username, Long taskId, long responseTimeMs, long threshold) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException(
                         "User not found during fraud escalation: " + username));
@@ -144,23 +146,27 @@ public class FraudDetectionService {
 
         if (newStrikeCount >= strikesForBan) {
             publishBan(username, reason, newStrikeCount);
+            return new FraudAnalysisResult(true, null);
         } else if (newStrikeCount >= strikesForWarning2 && (user.getWarningCount() == null || user.getWarningCount() < 2)) {
-            publishWarning(user, username, WarningLevel.WARNING_2, reason, newStrikeCount);
+            ClassificationWarningDto warning = publishWarning(user, username, WarningLevel.WARNING_2, reason, newStrikeCount);
+            return new FraudAnalysisResult(false, warning);
         } else if (newStrikeCount >= strikesForWarning1 && (user.getWarningCount() == null || user.getWarningCount() < 1)) {
-            publishWarning(user, username, WarningLevel.WARNING_1, reason, newStrikeCount);
+            ClassificationWarningDto warning = publishWarning(user, username, WarningLevel.WARNING_1, reason, newStrikeCount);
+            return new FraudAnalysisResult(false, warning);
         } else {
             log.debug("Strike #{} for user {} — below warning threshold, silent", newStrikeCount, username);
+            return new FraudAnalysisResult(false, null);
         }
     }
 
-    private void publishWarning(User user, String username, WarningLevel level,
+    private ClassificationWarningDto publishWarning(User user, String username, WarningLevel level,
                                 String reason, int strikeCount) {
         // Respect the cooldown window to avoid spamming warnings in a single bad session.
         if (user.getLastWarningAt() != null) {
             LocalDateTime cooldownEnd = user.getLastWarningAt().plusMinutes(warningCooldownMinutes);
             if (LocalDateTime.now().isBefore(cooldownEnd)) {
                 log.debug("Warning suppressed for {} — within cooldown until {}", username, cooldownEnd);
-                return;
+                return null;
             }
         }
 
@@ -177,6 +183,13 @@ public class FraudDetectionService {
                 .strikesUntilBan(strikesUntilBan)
                 .detectedAt(LocalDateTime.now())
                 .build());
+
+        return ClassificationWarningDto.builder()
+                .level(level.name())
+                .message(reason)
+                .strikeCount(strikeCount)
+                .strikesUntilBan(strikesUntilBan)
+                .build();
     }
 
     private void publishBan(String username, String reason, int totalStrikes) {

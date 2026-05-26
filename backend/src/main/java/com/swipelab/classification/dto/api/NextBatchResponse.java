@@ -8,4 +8,5 @@ import java.util.List;
 @Builder
 public class NextBatchResponse {
     private List<BatchImageDto> images;
+    private ClassificationWarningDto warning;
 }

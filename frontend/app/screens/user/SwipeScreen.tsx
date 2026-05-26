@@ -40,6 +40,7 @@ export default function SwipeScreen() {
   const { dataBatch, currentIndex, activeTaskId, setActiveTaskId, setBatch, nextCard, clearBatch } =
     useSwipeStore();
   const [loading, setLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeWarning, setActiveWarning] = useState<ClassificationWarning | null>(null);
   const { logout } = useAuthStore();
@@ -102,41 +103,49 @@ export default function SwipeScreen() {
   };
 
   const handleSwipe = async (direction: SwipeDirection) => {
+    if (isSubmitting) return;
     const currentImage = dataBatch[currentIndex];
 
     if (currentImage) {
+      setIsSubmitting(true);
       let decision = direction.toUpperCase();
       if (direction === 'dont-know') decision = 'DONT_KNOW';
 
-      apiFetch(`/api/v1/classifications/submit`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          imageId: currentImage.imageId,
-          taskId: currentImage.taskId,
-          question: currentImage.question,
-          decision,
-          responseTimeMs: 0,
-        }),
-      })
-        .then(async (res) => {
-          if (res.status === 403) {
-            // Account banned — force logout so BannedScreen is shown via RootNavigator
-            await logout();
-            return;
+      try {
+        const res = await apiFetch(`/api/v1/classifications/submit`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            imageId: currentImage.imageId,
+            taskId: currentImage.taskId,
+            question: currentImage.question,
+            decision,
+            responseTimeMs: 0,
+          }),
+        });
+
+        if (res.status === 403) {
+          // Account banned — force logout so BannedScreen is shown via RootNavigator
+          await logout();
+          setIsSubmitting(false);
+          return;
+        }
+
+        if (res.ok) {
+          const data = await res.json();
+          // Show warning toast if the fraud detection system issued one
+          if (data?.warning) {
+            setActiveWarning(data.warning as ClassificationWarning);
           }
-          if (res.ok) {
-            const data = await res.json();
-            // Show warning toast if the fraud detection system issued one
-            if (data?.warning) {
-              setActiveWarning(data.warning as ClassificationWarning);
-            }
-            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.challenges });
-            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.myBadges });
-            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.userProfile });
-          }
-        })
-        .catch((e) => console.error('Submit error:', e));
+          queryClient.invalidateQueries({ queryKey: QUERY_KEYS.challenges });
+          queryClient.invalidateQueries({ queryKey: QUERY_KEYS.myBadges });
+          queryClient.invalidateQueries({ queryKey: QUERY_KEYS.userProfile });
+        }
+      } catch (e) {
+        console.error('Submit error:', e);
+      } finally {
+        setIsSubmitting(false);
+      }
     }
 
     if (currentIndex + 1 < dataBatch.length) {
@@ -149,9 +158,10 @@ export default function SwipeScreen() {
 
   // Keyboard shortcuts (web only, active swipe state)
   useEffect(() => {
-    if (Platform.OS !== 'web' || loading || dataBatch.length === 0) return;
+    if (Platform.OS !== 'web' || loading || isSubmitting || dataBatch.length === 0) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (isSubmitting) return;
       switch (e.key) {
         case 'ArrowUp':    cardRef.current?.swipeCard('dont-know'); break;
         case 'ArrowDown':  cardRef.current?.swipeCard('trash');     break;
@@ -162,7 +172,7 @@ export default function SwipeScreen() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [loading, dataBatch, currentIndex]);
+  }, [loading, isSubmitting, dataBatch, currentIndex]);
 
   // ─── STATE A: Active task — loading batch ──────────────────────────────────
   if (activeTaskId && (loading || isQueryLoading)) {
