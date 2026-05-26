@@ -7,16 +7,19 @@ import com.swipelab.exception.ResourceNotFoundException;
 import com.swipelab.model.enums.UserRole;
 import com.swipelab.model.enums.UserStatus;
 import com.swipelab.users.domain.User;
+import com.swipelab.users.events.UserStatusChangedEvent;
 import com.swipelab.users.infrastructure.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -36,6 +39,7 @@ class UserServiceBanTest {
     @Mock private UserRepository userRepository;
     @Mock private AuthMapper authMapper;
     @Mock private SecurityAuthorizationService securityAuthorizationService;
+    @Mock private ApplicationEventPublisher eventPublisher;
 
     @InjectMocks
     private UserService userService;
@@ -74,7 +78,7 @@ class UserServiceBanTest {
     // ── Happy flow ────────────────────────────────────────────────────────────
 
     @Test
-    @DisplayName("Banning a regular user sets status=BANNED and active=false")
+    @DisplayName("Banning a regular user sets status=BANNED, active=false, accountLocked=true and publishes UserStatusChangedEvent")
     void banRegularUser_success() {
         when(securityAuthorizationService.isSuperAdmin("target")).thenReturn(false);
         when(userRepository.findByUsername("target")).thenReturn(Optional.of(targetUser));
@@ -83,9 +87,20 @@ class UserServiceBanTest {
 
         userService.banUser("target");
 
+        // Core state assertions
         assertThat(targetUser.getStatus()).isEqualTo(UserStatus.BANNED);
         assertThat(targetUser.getActive()).isFalse();
+        // accountLocked must be set — mirrors auto-ban path and enables BannedUserFilter
+        assertThat(targetUser.getAccountLocked()).isTrue();
         verify(userRepository).save(targetUser);
+
+        // UserStatusChangedEvent must be published so recipients module removes the user
+        ArgumentCaptor<UserStatusChangedEvent> eventCaptor =
+                ArgumentCaptor.forClass(UserStatusChangedEvent.class);
+        verify(eventPublisher).publishEvent(eventCaptor.capture());
+        UserStatusChangedEvent published = eventCaptor.getValue();
+        assertThat(published.getUsername()).isEqualTo("target");
+        assertThat(published.isActive()).isFalse();
     }
 
     // ── Edge cases ────────────────────────────────────────────────────────────
