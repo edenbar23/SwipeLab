@@ -63,6 +63,7 @@ public class GlobalExceptionHandler {
                                 .error("Forbidden")
                                 .message("You don't have permission to access this resource.")
                                 .path(request.getRequestURI())
+                                .errorCode("ACCESS_DENIED")
                                 .build();
 
                 return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
@@ -78,6 +79,7 @@ public class GlobalExceptionHandler {
                                 .error("Forbidden")
                                 .message(ex.getMessage())
                                 .path(request.getRequestURI())
+                                .errorCode("ACCOUNT_BANNED")
                                 .build();
 
                 return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
