@@ -206,6 +206,7 @@ export default function AddTaskScreen({ route, navigation }: any) {
 
       const resData = await res.json();
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["species", "pool"] });
       setCreatedTaskId(resData.taskId);
     } catch (err) {
       console.error("Error creating task:", err);
