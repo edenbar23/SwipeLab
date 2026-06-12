@@ -19,6 +19,7 @@ import java.time.Instant;
 
 @Slf4j
 @RestController
+@RequestMapping("/stardbi")
 @Profile({"mock", "e2e"})
 public class MockStardbiController {
 
