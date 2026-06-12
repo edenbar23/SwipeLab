@@ -1,0 +1,50 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# E2E Testing Profile
+# Purpose: Run backend locally alongside frontend with mocked StarDBI.
+#          Uses a separate database with create-drop for test isolation.
+# Usage:   ./mvnw spring-boot:run -Dspring-boot.run.profiles=e2e
+# ──────────────────────────────────────────────────────────────────────────────
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/swipelab_e2e
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop  # Fresh schema each run for test reproducibility
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
+
+  flyway:
+    enabled: false  # Let Hibernate generate tables from entities
+
+  mail:
+    host: localhost
+    port: 1025  # Local SMTP stub (MailHog or similar); no-op for E2E
+    username: e2e@localhost
+    password: e2e
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
+
+# Auto-verify emails so registration flows don't block on SMTP
+app:
+  auto-verify-emails: true
+
+# Disable scheduled StarDBI sync — data is seeded explicitly by E2eDataSeeder
+stardbi:
+  sync:
+    delay: 999999999
+
+logging:
+  level:
+    com.swipelab: INFO
