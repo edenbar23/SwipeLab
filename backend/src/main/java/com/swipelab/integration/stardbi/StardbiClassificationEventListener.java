@@ -28,7 +28,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @RequiredArgsConstructor
 public class StardbiClassificationEventListener {
 
-    private final StardbiClient stardbiClient;
+    private final StardbiClientPort stardbiClient;
     private final TaskRepository taskRepository;
     private final UserRepository userRepository;
     private final ImageRepository imageRepository;

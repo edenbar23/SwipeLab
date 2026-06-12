@@ -4,7 +4,7 @@ import com.swipelab.dto.request.CreateTaskRequest;
 import com.swipelab.dto.request.UpdateTaskRequest;
 import com.swipelab.dto.response.TaskPageResponse;
 import com.swipelab.dto.response.TaskResponse;
-import com.swipelab.integration.stardbi.StardbiClient;
+import com.swipelab.integration.stardbi.StardbiClientPort;
 import com.swipelab.integration.stardbi.dto.ExternalExperimentDto;
 import com.swipelab.tasks.application.TaskService;
 import jakarta.validation.Valid;
@@ -28,7 +28,7 @@ import java.util.List;
 public class TaskController {
 
     private final TaskService taskService;
-    private final StardbiClient stardbiClient;
+    private final StardbiClientPort stardbiClient;
 
     // =========================
     // User Endpoints

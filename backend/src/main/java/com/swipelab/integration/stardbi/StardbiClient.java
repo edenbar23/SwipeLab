@@ -11,12 +11,15 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import org.springframework.context.annotation.Profile;
+
 import java.util.List;
 
 @Slf4j
 @Service
+@Profile("!e2e")
 @RequiredArgsConstructor
-public class StardbiClient {
+public class StardbiClient implements StardbiClientPort {
 
     private final RestTemplate restTemplate;
 

@@ -24,7 +24,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class StardbiSyncService {
 
-    private final StardbiClient stardbiClient;
+    private final StardbiClientPort stardbiClient;
     private final TaskRepository taskRepository;
     private final ImageRepository imageRepository;
     private final UserRepository userRepository;

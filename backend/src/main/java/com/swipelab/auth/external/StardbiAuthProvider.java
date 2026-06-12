@@ -2,7 +2,7 @@ package com.swipelab.auth.external;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.swipelab.integration.stardbi.StardbiClient;
+import com.swipelab.integration.stardbi.StardbiClientPort;
 import com.swipelab.integration.stardbi.dto.StardbiRefreshTokenRequestDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @RequiredArgsConstructor
 public class StardbiAuthProvider implements ExternalAuthProvider {
 
-    private final StardbiClient stardbiClient;
+    private final StardbiClientPort stardbiClient;
     private final ObjectMapper objectMapper;
     private final com.swipelab.users.infrastructure.UserRepository userRepository;
 

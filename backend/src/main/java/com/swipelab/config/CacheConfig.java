@@ -1,7 +1,7 @@
 package com.swipelab.config;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
-import com.swipelab.integration.stardbi.StardbiClient;
+import com.swipelab.integration.stardbi.StardbiClientPort;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -30,7 +30,7 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class CacheConfig {
 
-    private final StardbiClient stardbiClient;
+    private final StardbiClientPort stardbiClient;
 
     // ── Cache names ────────────────────────────────────────────────────────────
 

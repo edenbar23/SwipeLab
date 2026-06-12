@@ -41,7 +41,7 @@ class StardbiClassificationEventListenerTest {
     }
 
     @MockBean
-    private StardbiClient stardbiClient;
+    private StardbiClientPort stardbiClient;
 
     @MockBean
     private TaskRepository taskRepository;

@@ -1,6 +1,6 @@
 package com.swipelab.tasks.api;
 
-import com.swipelab.integration.stardbi.StardbiClient;
+import com.swipelab.integration.stardbi.StardbiClientPort;
 import com.swipelab.integration.stardbi.dto.ExternalTaxonomyDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class MetadataController {
 
-    private final StardbiClient stardbiClient;
+    private final StardbiClientPort stardbiClient;
 
     @GetMapping("/species")
     @PreAuthorize("hasRole('RESEARCHER') or @securityAuthorizationService.isSuperAdmin(authentication.name)")

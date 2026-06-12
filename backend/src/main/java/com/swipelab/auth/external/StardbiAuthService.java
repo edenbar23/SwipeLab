@@ -2,7 +2,7 @@ package com.swipelab.auth.external;
 
 import com.swipelab.auth.infrastructure.AuthProvider;
 import com.swipelab.dto.request.ExternalLoginRequest;
-import com.swipelab.integration.stardbi.StardbiClient;
+import com.swipelab.integration.stardbi.StardbiClientPort;
 import com.swipelab.model.enums.UserRole;
 import com.swipelab.model.enums.UserStatus;
 import com.swipelab.users.domain.User;
@@ -21,7 +21,7 @@ import java.util.Optional;
 public class StardbiAuthService {
 
     private final StardbiAuthProvider stardbiAuthProvider;
-    private final StardbiClient stardbiClient;
+    private final StardbiClientPort stardbiClient;
     private final UserRepository userRepository;
 
     /**

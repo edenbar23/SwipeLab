@@ -1,6 +1,6 @@
 package com.swipelab.config;
 
-import com.swipelab.integration.stardbi.StardbiClient;
+import com.swipelab.integration.stardbi.StardbiClientPort;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -16,7 +16,7 @@ import static org.mockito.Mockito.*;
 class CacheConfigTest {
 
     @Mock
-    private StardbiClient stardbiClient;
+    private StardbiClientPort stardbiClient;
 
     @InjectMocks
     private CacheConfig cacheConfig;
