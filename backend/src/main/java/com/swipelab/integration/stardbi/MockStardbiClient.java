@@ -201,11 +201,11 @@ public class MockStardbiClient implements StardbiClientPort {
         log.info("Mock Stardbi client getTaxonomy");
         // returning subset of species provided
         return List.of(
-                ExternalTaxonomyDto.builder().speciesId(1L).clazz("insecta").order("hemiptera").family("thaumastocoridae").genus("thaumastocoris").species("thaumastocoris peregrinus").build(),
-                ExternalTaxonomyDto.builder().speciesId(2L).clazz("insecta").order("hemiptera").family("thaumastocoridae").genus("thaumastocoris").species("thaumastocoris peregrinos").build(),
-                ExternalTaxonomyDto.builder().speciesId(3L).clazz("insecta").order("hemiptera").family("thaumastocoridae").genus("thaumastocoris").species("thaumastocoris sp.").build(),
-                ExternalTaxonomyDto.builder().speciesId(4L).clazz("insecta").order("hemiptera").family("thaumastocoridae").genus("thaumastocoridae sp.").species("thaumastocoridae sp.").build(),
-                ExternalTaxonomyDto.builder().speciesId(5L).clazz("insecta").order("hemiptera").family("aphalaridae").genus("glycaspis").species("glycaspis brimblecombei").build()
+                ExternalTaxonomyDto.builder().speciesId(null).clazz("insecta").order("hemiptera").family("thaumastocoridae").genus("thaumastocoris").species("thaumastocoris peregrinus").build(),
+                ExternalTaxonomyDto.builder().speciesId(null).clazz("insecta").order("hemiptera").family("thaumastocoridae").genus("thaumastocoris").species("thaumastocoris peregrinos").build(),
+                ExternalTaxonomyDto.builder().speciesId(null).clazz("insecta").order("hemiptera").family("thaumastocoridae").genus("thaumastocoris").species("thaumastocoris sp.").build(),
+                ExternalTaxonomyDto.builder().speciesId(null).clazz("insecta").order("hemiptera").family("thaumastocoridae").genus("thaumastocoridae sp.").species("thaumastocoridae sp.").build(),
+                ExternalTaxonomyDto.builder().speciesId(null).clazz("insecta").order("hemiptera").family("aphalaridae").genus("glycaspis").species("glycaspis brimblecombei").build()
         );
     }
 
