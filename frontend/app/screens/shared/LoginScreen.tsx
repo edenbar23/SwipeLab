@@ -3,7 +3,7 @@ import * as WebBrowser from "expo-web-browser";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, Image, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View, ScrollView } from "react-native";
 import { API_ENDPOINTS } from '../../api/apiEndpoints';
-import { apiFetch } from "../../api/apiFetch";
+import { apiFetch, backendUrl } from "../../api/apiFetch";
 import { preloadAfterLogin } from "../../api/queries";
 import RegisterForm from "../../components/RegisterForm";
 import { useAuthStore } from "../../stores/authStore";
@@ -92,7 +92,11 @@ export default function LoginScreen() {
 
     try {
       // 1. Call Stardbi directly
-      const stardbiRes = await fetch(API_ENDPOINTS.STARDBI.LOGIN, {
+      // In development, route to our backend mock. In production, keep original relative routing (proxy).
+      const stardbiUrl = __DEV__ 
+        ? `${backendUrl}${API_ENDPOINTS.STARDBI.LOGIN}`
+        : API_ENDPOINTS.STARDBI.LOGIN;
+      const stardbiRes = await fetch(stardbiUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

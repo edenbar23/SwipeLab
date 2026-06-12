@@ -81,6 +81,7 @@ public class SecurityConfig {
                                                                 "/swipe_lab/**",
                                                                 "/api/v1/system/**",
                                                                 "/swagger-ui.html",
+                                                                "/stardbi/**",
                                                                 "/api/admin/gold-images/*/image",
                                                                 "/api/v1/images/*/content")
                                                 .permitAll()

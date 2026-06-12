@@ -67,26 +67,67 @@ public class MockStardbiClient implements StardbiClientPort {
 
     private List<ExternalExperimentDto> getMockExperiments() {
         ExternalExperimentDto exp1 = ExternalExperimentDto.builder()
-                .id(8L)
-                .name("michael test")
-                .notes("testing edits and uploads.\nchange note text.")
-                .startDate("2022-11-27")
-                .emdDate(null)
+                .id(1L)
+                .name("Mock Experiment 1")
+                .notes("Automatically synced by seeder on startup")
+                .startDate("2025-01-01")
+                .emdDate("2025-12-31")
                 .build();
-        return List.of(exp1);
+                
+        ExternalExperimentDto exp2 = ExternalExperimentDto.builder()
+                .id(2L)
+                .name("Mock Experiment 2")
+                .notes("Available for testing Add Task flows")
+                .startDate("2026-01-01")
+                .emdDate("2026-12-31")
+                .build();
+                
+        return List.of(exp1, exp2);
     }
 
     @Override
     public List<ExternalCropDto> getUnclassifiedImageIds(Long experimentId) {
         log.info("Mock Stardbi client getUnclassifiedImageIds for exp: {}", experimentId);
         List<ExternalCropDto> crops = new ArrayList<>();
-        // create a few crops
-        for (long i = 1; i <= 5; i++) {
-            crops.add(ExternalCropDto.builder()
-                    .boxId(i * 10)
-                    .imageId(i * 100)
-                    .speciesId(null)
-                    .build());
+        java.io.File folder = new java.io.File("src/main/resources/e2e-crops");
+        if (folder.exists() && folder.isDirectory()) {
+            java.io.File[] files = folder.listFiles();
+            if (files != null) {
+                for (java.io.File file : files) {
+                    if (file.isFile() && (file.getName().endsWith(".jpg") || file.getName().endsWith(".png"))) {
+                        try {
+                            String nameWithoutExt = file.getName().substring(0, file.getName().lastIndexOf('.'));
+                            String[] parts = nameWithoutExt.split("_");
+                            if (parts.length >= 3) {
+                                Long boxId = Long.parseLong(parts[parts.length - 1]);
+                                Long parentImageId = Long.parseLong(String.join("", java.util.Arrays.copyOfRange(parts, 1, parts.length - 1)));
+                                
+                                // Shift the boxId to guarantee global uniqueness across different mock experiments
+                                Long uniqueBoxId = boxId + (experimentId * 1000);
+                                
+                                crops.add(ExternalCropDto.builder()
+                                        .boxId(uniqueBoxId)
+                                        .imageId(parentImageId)
+                                        .speciesId(null)
+                                        .build());
+                            }
+                        } catch (Exception e) {
+                            log.warn("Could not parse image name: {}", file.getName());
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Fallback
+        if (crops.isEmpty()) {
+            for (long i = 1; i <= 5; i++) {
+                crops.add(ExternalCropDto.builder()
+                        .boxId(i * 10)
+                        .imageId(i * 100)
+                        .speciesId(null)
+                        .build());
+            }
         }
         return crops;
     }
@@ -106,11 +147,46 @@ public class MockStardbiClient implements StardbiClientPort {
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
              ZipOutputStream zos = new ZipOutputStream(baos)) {
             
-            for (long i = 1; i <= 5; i++) {
-                ZipEntry entry = new ZipEntry((i * 10) + ".png");
-                zos.putNextEntry(entry);
-                zos.write(getImageBuffer(i * 10));
-                zos.closeEntry();
+            java.io.File folder = new java.io.File("src/main/resources/e2e-crops");
+            boolean filesAdded = false;
+            if (folder.exists() && folder.isDirectory()) {
+                java.io.File[] files = folder.listFiles();
+                if (files != null) {
+                    for (java.io.File file : files) {
+                        if (file.isFile() && (file.getName().endsWith(".jpg") || file.getName().endsWith(".png"))) {
+                            try {
+                                String nameWithoutExt = file.getName().substring(0, file.getName().lastIndexOf('.'));
+                                String[] parts = nameWithoutExt.split("_");
+                                if (parts.length >= 3) {
+                                    Long boxId = Long.parseLong(parts[parts.length - 1]);
+                                    Long parentImageId = Long.parseLong(String.join("", java.util.Arrays.copyOfRange(parts, 1, parts.length - 1)));
+                                    
+                                    // Shift the boxId with a random value to guarantee global uniqueness every time the ZIP is downloaded
+                                    long randomShift = (long)(Math.random() * 1000000);
+                                    Long uniqueBoxId = boxId + (experimentId * 1000) + randomShift;
+                                    
+                                    String ext = file.getName().substring(file.getName().lastIndexOf('.'));
+                                    ZipEntry entry = new ZipEntry(parentImageId + "_" + uniqueBoxId + ext);
+                                    zos.putNextEntry(entry);
+                                    zos.write(java.nio.file.Files.readAllBytes(file.toPath()));
+                                    zos.closeEntry();
+                                    filesAdded = true;
+                                }
+                            } catch (Exception e) {
+                                log.warn("Could not parse image name for zip: {}", file.getName());
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (!filesAdded) {
+                for (long i = 1; i <= 5; i++) {
+                    ZipEntry entry = new ZipEntry((i * 100) + "_" + (i * 10) + ".png");
+                    zos.putNextEntry(entry);
+                    zos.write(getImageBuffer(i * 10));
+                    zos.closeEntry();
+                }
             }
             zos.finish();
             return baos.toByteArray();

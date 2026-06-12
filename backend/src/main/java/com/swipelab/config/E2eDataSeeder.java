@@ -163,6 +163,10 @@ public class E2eDataSeeder implements CommandLineRunner {
         if (taskRepository.count() == 0) {
             User admin = userRepository.findById("admin_e2e").orElseThrow();
 
+            List<Long> speciesIds = labelRepository.findAll().stream()
+                    .map(Label::getId)
+                    .collect(java.util.stream.Collectors.toList());
+
             Task task = Task.builder()
                     .title("E2E Identification Task")
                     .name("e2e_identification_task")
@@ -175,21 +179,55 @@ public class E2eDataSeeder implements CommandLineRunner {
                     .consensusThreshold(80.0)
                     .isPublic(false)
                     .deadline(LocalDateTime.now().plusDays(30))
+                    .targetSpeciesIds(speciesIds)
                     .build();
 
             taskRepository.save(task);
 
-            Image img1 = Image.builder()
-                    .srcPath("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=") // Mock Stardbi ID 101
-                    .taskId(task.getId())
-                    .priority(1)
-                    .build();
+            java.io.File folder = new java.io.File("src/main/resources/e2e-crops");
+            List<Image> e2eImages = new java.util.ArrayList<>();
+            
+            if (folder.exists() && folder.isDirectory()) {
+                java.io.File[] files = folder.listFiles();
+                if (files != null) {
+                    for (java.io.File file : files) {
+                        if (file.isFile() && (file.getName().endsWith(".jpg") || file.getName().endsWith(".png"))) {
+                            Long experimentId = 1L;
+                            Long parentImageId = null;
+                            Long boxId = null;
+                            
+                            try {
+                                String nameWithoutExt = file.getName().substring(0, file.getName().lastIndexOf('.'));
+                                String[] parts = nameWithoutExt.split("_");
+                                if (parts.length >= 3) {
+                                    experimentId = Long.parseLong(parts[0]);
+                                    boxId = Long.parseLong(parts[parts.length - 1]);
+                                    parentImageId = Long.parseLong(String.join("", java.util.Arrays.copyOfRange(parts, 1, parts.length - 1)));
+                                }
+                            } catch (Exception e) {
+                                log.warn("Could not parse image name for metadata: {}", file.getName());
+                            }
 
-            Image img2 = Image.builder()
-                    .srcPath("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=") // Mock Stardbi ID 102
-                    .taskId(task.getId())
-                    .priority(1)
-                    .build();
+                            e2eImages.add(Image.builder()
+                                    .srcPath(file.getPath().replace("\\", "/"))
+                                    .taskId(task.getId())
+                                    .priority(1)
+                                    .experimentId(experimentId)
+                                    .parentImageId(parentImageId)
+                                    .externalBoxId(boxId)
+                                    .build());
+                        }
+                    }
+                }
+            }
+            
+            if (e2eImages.isEmpty()) {
+                e2eImages.add(Image.builder()
+                        .srcPath("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=")
+                        .taskId(task.getId())
+                        .priority(1)
+                        .build());
+            }
 
             // Seed a second, public task that is not assigned to e2e_user
             // to allow testing of the task assignment and cache-update flow.
@@ -205,17 +243,19 @@ public class E2eDataSeeder implements CommandLineRunner {
                     .consensusThreshold(80.0)
                     .isPublic(true)
                     .deadline(LocalDateTime.now().plusDays(30))
+                    .targetSpeciesIds(speciesIds)
                     .build();
 
             taskRepository.save(exploreTask);
 
             Image img3 = Image.builder()
-                    .srcPath("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=")
+                    .srcPath("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=")
                     .taskId(exploreTask.getId())
                     .priority(1)
                     .build();
 
-            imageRepository.saveAll(List.of(img1, img2, img3));
+            e2eImages.add(img3);
+            imageRepository.saveAll(e2eImages);
             log.info("Seeded Tasks and Images (including public explore task).");
         }
     }

@@ -11,6 +11,7 @@ target/
 # Runtime upload directories (gold images, reference images)
 # Generated at runtime — never commit
 backend/uploads/
+backend/storage/
 
 # OS
 .DS_Store
