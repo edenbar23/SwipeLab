@@ -14,25 +14,37 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.Base64;
+import java.time.Instant;
 
 @Slf4j
 @RestController
-@Profile("mock")
+@Profile({"mock", "e2e"})
 public class MockStardbiController {
 
     @PostMapping("/auth/get_token/")
     public ResponseEntity<Object> getToken(@RequestBody Map<String, Object> request) {
         String username = (String) request.get("username");
         log.info("Mock Stardbi login for {}", username);
+        
+        String header = Base64.getUrlEncoder().withoutPadding().encodeToString("{\"alg\":\"none\",\"typ\":\"JWT\"}".getBytes());
+        String payload = Base64.getUrlEncoder().withoutPadding().encodeToString(String.format(
+            "{\"user_id\":1,\"username\":\"%s\",\"exp\":%d}",
+            username != null ? username : "mockuser",
+            Instant.now().plusSeconds(3600).getEpochSecond()
+        ).getBytes());
+        String mockAccessToken = header + "." + payload + ".mock-signature";
+        String mockRefreshToken = header + "." + payload + ".mock-refresh-sig";
+
         return ResponseEntity.ok(Map.of(
-                "access", "mock-access-" + UUID.randomUUID(),
-                "refresh", "mock-refresh-" + UUID.randomUUID(),
+                "access", mockAccessToken,
+                "refresh", mockRefreshToken,
                 "lifetime", 3600,
                 "id", 1L,
                 "username", username != null ? username : "mockuser",
                 "first_name", "Mock",
-                "last_name", "User",
-                "email", (username != null ? username : "mockuser") + "@mock.com"
+                "last_name", "Researcher",
+                "email", (username != null ? username : "mockuser") + "@stardbi.external"
         ));
     }
 
@@ -45,9 +57,18 @@ public class MockStardbiController {
     @PostMapping("/auth/token_refresh/")
     public ResponseEntity<Object> refreshToken(@RequestBody Map<String, Object> request) {
         log.info("Mock Stardbi refresh token");
+        String header = Base64.getUrlEncoder().withoutPadding().encodeToString("{\"alg\":\"none\",\"typ\":\"JWT\"}".getBytes());
+        String payload = Base64.getUrlEncoder().withoutPadding().encodeToString(String.format(
+            "{\"user_id\":1,\"username\":\"%s\",\"exp\":%d}",
+            "mockuser",
+            Instant.now().plusSeconds(3600).getEpochSecond()
+        ).getBytes());
+        String mockAccessToken = header + "." + payload + ".mock-signature";
+        String mockRefreshToken = header + "." + payload + ".mock-refresh-sig";
+
         return ResponseEntity.ok(Map.of(
-                "access", "mock-new-access-" + UUID.randomUUID(),
-                "refresh", "mock-new-refresh-" + UUID.randomUUID(),
+                "access", mockAccessToken,
+                "refresh", mockRefreshToken,
                 "lifetime", 3600
         ));
     }
