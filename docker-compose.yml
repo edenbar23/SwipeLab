@@ -34,6 +34,8 @@ services:
       - DB_PASSWORD=${DB_PASSWORD:-postgres}
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - STARDBI_SERVICE_ACCOUNT_USERNAME=${STARDBI_SERVICE_ACCOUNT_USERNAME}
+      - STARDBI_SERVICE_ACCOUNT_PASSWORD=${STARDBI_SERVICE_ACCOUNT_PASSWORD}
 
   frontend:
     build:
@@ -52,3 +54,4 @@ services:
 
 volumes:
   postgres_data:
+  crops_data:

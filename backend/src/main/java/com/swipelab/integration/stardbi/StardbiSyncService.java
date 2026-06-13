@@ -29,8 +29,7 @@ public class StardbiSyncService {
     private final ImageRepository imageRepository;
     private final UserRepository userRepository;
 
-    @org.springframework.beans.factory.annotation.Value("${swipelab.storage.path:./storage/crops}")
-    private String storagePath;
+
 
     /**
      * Periodically syncs experiments from STARdbi and creates local Tasks.
@@ -107,78 +106,92 @@ public class StardbiSyncService {
     @Transactional
     public void syncExperimentsForTask(Task task, String accessToken, String refreshToken) {
         log.info("Starting STARdbi experiment ZIP download for task: {}", task.getId());
-        
-        try {
-            // Ensure storage directory exists
-            java.io.File storageDir = new java.io.File(storagePath);
-            if (!storageDir.exists()) {
-                storageDir.mkdirs();
-            }
 
-            String currentAccessToken = accessToken;
-            if (currentAccessToken == null || currentAccessToken.isEmpty()) {
-                log.info("No user Stardbi token provided for task {}, falling back to service account token.", task.getId());
-                // We don't have a public getServiceAccountToken method, so we pass null and let the client handle it if we modify it, or we can use it.
-                // Wait, getServiceAccountToken() in StardbiClient is private!
-                // If it's private, StardbiClient must handle null tokens by using the service account token.
-            } else if (!stardbiClient.checkAuth(currentAccessToken)) {
-                log.info("Stardbi access token expired for task {}, attempting refresh...", task.getId());
-                if (refreshToken != null) {
-                    com.swipelab.integration.stardbi.dto.StardbiAuthResponseDto newAuth = 
-                        stardbiClient.refreshToken(new com.swipelab.integration.stardbi.dto.StardbiRefreshTokenRequestDto(refreshToken));
+        String currentAccessToken = accessToken;
+        // If access token is a non-null but non-Stardbi token (e.g. a SwipeLab JWT),
+        // checkAuth against the real Stardbi will return false and we fall back to
+        // the service account — which is fine. We deliberately pass null so the client
+        // uses its own getServiceAccountToken() fallback.
+        if (currentAccessToken != null && !currentAccessToken.isEmpty()
+                && !stardbiClient.checkAuth(currentAccessToken)) {
+            log.info("Provided token failed Stardbi auth check for task {}; falling back to service account.", task.getId());
+            if (refreshToken != null && !refreshToken.isEmpty()) {
+                try {
+                    com.swipelab.integration.stardbi.dto.StardbiAuthResponseDto newAuth =
+                            stardbiClient.refreshToken(new com.swipelab.integration.stardbi.dto.StardbiRefreshTokenRequestDto(refreshToken));
                     currentAccessToken = newAuth.getAccess();
-                } else {
-                    log.error("No refresh token provided, using service account token as fallback.");
+                    log.info("Stardbi token refreshed successfully for task {}", task.getId());
+                } catch (Exception e) {
+                    log.warn("Token refresh failed for task {}; falling back to service account.", task.getId(), e);
                     currentAccessToken = null;
                 }
+            } else {
+                currentAccessToken = null; // Let StardbiClient use service account
             }
+        }
 
+        int totalSaved = 0;
+        try {
             for (Long expId : task.getExperiments()) {
-                byte[] zipBytes = null;
+                byte[] zipBytes;
                 try {
                     zipBytes = stardbiClient.downloadExperimentCropsZip(expId, currentAccessToken);
                 } catch (Exception e) {
-                    log.error("Failed to download zip for experiment {}", expId, e);
+                    log.error("Failed to download ZIP for experiment {} (task {}): {}", expId, task.getId(), e.getMessage());
                     continue;
                 }
 
-                if (zipBytes != null && zipBytes.length > 0) {
-                    try (java.util.zip.ZipInputStream zis = new java.util.zip.ZipInputStream(new java.io.ByteArrayInputStream(zipBytes))) {
-                        java.util.zip.ZipEntry zipEntry = zis.getNextEntry();
-                        int savedCount = 0;
-                        while (zipEntry != null) {
-                            if (!zipEntry.isDirectory()) {
-                                String fileName = zipEntry.getName();
-                                Long boxId = extractBoxIdFromFileName(fileName);
-                                
-                                if (boxId != null && !imageRepository.existsByExternalBoxId(boxId)) {
-                                    java.io.File outputFile = new java.io.File(storageDir, expId + "_" + fileName);
-                                    java.nio.file.Files.copy(zis, outputFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-                                    
-                                    Image newImage = Image.builder()
-                                            .taskId(task.getId())
-                                            .externalBoxId(boxId)
-                                            .parentImageId(extractImageIdFromFileName(fileName))
-                                            .srcPath(outputFile.getAbsolutePath())
-                                            .experimentId(expId)
-                                            .build();
-                                    
-                                    imageRepository.save(newImage);
-                                    savedCount++;
-                                }
+                if (zipBytes == null || zipBytes.length == 0) {
+                    log.warn("Empty ZIP received for experiment {} (task {})", expId, task.getId());
+                    continue;
+                }
+
+                try (java.util.zip.ZipInputStream zis =
+                             new java.util.zip.ZipInputStream(new java.io.ByteArrayInputStream(zipBytes))) {
+                    java.util.zip.ZipEntry zipEntry = zis.getNextEntry();
+                    int savedCount = 0;
+                    while (zipEntry != null) {
+                        if (!zipEntry.isDirectory()) {
+                            String fileName = zipEntry.getName();
+                            Long boxId = extractBoxIdFromFileName(fileName);
+
+                            if (boxId != null && !imageRepository.existsByExternalBoxId(boxId)) {
+                                // Store image bytes as base64 in the DB — avoids Docker volume dependency
+                                // and survives container restarts without any mounted filesystem.
+                                byte[] imageBytes = zis.readAllBytes();
+                                String base64 = Base64.getEncoder().encodeToString(imageBytes);
+
+                                Image newImage = Image.builder()
+                                        .taskId(task.getId())
+                                        .externalBoxId(boxId)
+                                        .parentImageId(extractImageIdFromFileName(fileName))
+                                        .srcPath(base64)
+                                        .experimentId(expId)
+                                        .build();
+
+                                imageRepository.save(newImage);
+                                savedCount++;
                             }
-                            zipEntry = zis.getNextEntry();
                         }
-                        log.info("Extracted and saved {} new crops for experiment {}", savedCount, expId);
+                        zipEntry = zis.getNextEntry();
                     }
+                    totalSaved += savedCount;
+                    log.info("Saved {} new crops (base64) for experiment {} (task {})", savedCount, expId, task.getId());
                 }
             }
 
             task.setStatus(TaskStatus.ACTIVE);
             taskRepository.save(task);
-            log.info("Task {} is now ACTIVE", task.getId());
+            log.info("Task {} is now ACTIVE with {} total new images ingested.", task.getId(), totalSaved);
+
         } catch (Exception e) {
-            log.error("Error during STARdbi zip synchronization for task {}", task.getId(), e);
+            log.error("Fatal error during crop sync for task {}; marking task as FAILED.", task.getId(), e);
+            try {
+                task.setStatus(TaskStatus.FAILED);
+                taskRepository.save(task);
+            } catch (Exception saveEx) {
+                log.error("Could not persist FAILED status for task {}", task.getId(), saveEx);
+            }
         }
     }
 

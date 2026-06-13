@@ -18,6 +18,7 @@ import com.swipelab.classification.infrastructure.ImageRepository;
 import com.swipelab.classification.infrastructure.ClassificationRepository;
 import com.swipelab.dto.response.TaskProgressResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -32,6 +33,7 @@ import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TaskService {
@@ -232,9 +234,16 @@ public class TaskService {
         
         task = taskRepository.save(task);
         
-        // Trigger a background sync using the user's Stardbi token
+        // Run async so the API call returns immediately while images are ingested in the background.
+        // exceptionally() ensures uncaught errors surface in the log even if the sync method's own
+        // catch block somehow rethrows.
         final Task savedTask = task;
-        CompletableFuture.runAsync(() -> stardbiSyncService.syncExperimentsForTask(savedTask, stardbiAccessToken, stardbiRefreshToken));
+        CompletableFuture
+                .runAsync(() -> stardbiSyncService.syncExperimentsForTask(savedTask, stardbiAccessToken, stardbiRefreshToken))
+                .exceptionally(ex -> {
+                    log.error("[TaskService] Async crop sync failed for task {}. Task may remain in PROCESSING state.", savedTask.getId(), ex);
+                    return null;
+                });
         
         return mapToResponse(task);
     }

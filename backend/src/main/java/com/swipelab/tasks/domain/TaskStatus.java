@@ -6,5 +6,7 @@ public enum TaskStatus {
     ACTIVE,
     PAUSED,
     COMPLETED,
-    ARCHIVED
+    ARCHIVED,
+    /** Experiment crop download failed during async sync. Researcher must retry or check credentials. */
+    FAILED
 }
