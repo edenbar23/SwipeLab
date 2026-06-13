@@ -40,6 +40,7 @@ services:
       context: ./frontend
       args:
         - EXPO_PUBLIC_API_URL=https://swipelab.cs.bgu.ac.il
+        - EXPO_PUBLIC_GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
     container_name: swipelab-frontend
     depends_on:
       - backend

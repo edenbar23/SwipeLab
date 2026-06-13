@@ -23,23 +23,60 @@ export default function LoginScreen() {
   const [showRegister, setShowRegister] = useState(false);
 
   const [request, response, promptAsync] = Google.useAuthRequest({
-    clientId: "<YOUR_GOOGLE_CLIENT_ID>",
+    clientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID,
+    webClientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID,
+    iosClientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID,
+    androidClientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID,
+    scopes: ["openid", "profile", "email"],
   });
 
   useEffect(() => {
     if (response?.type === "success") {
       const { authentication } = response;
-      const token = "mock-jwt-token";
-      const role = "RESEARCHER";
-
-      // Needs async wrapper
+      
       (async () => {
         setLoading(true);
-        await setAuth(token, role);
-        // Preload cache
-        await preloadAfterLogin(role);
-        setLoading(false);
+        setError("");
+        
+        try {
+          const res = await apiFetch(API_ENDPOINTS.AUTH.LOGIN + '/google', {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              credential: authentication?.idToken || authentication?.accessToken, // Some Google auth flows might return token directly
+            }),
+          });
+
+          if (!res.ok) {
+            try {
+              const errorData = await res.json();
+              setError(errorData.message || "Google login failed");
+            } catch {
+              setError(`Google login failed: ${res.status}`);
+            }
+            return;
+          }
+
+          const data = await res.json();
+          const role = data.user.role;
+          const isSuperAdmin = data.user.isSuperAdmin;
+
+          // Store auth data in Zustand
+          await setAuth(data.accessToken, role, data.refreshToken);
+          useAuthStore.getState().setIsSuperAdmin(isSuperAdmin);
+
+          // Preload data
+          await preloadAfterLogin(role);
+        } catch (e) {
+          setError("Something went wrong with Google Login. Please try again.");
+        } finally {
+          setLoading(false);
+        }
       })();
+    } else if (response?.type === "error") {
+      setError(`Google Login Error: ${response.error?.message}`);
     }
   }, [response]);
 
