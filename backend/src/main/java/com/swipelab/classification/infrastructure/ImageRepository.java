@@ -17,6 +17,7 @@ public interface ImageRepository extends JpaRepository<Image, Long> {
     long countByTaskId(Long taskId);
 
     boolean existsByExternalBoxId(Long externalBoxId);
+    boolean existsByExternalBoxIdAndTaskId(Long externalBoxId, Long taskId);
     Image findByExternalBoxId(Long externalBoxId);
 
     // Find all unclassified gold standard images for a specific task and user

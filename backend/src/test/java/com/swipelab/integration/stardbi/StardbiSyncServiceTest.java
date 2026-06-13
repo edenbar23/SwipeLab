@@ -74,7 +74,7 @@ class StardbiSyncServiceTest {
 
         when(stardbiClient.checkAuth(anyString())).thenReturn(false); // force service-account fallback
         when(stardbiClient.downloadExperimentCropsZip(1L, null)).thenReturn(zipBytes);
-        when(imageRepository.existsByExternalBoxId(102L)).thenReturn(false);
+        when(imageRepository.existsByExternalBoxIdAndTaskId(102L, 10L)).thenReturn(false);
         when(imageRepository.save(any(Image.class))).thenAnswer(inv -> inv.getArgument(0));
         when(taskRepository.save(any(Task.class))).thenAnswer(inv -> inv.getArgument(0));
 
@@ -107,7 +107,7 @@ class StardbiSyncServiceTest {
         when(stardbiClient.checkAuth(anyString())).thenReturn(false);
         when(stardbiClient.downloadExperimentCropsZip(1L, null)).thenReturn(zipBytes);
         // Image already ingested
-        when(imageRepository.existsByExternalBoxId(102L)).thenReturn(true);
+        when(imageRepository.existsByExternalBoxIdAndTaskId(102L, 10L)).thenReturn(true);
         when(taskRepository.save(any(Task.class))).thenAnswer(inv -> inv.getArgument(0));
 
         stardbiSyncService.syncExperimentsForTask(task, "token", null);
@@ -160,7 +160,7 @@ class StardbiSyncServiceTest {
         newAuth.setAccess("new-token");
         when(stardbiClient.refreshToken(any())).thenReturn(newAuth);
         when(stardbiClient.downloadExperimentCropsZip(1L, "new-token")).thenReturn(zipBytes);
-        when(imageRepository.existsByExternalBoxId(105L)).thenReturn(false);
+        when(imageRepository.existsByExternalBoxIdAndTaskId(105L, 10L)).thenReturn(false);
         when(imageRepository.save(any(Image.class))).thenAnswer(inv -> inv.getArgument(0));
         when(taskRepository.save(any(Task.class))).thenAnswer(inv -> inv.getArgument(0));
 

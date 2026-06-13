@@ -173,7 +173,7 @@ public class StardbiSyncService {
                                         fileName, boxId, expId);
                             }
 
-                            if (!imageRepository.existsByExternalBoxId(boxId)) {
+                            if (!imageRepository.existsByExternalBoxIdAndTaskId(boxId, task.getId())) {
                                 // Store image bytes as base64 in the DB — avoids Docker volume dependency
                                 // and survives container restarts without any mounted filesystem.
                                 byte[] imageBytes = zis.readAllBytes();
