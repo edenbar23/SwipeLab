@@ -150,12 +150,30 @@ public class StardbiSyncService {
                              new java.util.zip.ZipInputStream(new java.io.ByteArrayInputStream(zipBytes))) {
                     java.util.zip.ZipEntry zipEntry = zis.getNextEntry();
                     int savedCount = 0;
+                    int entryIndex = 0;
                     while (zipEntry != null) {
                         if (!zipEntry.isDirectory()) {
                             String fileName = zipEntry.getName();
+
+                            // Log the first 5 filenames so we can diagnose the real StarDBI format
+                            if (entryIndex < 5) {
+                                log.warn("[StarDBI ZIP] experiment={} entry[{}] filename='{}' — used for boxId parsing",
+                                        expId, entryIndex, fileName);
+                            }
+                            entryIndex++;
+
                             Long boxId = extractBoxIdFromFileName(fileName);
 
-                            if (boxId != null && !imageRepository.existsByExternalBoxId(boxId)) {
+                            // Fallback: if filename doesn't match {imageId}_{boxId}.ext,
+                            // derive a synthetic unique ID from the filename hash so the
+                            // image is not silently skipped.
+                            if (boxId == null) {
+                                boxId = (long) (expId * 1_000_000L + Math.abs(fileName.hashCode() % 1_000_000L));
+                                log.warn("[StarDBI ZIP] Could not parse boxId from '{}' — using synthetic id {} (experiment {})",
+                                        fileName, boxId, expId);
+                            }
+
+                            if (!imageRepository.existsByExternalBoxId(boxId)) {
                                 // Store image bytes as base64 in the DB — avoids Docker volume dependency
                                 // and survives container restarts without any mounted filesystem.
                                 byte[] imageBytes = zis.readAllBytes();

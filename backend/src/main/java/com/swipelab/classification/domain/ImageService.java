@@ -135,9 +135,29 @@ public class ImageService {
                                 .warn("Could not read image from path: {}", path, e);
                 }
 
-                // Already raw base64 or data URI
-                if (path.startsWith("data:image") || path.startsWith("/9j") || path.startsWith("iVBOR")) {
+                // Already a data URI — return as-is
+                if (path.startsWith("data:image")) {
                         return path;
+                }
+
+                // Detect raw base64 by checking known image format magic-byte prefixes.
+                // These are the base64-encoded signatures of common image types:
+                //   JPEG → /9j/
+                //   PNG  → iVBOR
+                //   GIF  → R0lGOD
+                //   WebP → UklGR
+                //   BMP  → Qk0
+                // We also do a generic check: if the string is long (>64 chars), only contains
+                // base64 characters, and doesn't look like a filesystem path at all.
+                if (path.startsWith("/9j") || path.startsWith("iVBOR")
+                        || path.startsWith("R0lGOD") || path.startsWith("UklGR") || path.startsWith("Qk0")) {
+                        return "data:image/jpeg;base64," + path;
+                }
+
+                // Generic: long base64-only string with no path separator context
+                // (file paths have spaces, colons on Windows, or sequences like '/app/')
+                if (path.length() > 128 && path.matches("[A-Za-z0-9+/=]+")) {
+                        return "data:image/jpeg;base64," + path;
                 }
 
                 return getFallbackImage();
@@ -217,9 +237,12 @@ public class ImageService {
 
         private ImageResponse mapToResponse(Image image) {
                 boolean isGold = goldImageRepository.existsByImageId(image.getId());
+                // Route through getProvidedImagePath so base64 srcPaths get the correct
+                // data:image/...;base64, prefix before being sent to the frontend.
+                String imageUrl = getProvidedImagePath(image.getSrcPath());
                 return ImageResponse.builder()
                                 .id(image.getId())
-                                .imageUrl(image.getSrcPath())
+                                .imageUrl(imageUrl)
                                 .thumbnailUrl(image.getThumbnailUrl())
                                 .caption(image.getCaption())
                                 .taskId(image.getTaskId())
