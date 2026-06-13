@@ -28,6 +28,7 @@ export default function LoginScreen() {
     iosClientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID,
     androidClientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID,
     scopes: ["openid", "profile", "email"],
+    responseType: "id_token",
   });
 
   useEffect(() => {
