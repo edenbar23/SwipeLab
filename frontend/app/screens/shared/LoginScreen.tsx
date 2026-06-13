@@ -28,13 +28,19 @@ export default function LoginScreen() {
     iosClientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID,
     androidClientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID,
     scopes: ["openid", "profile", "email"],
-    responseType: "id_token",
   });
 
   useEffect(() => {
     if (response?.type === "success") {
-      const { authentication } = response;
-      
+      const { authentication, params } = response as any;
+      // Prefer id_token (JWT) — backends can verify it locally.
+      // Fall back to access_token (opaque), which the backend validates via Google userinfo API.
+      const credential =
+        authentication?.idToken ??
+        params?.id_token ??
+        authentication?.accessToken ??
+        params?.access_token;
+
       (async () => {
         setLoading(true);
         setError("");
@@ -46,7 +52,7 @@ export default function LoginScreen() {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              credential: authentication?.idToken || authentication?.accessToken, // Some Google auth flows might return token directly
+              credential,
             }),
           });
 

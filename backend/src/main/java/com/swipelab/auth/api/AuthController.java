@@ -174,34 +174,50 @@ public class AuthController {
 
     @PostMapping("/login/google")
     public ResponseEntity<AuthResponse> loginGoogle(@RequestBody Map<String, String> payload) {
-        String token = payload.get("credential"); // Standard field for Google Identity Services
-        if (token == null) {
-            token = payload.get("idToken"); // Fallback
+        String credential = payload.get("credential");
+        if (credential == null) {
+            credential = payload.get("idToken");
+        }
+        if (credential == null) {
+            credential = payload.get("accessToken");
         }
 
-        if (token == null) {
-            throw new RuntimeException("Missing Google ID Token");
+        if (credential == null) {
+            throw new IllegalArgumentException("Missing Google token");
         }
 
-        // Verify the token securely
-        com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload googlePayload = oAuth2Service
-                .verifyGoogleToken(token);
+        String email, name, picture, providerId;
 
-        String email = googlePayload.getEmail();
-        String name = (String) googlePayload.get("name");
-        String picture = (String) googlePayload.get("picture");
-        String providerId = googlePayload.getSubject();
+        // An id_token is a JWT: three base64 parts separated by dots.
+        // An access_token is an opaque string that does NOT have that structure.
+        if (credential.split("\\.").length == 3) {
+            // --- id_token path ---
+            com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload googlePayload =
+                    oAuth2Service.verifyGoogleToken(credential);
+
+            email      = googlePayload.getEmail();
+            name       = (String) googlePayload.get("name");
+            picture    = (String) googlePayload.get("picture");
+            providerId = googlePayload.getSubject();
+        } else {
+            // --- access_token path (mobile / Expo Go) ---
+            java.util.Map<String, Object> userInfo = oAuth2Service.verifyGoogleAccessToken(credential);
+
+            email      = (String) userInfo.get("email");
+            name       = (String) userInfo.get("name");
+            picture    = (String) userInfo.get("picture");
+            providerId = (String) userInfo.get("sub");
+        }
 
         if (email == null) {
-            throw new RuntimeException("Invalid ID Token: Email not found");
+            throw new IllegalArgumentException("Could not retrieve email from Google token");
         }
 
         User user = oAuth2Service.processUserFromIdToken(email, name, picture, providerId);
 
-        String accessToken = jwtService.generateAccessToken(user);
+        String accessToken  = jwtService.generateAccessToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
 
-        // Use mapper
         return ResponseEntity.ok(authMapper.toAuthResponse(accessToken, refreshToken, user));
     }
 

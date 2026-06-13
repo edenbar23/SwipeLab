@@ -20,6 +20,12 @@ import org.springframework.beans.factory.annotation.Value;
 import java.util.Collections;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.util.Map;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +37,11 @@ public class OAuth2Service {
     @Value("${GOOGLE_CLIENT_ID:your-google-client-id}")
     private String googleClientId;
 
+    private static final String GOOGLE_USERINFO_URL = "https://www.googleapis.com/oauth2/v3/userinfo";
+
+    /**
+     * Verifies a Google ID Token (JWT). Used when the frontend sends an id_token.
+     */
     public GoogleIdToken.Payload verifyGoogleToken(String idTokenString) {
         try {
             GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(),
@@ -47,6 +58,29 @@ public class OAuth2Service {
         } catch (GeneralSecurityException | IOException e) {
             throw new IllegalArgumentException("Invalid ID token: " + e.getMessage());
         }
+    }
+
+    /**
+     * Validates a Google access token by calling Google's userinfo endpoint.
+     * Returns a map with keys: email, name, picture, sub.
+     * Used as a fallback when the frontend sends an access_token (e.g. mobile/Expo Go).
+     */
+    public Map<String, Object> verifyGoogleAccessToken(String accessToken) {
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(accessToken);
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+        try {
+            ResponseEntity<Map> response = restTemplate.exchange(
+                    GOOGLE_USERINFO_URL, HttpMethod.GET, entity, Map.class);
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                return response.getBody();
+            }
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Invalid Google access token: " + e.getMessage());
+        }
+        throw new IllegalArgumentException("Could not fetch user info from Google.");
     }
 
     @Transactional
