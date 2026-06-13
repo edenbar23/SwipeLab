@@ -36,7 +36,6 @@ export default function SwipeScreen() {
   const { dataBatch, currentIndex, activeTaskId, setActiveTaskId, setBatch, nextCard, clearBatch } =
     useSwipeStore();
   const [loading, setLoading] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeWarning, setActiveWarning] = useState<ClassificationWarning | null>(null);
 
@@ -97,28 +96,34 @@ export default function SwipeScreen() {
     }
   };
 
-  const handleSwipe = async (direction: SwipeDirection) => {
-    if (isSubmitting) return;
+  const handleSwipe = (direction: SwipeDirection) => {
     const currentImage = dataBatch[currentIndex];
 
+    // Immediately advance UI to the next card
+    if (currentIndex + 1 < dataBatch.length) {
+      nextCard();
+      setShowReference(false);
+    } else {
+      fetchNextBatch();
+    }
+
+    // Process submission in background
     if (currentImage) {
-      setIsSubmitting(true);
       let decision = direction.toUpperCase();
       if (direction === 'dont-know') decision = 'DONT_KNOW';
 
-      try {
-        const res = await apiFetch(`/api/v1/classifications/submit`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            imageId: currentImage.imageId,
-            taskId: currentImage.taskId,
-            question: currentImage.question,
-            decision,
-            responseTimeMs: 0,
-          }),
-        });
-
+      apiFetch(`/api/v1/classifications/submit`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          imageId: currentImage.imageId,
+          taskId: currentImage.taskId,
+          question: currentImage.question,
+          decision,
+          responseTimeMs: 0,
+        }),
+      })
+      .then(async (res) => {
         if (res.ok) {
           const data = await res.json();
           // Show warning toast if the fraud detection system issued one
@@ -129,27 +134,18 @@ export default function SwipeScreen() {
           queryClient.invalidateQueries({ queryKey: QUERY_KEYS.myBadges });
           queryClient.invalidateQueries({ queryKey: QUERY_KEYS.userProfile });
         }
-      } catch (e) {
+      })
+      .catch((e) => {
         console.error('Submit error:', e);
-      } finally {
-        setIsSubmitting(false);
-      }
-    }
-
-    if (currentIndex + 1 < dataBatch.length) {
-      nextCard();
-      setShowReference(false);
-    } else {
-      fetchNextBatch();
+      });
     }
   };
 
   // Keyboard shortcuts (web only, active swipe state)
   useEffect(() => {
-    if (Platform.OS !== 'web' || loading || isSubmitting || dataBatch.length === 0) return;
+    if (Platform.OS !== 'web' || loading || dataBatch.length === 0) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (isSubmitting) return;
       switch (e.key) {
         case 'ArrowUp':    cardRef.current?.swipeCard('dont-know'); break;
         case 'ArrowDown':  cardRef.current?.swipeCard('trash');     break;
@@ -160,7 +156,7 @@ export default function SwipeScreen() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [loading, isSubmitting, dataBatch, currentIndex]);
+  }, [loading, dataBatch, currentIndex]);
 
   // ─── STATE A: Active task — loading batch ──────────────────────────────────
   if (activeTaskId && (loading || isQueryLoading)) {

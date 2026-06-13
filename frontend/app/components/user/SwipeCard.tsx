@@ -67,7 +67,6 @@ const SwipeCard = forwardRef<SwipeCardHandle, SwipeCardProps>(
         duration: 250,
         useNativeDriver: false,
       }).start(() => {
-        position.setValue({ x: 0, y: 0 });
         onSwipe(direction);
       });
     };
