@@ -78,12 +78,13 @@ CREATE TABLE images (
     thumbnail_url VARCHAR(500),
     caption TEXT,
     parent_image_id BIGINT,
-    external_box_id BIGINT UNIQUE,    -- FK to Stardbi source
+    external_box_id BIGINT,           -- FK to Stardbi source (unique per task)
     experiment_id BIGINT,
     priority INTEGER DEFAULT 0,
     task_id BIGINT NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    CONSTRAINT fk_image_task FOREIGN KEY (task_id) REFERENCES tasks(id)
+    CONSTRAINT fk_image_task FOREIGN KEY (task_id) REFERENCES tasks(id),
+    CONSTRAINT uk_external_box_task UNIQUE (external_box_id, task_id)
 );
 
 -- ─── CLASSIFICATIONS TABLE ───────────────────────────────────────────────────

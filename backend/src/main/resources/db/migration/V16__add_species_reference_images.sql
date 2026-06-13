@@ -8,17 +8,15 @@
 -- Stores the globally shared reference images per species.
 -- Images are compressed + thumbnailed at upload time.
 CREATE TABLE IF NOT EXISTS species_reference_images (
-    id              BIGSERIAL PRIMARY KEY,
-    label_id        BIGINT        NOT NULL REFERENCES labels(id) ON DELETE CASCADE,
-    image_path      VARCHAR(500)  NOT NULL,   -- /uploads/ref/uuid.jpg  (compressed)
-    thumbnail_path  VARCHAR(500)  NOT NULL,   -- /uploads/ref/thumb/uuid.jpg (200px)
-    file_size_bytes BIGINT,                   -- post-compression size in bytes
-    caption         VARCHAR(255),
-    uploaded_by     VARCHAR(255)  NOT NULL,   -- researcher username
+    id               BIGSERIAL PRIMARY KEY,
+    label_id         BIGINT        NOT NULL REFERENCES labels(id) ON DELETE CASCADE,
+    image_base64     TEXT          NOT NULL,   -- compressed full image stored as Base64
+    thumbnail_base64 TEXT          NOT NULL,   -- 200px thumbnail stored as Base64
+    file_size_bytes  BIGINT,                   -- post-compression size in bytes
+    caption          VARCHAR(255),
+    uploaded_by      VARCHAR(255)  NOT NULL,   -- researcher username
 
-    created_at      TIMESTAMP     NOT NULL DEFAULT NOW(),
-
-    CONSTRAINT uk_species_ref_image UNIQUE (label_id, image_path)
+    created_at       TIMESTAMP     NOT NULL DEFAULT NOW()
 );
 
 CREATE INDEX IF NOT EXISTS idx_species_ref_images_label ON species_reference_images(label_id);
