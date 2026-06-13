@@ -103,7 +103,6 @@ public class StardbiSyncService {
         }
     }
 
-    @Transactional
     public void syncExperimentsForTask(Task task, String accessToken, String refreshToken) {
         log.info("Starting STARdbi experiment ZIP download for task: {}", task.getId());
 

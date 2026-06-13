@@ -10,7 +10,9 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "images")
+@Table(name = "images", uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"external_box_id", "task_id"})
+})
 @Data
 @Builder
 @NoArgsConstructor
@@ -32,7 +34,7 @@ public class Image {
     @Column(name = "parent_image_id")
     private Long parentImageId;
 
-    @Column(name = "external_box_id", unique = true)
+    @Column(name = "external_box_id")
     private Long externalBoxId;
 
     @Column(name = "experiment_id")
