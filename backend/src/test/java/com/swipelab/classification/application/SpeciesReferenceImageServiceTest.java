@@ -49,8 +49,8 @@ class SpeciesReferenceImageServiceTest {
         sampleEntity = SpeciesReferenceImage.builder()
                 .id(1L)
                 .labelId(42L)
-                .imagePath("/uploads/ref/abc.jpg")
-                .thumbnailPath("/uploads/ref/thumb/abc.jpg")
+                .imageBase64("base64data")
+                .thumbnailBase64("base64thumb")
                 .fileSizeBytes(102400L)
                 .caption("Test caption")
                 .uploadedBy("researcher1")
@@ -66,7 +66,7 @@ class SpeciesReferenceImageServiceTest {
                 "files", "bee.jpg", "image/jpeg", new byte[1024]);
 
         var processed = new ImageProcessingService.ProcessedImageResult(
-                "/uploads/ref/uuid1.jpg", "/uploads/ref/thumb/uuid1.jpg", 80000L);
+                "base64data1", "base64thumb1", 80000L);
 
         Label label = Label.builder().id(42L).name("speciesA").build();
         when(labelRepository.findByName("speciesA")).thenReturn(Optional.of(label));
@@ -103,7 +103,7 @@ class SpeciesReferenceImageServiceTest {
 
         SpeciesReferenceImage second = SpeciesReferenceImage.builder()
                 .id(2L).labelId(99L)
-                .imagePath("/uploads/ref/x.jpg").thumbnailPath("/uploads/ref/thumb/x.jpg")
+                .imageBase64("base64x").thumbnailBase64("base64thumbx")
                 .uploadedBy("researcher1").createdAt(LocalDateTime.now()).build();
 
         when(labelRepository.findByNameIn(List.of("speciesA", "speciesB")))

@@ -8,17 +8,14 @@ import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriteParam;
 import javax.imageio.ImageWriter;
-import javax.imageio.stream.FileImageOutputStream;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.ByteArrayOutputStream;
+import java.util.Base64;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.UUID;
 
 /**
  * Handles all image processing for species reference images:
@@ -45,25 +42,15 @@ public class ImageProcessingService {
             "image/webp", "image/gif", "image/bmp"
     );
 
-    /** Output record: both paths + compressed file size. */
+    /** Output record: both base64 images + compressed file size. */
     public record ProcessedImageResult(
-            String imagePath,       // /uploads/ref/<uuid>.jpg
-            String thumbnailPath,   // /uploads/ref/thumb/<uuid>.jpg
+            String imageBase64,
+            String thumbnailBase64,
             long fileSizeBytes
     ) {}
 
-    private final Path refDir;
-    private final Path thumbDir;
-
     public ImageProcessingService() {
-        this.refDir   = Paths.get("uploads", "ref").toAbsolutePath().normalize();
-        this.thumbDir = refDir.resolve("thumb");
-        try {
-            Files.createDirectories(refDir);
-            Files.createDirectories(thumbDir);
-        } catch (IOException ex) {
-            throw new IllegalStateException("Cannot create reference-image directories", ex);
-        }
+        // No longer creating local directories
     }
 
     /**
@@ -82,21 +69,20 @@ public class ImageProcessingService {
 
         // Compress + resize full image
         BufferedImage compressed = resizeIfNeeded(original, MAX_FULL_PX);
-        String uuid      = UUID.randomUUID().toString();
-        Path fullPath    = refDir.resolve(uuid + ".jpg");
-        writeJpeg(compressed, fullPath, JPEG_QUALITY);
+        byte[] fullBytes = encodeToJpeg(compressed, JPEG_QUALITY);
+        String fullBase64 = Base64.getEncoder().encodeToString(fullBytes);
 
         // Generate thumbnail from the already-resized image
         BufferedImage thumb = resizeIfNeeded(compressed, MAX_THUMB_PX);
-        Path thumbPath  = thumbDir.resolve(uuid + ".jpg");
-        writeJpeg(thumb, thumbPath, JPEG_QUALITY);
+        byte[] thumbBytes = encodeToJpeg(thumb, JPEG_QUALITY);
+        String thumbBase64 = Base64.getEncoder().encodeToString(thumbBytes);
 
-        long sizeBytes = Files.size(fullPath);
-        log.info("Processed reference image → full={} thumb={} size={}B", fullPath, thumbPath, sizeBytes);
+        long sizeBytes = fullBytes.length;
+        log.info("Processed reference image → size={}B", sizeBytes);
 
         return new ProcessedImageResult(
-                "/uploads/ref/"        + uuid + ".jpg",
-                "/uploads/ref/thumb/"  + uuid + ".jpg",
+                fullBase64,
+                thumbBase64,
                 sizeBytes
         );
     }
@@ -160,8 +146,8 @@ public class ImageProcessingService {
         return out;
     }
 
-    /** Writes a BufferedImage as JPEG to {@code dest} at the given quality (0.0–1.0). */
-    private void writeJpeg(BufferedImage img, Path dest, float quality) throws IOException {
+    /** Encodes a BufferedImage to a JPEG byte array at the given quality (0.0–1.0). */
+    private byte[] encodeToJpeg(BufferedImage img, float quality) throws IOException {
         Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName("jpeg");
         if (!writers.hasNext()) {
             throw new IllegalStateException("No JPEG ImageWriter found on this JVM");
@@ -171,9 +157,11 @@ public class ImageProcessingService {
         param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
         param.setCompressionQuality(quality);
 
-        try (FileImageOutputStream out = new FileImageOutputStream(dest.toFile())) {
-            writer.setOutput(out);
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
+             javax.imageio.stream.ImageOutputStream ios = ImageIO.createImageOutputStream(baos)) {
+            writer.setOutput(ios);
             writer.write(null, new IIOImage(img, null, null), param);
+            return baos.toByteArray();
         } finally {
             writer.dispose();
         }

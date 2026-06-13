@@ -30,13 +30,13 @@ public class SpeciesReferenceImage {
     @Column(name = "label_id", nullable = false)
     private Long labelId;
 
-    /** Compressed full image path: /uploads/ref/uuid.jpg */
-    @Column(name = "image_path", nullable = false, length = 500)
-    private String imagePath;
+    /** Compressed full image as Base64 string */
+    @Column(name = "image_base64", nullable = false, columnDefinition = "TEXT")
+    private String imageBase64;
 
-    /** 200px thumbnail path: /uploads/ref/thumb/uuid.jpg */
-    @Column(name = "thumbnail_path", nullable = false, length = 500)
-    private String thumbnailPath;
+    /** 200px thumbnail as Base64 string */
+    @Column(name = "thumbnail_base64", nullable = false, columnDefinition = "TEXT")
+    private String thumbnailBase64;
 
     /** File size in bytes after compression (informational). */
     @Column(name = "file_size_bytes")

@@ -117,13 +117,7 @@ class OAuth2ServiceTest {
         fakeUserInfo.put("picture", "https://pic.url");
         fakeUserInfo.put("sub", "google-sub-123");
 
-        RestTemplate mockRestTemplate = mock(RestTemplate.class);
-        when(mockRestTemplate.exchange(
-                anyString(),
-                eq(HttpMethod.GET),
-                any(),
-                eq(Map.class)))
-                .thenReturn(new ResponseEntity<>(fakeUserInfo, HttpStatus.OK));
+        // Mocking RestTemplate was removed because it's not used when calling processUserFromIdToken directly.
 
         // Call verifyGoogleAccessToken via a subclass override so we can inject RestTemplate
         // (The service creates it internally; here we validate the happy path behaviour.)

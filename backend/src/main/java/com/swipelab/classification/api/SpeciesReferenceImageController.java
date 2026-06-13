@@ -20,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 
@@ -107,7 +108,7 @@ public class SpeciesReferenceImageController {
      */
     @GetMapping("/reference-images/{id}/image")
     @PreAuthorize("hasRole('RESEARCHER') or hasRole('USER') or @securityAuthorizationService.isSuperAdmin(authentication.name)")
-    public ResponseEntity<Resource> serveImage(@PathVariable Long id) {
+    public ResponseEntity<byte[]> serveImage(@PathVariable Long id) {
         return serveFile(id, false);
     }
 
@@ -117,29 +118,25 @@ public class SpeciesReferenceImageController {
      */
     @GetMapping("/reference-images/{id}/thumbnail")
     @PreAuthorize("hasRole('RESEARCHER') or hasRole('USER') or @securityAuthorizationService.isSuperAdmin(authentication.name)")
-    public ResponseEntity<Resource> serveThumbnail(@PathVariable Long id) {
+    public ResponseEntity<byte[]> serveThumbnail(@PathVariable Long id) {
         return serveFile(id, true);
     }
 
     // ── Private helpers ───────────────────────────────────────────────────────
 
-    private ResponseEntity<Resource> serveFile(Long id, boolean thumbnail) {
+    private ResponseEntity<byte[]> serveFile(Long id, boolean thumbnail) {
         SpeciesReferenceImage entity = service.getEntityById(id);
-        String relativePath = thumbnail ? entity.getThumbnailPath() : entity.getImagePath();
+        String base64Str = thumbnail ? entity.getThumbnailBase64() : entity.getImageBase64();
 
-        // Strip leading slash so Paths.get() resolves from CWD correctly
-        Path filePath = Paths.get(
-                relativePath.startsWith("/") ? relativePath.substring(1) : relativePath
-        ).toAbsolutePath();
-
-        Resource resource = new FileSystemResource(filePath);
-        if (!resource.exists() || !resource.isReadable()) {
+        if (base64Str == null || base64Str.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
+
+        byte[] data = Base64.getDecoder().decode(base64Str);
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CACHE_CONTROL, "max-age=86400, public")
                 .contentType(MediaType.IMAGE_JPEG)
-                .body(resource);
+                .body(data);
     }
 }

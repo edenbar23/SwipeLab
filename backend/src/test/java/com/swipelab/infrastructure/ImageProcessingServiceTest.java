@@ -44,8 +44,8 @@ class ImageProcessingServiceTest {
 
         ImageProcessingService.ProcessedImageResult result = service.processAndStore(file);
 
-        assertThat(result.imagePath()).startsWith("/uploads/ref/").endsWith(".jpg");
-        assertThat(result.thumbnailPath()).startsWith("/uploads/ref/thumb/").endsWith(".jpg");
+        assertThat(result.imageBase64()).isNotBlank();
+        assertThat(result.thumbnailBase64()).isNotBlank();
         assertThat(result.fileSizeBytes()).isPositive();
     }
 
@@ -58,7 +58,7 @@ class ImageProcessingServiceTest {
         ImageProcessingService.ProcessedImageResult result = service.processAndStore(file);
 
         // The file should exist and be smaller than a naive 3000×2000 JPEG
-        assertThat(result.imagePath()).isNotBlank();
+        assertThat(result.imageBase64()).isNotBlank();
         assertThat(result.fileSizeBytes()).isGreaterThan(0);
     }
 

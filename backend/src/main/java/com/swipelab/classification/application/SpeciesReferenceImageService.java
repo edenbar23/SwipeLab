@@ -81,8 +81,8 @@ public class SpeciesReferenceImageService {
 
                 SpeciesReferenceImage entity = SpeciesReferenceImage.builder()
                         .labelId(labelId)
-                        .imagePath(result.imagePath())
-                        .thumbnailPath(result.thumbnailPath())
+                        .imageBase64(result.imageBase64())
+                        .thumbnailBase64(result.thumbnailBase64())
                         .fileSizeBytes(result.fileSizeBytes())
                         .caption(caption)
                         .uploadedBy(username)
@@ -159,8 +159,6 @@ public class SpeciesReferenceImageService {
             throw new AccessDeniedException("You can only delete images you uploaded.");
         }
 
-        deleteDiskFile(image.getImagePath());
-        deleteDiskFile(image.getThumbnailPath());
         repository.delete(image);
         log.info("Deleted reference image id={} by username={}", id, username);
     }
@@ -181,17 +179,4 @@ public class SpeciesReferenceImageService {
                 .build();
     }
 
-    // ── Disk helpers ──────────────────────────────────────────────────────────
-
-    private void deleteDiskFile(String relativePath) {
-        if (relativePath == null) return;
-        try {
-            java.nio.file.Path p = java.nio.file.Paths.get(
-                    relativePath.startsWith("/") ? relativePath.substring(1) : relativePath
-            ).toAbsolutePath();
-            java.nio.file.Files.deleteIfExists(p);
-        } catch (Exception e) {
-            log.warn("Could not delete file from disk: {}", relativePath, e);
-        }
-    }
 }
