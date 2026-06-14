@@ -25,7 +25,7 @@ export default function BottomBar({ items }: Props) {
     <View style={[styles.container, { backgroundColor: themeColors.card, borderColor: themeColors.border, paddingVertical: isDesktop ? 8 : 10 }]}>
       {items.map((item, idx) => (
         <TouchableOpacity
-          key={idx}
+          key={`${idx}-${theme}`}
           style={[styles.button, { padding: isDesktop ? 4 : 6 }]}
           onPress={() => navigation.navigate(item.route)}
         >
