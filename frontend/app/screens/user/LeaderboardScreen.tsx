@@ -6,7 +6,7 @@ import { apiFetch } from '../../api/apiFetch';
 import ScreenHeaderLayout from '../../components/layout/ScreenHeaderLayout/ScreenHeaderLayout';
 import { useThemeStore } from '../../stores/themeStore';
 import { API_ENDPOINTS } from '../../api/apiEndpoints';
-import { useLeaderboard, useRank } from '../../api/queries';
+import { useLeaderboard, useRank, useProfile } from '../../api/queries';
 
 
 interface LeaderboardEntry {
@@ -188,23 +188,25 @@ export default function LeaderboardScreen() {
     const { theme } = useThemeStore();
     const themeColors = Colors[theme as keyof typeof Colors];
 
+    const { data: profile } = useProfile();
     const { data: rawData, isLoading: loading, error } = useLeaderboard();
 
     const data = React.useMemo(() => {
         if (!rawData) return null;
         const allTime = rawData.map((item: any, index: number) => ({
             rank: index + 1,
-            username: item.username,
-            score: item.score
+            username: item.username === profile?.username ? "You" : item.username,
+            score: item.score,
+            isCurrentUser: item.username === profile?.username
         }));
         const monthly = [...allTime].sort((a, b) => b.score - a.score).slice(0, 5);
-        const currentUser = allTime.find((item: any) => item.username === "You") || {
+        const currentUser = allTime.find((item: any) => item.isCurrentUser) || {
             rank: 0,
             username: "You",
             score: 0
         };
         return { currentUser, allTime, monthly };
-    }, [rawData]);
+    }, [rawData, profile]);
 
     const updateScore = async (newScore: number) => {
         console.warn("Update score not implemented in backend yet");
