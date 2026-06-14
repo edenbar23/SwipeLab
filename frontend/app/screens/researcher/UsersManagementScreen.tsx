@@ -10,6 +10,7 @@ import {
     TextInput,
     TouchableOpacity,
     View,
+    Alert,
 } from 'react-native';
 import useResponsive from '../../hooks/useResponsive';
 import { Colors } from '../../../constants/theme';
@@ -31,7 +32,6 @@ type SortOrder = 'default' | 'asc' | 'desc';
 type UsersManagementScreenNavigationProp = NativeStackNavigationProp<researcherStackParamList, 'UsersManagement'>;
 
 interface User {
-    id: string;
     username: string;
     // credibilityScore: composite 0–100 score from backend UserProfileResponse
     credibilityScore: number;
@@ -85,16 +85,39 @@ export default function UsersManagementScreen() {
 
     const toggleBanStatus = useMutation({
         mutationFn: async ({ username, isBanned }: { username: string; isBanned: boolean }) => {
+            console.log(`[UsersManagement] Toggling ban status for ${username}. Target isBanned=${isBanned}`);
             const endpoint = isBanned
                 ? API_ENDPOINTS.USERS.UNBAN(username)
                 : API_ENDPOINTS.USERS.BAN(username);
             const res = await apiFetch(endpoint, { method: 'POST' });
-            if (!res.ok) throw new Error('Failed to toggle ban status');
-            return res.json();
+            if (!res.ok) {
+                const text = await res.text();
+                console.error(`[UsersManagement] API error: ${res.status} - ${text}`);
+                throw new Error(`Failed to toggle ban status. Server returned ${res.status}`);
+            }
+            const data = await res.json();
+            console.log(`[UsersManagement] API success. Updated user:`, data);
+            return data;
         },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.allUsers });
+        onSuccess: (updatedUser: User) => {
+            console.log(`[UsersManagement] onSuccess triggered for ${updatedUser.username}. Updating cache...`);
+            // Optimistically update the UI without waiting for network
+            queryClient.setQueryData(QUERY_KEYS.allUsers, (oldUsers: User[] | undefined) => {
+                if (!oldUsers) {
+                    console.log(`[UsersManagement] Cache miss for oldUsers.`);
+                    return oldUsers;
+                }
+                const newUsers = oldUsers.map((u) => u.username === updatedUser.username ? updatedUser : u);
+                console.log(`[UsersManagement] Cache updated. Length: ${newUsers.length}`);
+                return newUsers;
+            });
+            // Removed invalidateQueries here because aggressive network caching 
+            // of the GET request was instantly reverting the optimistic update.
         },
+        onError: (error) => {
+            console.error(`[UsersManagement] Mutation error:`, error);
+            Alert.alert("Error", error.message);
+        }
     });
 
     // ─── Web: table layout ────────────────────────────────────────────────────
@@ -127,7 +150,7 @@ export default function UsersManagementScreen() {
             <ScrollView style={webStyles.tableBody}>
                 {displayedUsers.map((item: User, index: number) => (
                     <View
-                        key={item.id}
+                        key={item.username}
                         style={[
                             webStyles.tableRow,
                             { borderBottomColor: themeColors.border },
@@ -258,7 +281,7 @@ export default function UsersManagementScreen() {
                         showsVerticalScrollIndicator={false}
                         data={displayedUsers}
                         renderItem={renderMobileCard}
-                        keyExtractor={item => item.id}
+                        keyExtractor={item => item.username}
                         numColumns={2}
                         contentContainerStyle={mobileStyles.listContent}
                         columnWrapperStyle={mobileStyles.columnWrapper}
