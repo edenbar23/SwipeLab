@@ -67,9 +67,6 @@ export default function AddGoldImageScreen({ navigation }: any) {
         fetchOptions();
     }, []);
 
-    // For demo purposes, using taskId = 1. In production, this would come from navigation params
-    const taskId = 1;
-
     const validateImageUrl = async (url: string): Promise<string | null> => {
         try {
             // Try HEAD first (cheaper), fall back to GET if server doesn't allow HEAD
@@ -140,10 +137,6 @@ export default function AddGoldImageScreen({ navigation }: any) {
     const handleSubmit = async () => {
         setStatusMessage(null);
 
-        if (!taskId) {
-            setStatusMessage({ type: 'error', text: "Task ID is required" });
-            return;
-        }
         if (uploadType === "url" && !imageUrl) {
             setStatusMessage({ type: 'error', text: "Image URL is required" });
             return;
@@ -178,7 +171,6 @@ export default function AddGoldImageScreen({ navigation }: any) {
         }
 
         const formData = new FormData();
-        formData.append("taskId", taskId.toString());
         formData.append("species", species.trim());
         formData.append("correctAnswer", correctAnswer);
 

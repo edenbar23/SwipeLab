@@ -17,6 +17,7 @@ public class TaskDistributionService {
 
     private final ImageRepository imageRepository;
     private final ClassificationRepository classificationRepository;
+    private final com.swipelab.classification.infrastructure.GoldImageRepository goldImageRepository;
     private final GoldImagePolicy goldImagePolicy;
 
     /**
@@ -43,12 +44,16 @@ public class TaskDistributionService {
      * Get next gold standard image+species pair that user hasn't classified yet for that species.
      */
     private Optional<ImageSpeciesPair> getNextGoldImagePair(String username, Long taskId, List<String> taskSpecies) {
-        List<Image> goldImages = imageRepository.findUnclassifiedGoldImages(username, taskId);
+        if (taskSpecies == null || taskSpecies.isEmpty()) return Optional.empty();
+        
+        List<Image> goldImages = imageRepository.findUnclassifiedGoldImages(username, taskSpecies);
         if (goldImages.isEmpty()) return Optional.empty();
 
         for (Image image : goldImages) {
-            String species = pickUnqueriedSpecies(username, image.getId(), taskSpecies);
-            if (species != null) return Optional.of(new ImageSpeciesPair(image, species));
+            Optional<com.swipelab.classification.domain.GoldImage> goldOpt = goldImageRepository.findByImageIdAndActiveTrue(image.getId());
+            if (goldOpt.isPresent()) {
+                return Optional.of(new ImageSpeciesPair(image, goldOpt.get().getSpecies()));
+            }
         }
         return Optional.empty();
     }

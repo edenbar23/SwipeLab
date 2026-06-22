@@ -39,10 +39,9 @@ public class GoldImageController {
     public ResponseEntity<GoldImageResponse> uploadGoldImage(
             @RequestParam(value = "file", required = false) org.springframework.web.multipart.MultipartFile file,
             @RequestParam(value = "imageUrl", required = false) String imageUrl,
-            @RequestParam("taskId") Long taskId,
             @RequestParam("species") String species,
             @RequestParam(value = "correctAnswer", defaultValue = "YES") String correctAnswer) {
-        GoldImageResponse response = goldImageService.uploadGoldImage(file, imageUrl, taskId, species, correctAnswer);
+        GoldImageResponse response = goldImageService.uploadGoldImage(file, imageUrl, species, correctAnswer);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 

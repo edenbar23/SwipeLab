@@ -28,6 +28,9 @@ class TaskDistributionServiceTest {
     private ClassificationRepository classificationRepository;
 
     @Mock
+    private com.swipelab.classification.infrastructure.GoldImageRepository goldImageRepository;
+
+    @Mock
     private GoldImagePolicy goldImagePolicy;
 
     @InjectMocks
@@ -72,10 +75,12 @@ class TaskDistributionServiceTest {
     @Test
     void getNextImageForUser_ShouldReturnGoldImage_WhenPolicySaysGold() {
         when(goldImagePolicy.shouldServeGoldImage("testuser", 1L)).thenReturn(true);
-        when(imageRepository.findUnclassifiedGoldImages("testuser", 1L))
+        when(imageRepository.findUnclassifiedGoldImages("testuser", SPECIES))
                 .thenReturn(List.of(goldImage));
-        when(classificationRepository.findQueriedSpeciesByUsernameAndImageId("testuser", 3L))
-                .thenReturn(Collections.emptyList());
+        
+        com.swipelab.classification.domain.GoldImage mockGoldImage = new com.swipelab.classification.domain.GoldImage();
+        mockGoldImage.setSpecies("Bat");
+        when(goldImageRepository.findByImageIdAndActiveTrue(3L)).thenReturn(Optional.of(mockGoldImage));
 
         Optional<TaskDistributionService.ImageSpeciesPair> result =
                 taskDistributionService.getNextImageForUser("testuser", 1L, SPECIES);
@@ -88,7 +93,7 @@ class TaskDistributionServiceTest {
     @Test
     void getNextImageForUser_ShouldFallbackToRegularImage_WhenNoGoldAvailable() {
         when(goldImagePolicy.shouldServeGoldImage("testuser", 1L)).thenReturn(true);
-        when(imageRepository.findUnclassifiedGoldImages("testuser", 1L))
+        when(imageRepository.findUnclassifiedGoldImages("testuser", SPECIES))
                 .thenReturn(Collections.emptyList());
         when(imageRepository.findRegularImageCandidatesForUser(eq("testuser"), eq(1L), eq(1), any(PageRequest.class)))
                 .thenReturn(List.of(regularImage1));

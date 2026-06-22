@@ -106,11 +106,11 @@ class GoldImageServiceTest {
         MultipartFile mockFile = mock(MultipartFile.class);
         when(mockFile.isEmpty()).thenReturn(false);
         when(fileStorageService.storeFile(mockFile)).thenReturn("/uploads/stored-uuid.png");
-        when(taskProvider.getTaskInfo(1L)).thenReturn(taskInfo);
+
         when(imageRepository.save(any(Image.class))).thenReturn(image);
         when(goldImageRepository.save(any(GoldImage.class))).thenReturn(goldImage);
 
-        GoldImageResponse response = goldImageService.uploadGoldImage(mockFile, null, 1L, "Lion", "YES");
+        GoldImageResponse response = goldImageService.uploadGoldImage(mockFile, null, "Lion", "YES");
 
         assertNotNull(response);
         assertEquals(1L, response.getId());
@@ -124,11 +124,11 @@ class GoldImageServiceTest {
     void uploadGoldImage_WithUrl_ShouldDownloadAndStoreLocally() {
         String remoteUrl = "https://example.com/bee.jpg";
         when(fileStorageService.storeFileFromUrl(remoteUrl)).thenReturn("/uploads/downloaded-uuid.jpg");
-        when(taskProvider.getTaskInfo(1L)).thenReturn(taskInfo);
+
         when(imageRepository.save(any(Image.class))).thenReturn(image);
         when(goldImageRepository.save(any(GoldImage.class))).thenReturn(goldImage);
 
-        GoldImageResponse response = goldImageService.uploadGoldImage(null, remoteUrl, 1L, "Lion", "YES");
+        GoldImageResponse response = goldImageService.uploadGoldImage(null, remoteUrl, "Lion", "YES");
 
         assertNotNull(response);
         // External URL must never be returned as imageUrl — it must be the local API endpoint
@@ -143,7 +143,7 @@ class GoldImageServiceTest {
     @Test
     void uploadGoldImage_WithNeitherFileNorUrl_ShouldThrow() {
         assertThrows(IllegalArgumentException.class,
-                () -> goldImageService.uploadGoldImage(null, null, 1L, "Lion", "YES"));
+                () -> goldImageService.uploadGoldImage(null, null, "Lion", "YES"));
         verify(fileStorageService, never()).storeFile(any());
         verify(fileStorageService, never()).storeFileFromUrl(any());
     }
@@ -210,6 +210,7 @@ class GoldImageServiceTest {
 
     @Test
     void getGoldImagesByTask_ShouldReturnValidList() {
+        when(taskProvider.getTaskInfo(1L)).thenReturn(new TaskProvider.TaskInfo(1L, "Q", "S", Collections.singletonList("Lion"), Collections.emptyList()));
         when(goldImageRepository.findAllByActiveTrue()).thenReturn(Collections.singletonList(goldImage));
 
         List<GoldImageResponse> responses = goldImageService.getGoldImagesByTask(1L);

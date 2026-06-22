@@ -45,7 +45,7 @@ public class GoldImageService {
     }
 
     @Transactional
-    public GoldImageResponse uploadGoldImage(MultipartFile file, String imageUrl, Long taskId, String species, String correctAnswerStr) {
+    public GoldImageResponse uploadGoldImage(MultipartFile file, String imageUrl, String species, String correctAnswerStr) {
         String srcPath;
         if (file != null && !file.isEmpty()) {
             srcPath = fileStorageService.storeFile(file);
@@ -57,11 +57,9 @@ public class GoldImageService {
             throw new IllegalArgumentException("Either file or imageUrl must be provided");
         }
 
-        TaskProvider.TaskInfo taskInfo = taskProvider.getTaskInfo(taskId);
-
         Image image = Image.builder()
                 .srcPath(srcPath)
-                .taskId(taskInfo.id())
+                .taskId(null)
                 .build();
         Image savedImage = imageRepository.save(image);
 
@@ -84,8 +82,10 @@ public class GoldImageService {
 
     @Transactional(readOnly = true)
     public List<GoldImageResponse> getGoldImagesByTask(Long taskId) {
+        TaskProvider.TaskInfo taskInfo = taskProvider.getTaskInfo(taskId);
+        List<String> taskSpecies = taskInfo.targetSpeciesNames();
         return goldImageRepository.findAllByActiveTrue().stream()
-                .filter(g -> g.getImage().getTaskId().equals(taskId))
+                .filter(g -> taskSpecies != null && taskSpecies.contains(g.getSpecies()))
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }

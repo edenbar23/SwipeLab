@@ -65,7 +65,7 @@ public class Image {
      * private Label correctLabel;
      */
 
-    @Column(name = "task_id", nullable = false)
+    @Column(name = "task_id")
     private Long taskId;
 
     @CreationTimestamp
