@@ -36,6 +36,7 @@ public class ImageService {
         private final ClassificationRepository classificationRepository;
         private final GoldImageRepository goldImageRepository;
         private final TaskDistributionService taskDistributionService;
+        private final GoldImagePolicy goldImagePolicy;
 
         @Transactional(readOnly = true)
         public NextBatchResponse getNextBatchForApi(Long taskId, String username, int count) {
@@ -46,9 +47,22 @@ public class ImageService {
                 int attempt = 0;
                 int found = 0;
 
+                boolean shouldIncludeGoldImage = goldImagePolicy.shouldIncludeGoldImageInBatch(username, taskId, count);
+                boolean goldImageAdded = false;
+
                 while (found < count && attempt < count * 3) {
-                        Optional<TaskDistributionService.ImageSpeciesPair> pairOpt =
-                                taskDistributionService.getNextImageForUser(username, taskId, taskSpecies);
+                        Optional<TaskDistributionService.ImageSpeciesPair> pairOpt;
+                        if (shouldIncludeGoldImage && !goldImageAdded) {
+                                pairOpt = taskDistributionService.getNextGoldImagePair(username, taskId, taskSpecies);
+                                if (pairOpt.isPresent()) {
+                                        goldImageAdded = true;
+                                } else {
+                                        pairOpt = taskDistributionService.getNextRegularImagePair(username, taskId, taskSpecies);
+                                }
+                        } else {
+                                pairOpt = taskDistributionService.getNextRegularImagePair(username, taskId, taskSpecies);
+                        }
+
                         if (pairOpt.isEmpty()) break;
 
                         TaskDistributionService.ImageSpeciesPair pair = pairOpt.get();

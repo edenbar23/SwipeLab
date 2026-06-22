@@ -18,32 +18,18 @@ public class TaskDistributionService {
     private final ImageRepository imageRepository;
     private final ClassificationRepository classificationRepository;
     private final com.swipelab.classification.infrastructure.GoldImageRepository goldImageRepository;
-    private final GoldImagePolicy goldImagePolicy;
 
     /**
      * Holds the selected image and the species to query for that image.
      */
     public record ImageSpeciesPair(Image image, String species) {}
 
-    /**
-     * Get the next image+species pair for a user to classify.
-     * The same image may reappear with a different species if the user has not yet
-     * classified it for all species in the task.
-     */
-    @Transactional(readOnly = true)
-    public Optional<ImageSpeciesPair> getNextImageForUser(String username, Long taskId, List<String> taskSpecies) {
-        if (goldImagePolicy.shouldServeGoldImage(username, taskId)) {
-            Optional<ImageSpeciesPair> goldPair = getNextGoldImagePair(username, taskId, taskSpecies);
-            if (goldPair.isPresent()) return goldPair;
-        }
 
-        return getNextRegularImagePair(username, taskId, taskSpecies);
-    }
 
     /**
      * Get next gold standard image+species pair that user hasn't classified yet for that species.
      */
-    private Optional<ImageSpeciesPair> getNextGoldImagePair(String username, Long taskId, List<String> taskSpecies) {
+    public Optional<ImageSpeciesPair> getNextGoldImagePair(String username, Long taskId, List<String> taskSpecies) {
         if (taskSpecies == null || taskSpecies.isEmpty()) return Optional.empty();
         
         List<Image> goldImages = imageRepository.findUnclassifiedGoldImages(username, taskSpecies);
@@ -62,7 +48,7 @@ public class TaskDistributionService {
      * Get next regular image+species pair, prioritising images with fewer total classifications.
      * Candidates are images the user hasn't classified for EVERY species yet.
      */
-    private Optional<ImageSpeciesPair> getNextRegularImagePair(String username, Long taskId, List<String> taskSpecies) {
+    public Optional<ImageSpeciesPair> getNextRegularImagePair(String username, Long taskId, List<String> taskSpecies) {
         int speciesCount = taskSpecies == null || taskSpecies.isEmpty() ? 1 : taskSpecies.size();
         List<Image> candidates = imageRepository.findRegularImageCandidatesForUser(
                 username, taskId, speciesCount, PageRequest.of(0, 20));

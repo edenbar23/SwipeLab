@@ -9,12 +9,5 @@ package com.swipelab.classification.domain;
  */
 public interface GoldImagePolicy {
 
-    /**
-     * Returns true if the next image served to this user for this task
-     * should be a gold-standard image.
-     *
-     * @param username the user being served
-     * @param taskId   the task context
-     */
-    boolean shouldServeGoldImage(String username, Long taskId);
+    boolean shouldIncludeGoldImageInBatch(String username, Long taskId, int batchSize);
 }

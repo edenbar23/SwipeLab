@@ -21,9 +21,11 @@ public class FrequencyBasedGoldImagePolicy implements GoldImagePolicy {
     private final ClassificationRepository classificationRepository;
 
     @Override
-    public boolean shouldServeGoldImage(String username, Long taskId) {
+    public boolean shouldIncludeGoldImageInBatch(String username, Long taskId, int batchSize) {
         Long count = classificationRepository.countByUsernameAndTaskId(username, taskId);
-        if (count == null || count == 0) return false;
-        return count % GOLD_IMAGE_FREQUENCY == 0;
+        long safeCount = count == null ? 0 : count;
+        long currentInterval = safeCount / GOLD_IMAGE_FREQUENCY;
+        long nextInterval = (safeCount + batchSize) / GOLD_IMAGE_FREQUENCY;
+        return nextInterval > currentInterval;
     }
 }

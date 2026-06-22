@@ -49,6 +49,9 @@ class ImageServiceTest {
     @Mock
     private TaskDistributionService taskDistributionService;
 
+    @Mock
+    private GoldImagePolicy goldImagePolicy;
+
     @InjectMocks
     private ImageService imageService;
 
@@ -69,8 +72,8 @@ class ImageServiceTest {
     @Test
     void getNextBatchForApi_ShouldReturnImages() {
         when(taskProvider.getTaskInfo(1L)).thenReturn(taskInfo);
-        // task has no targetSpecies so species list is empty → question comes from task.getQuestion()
-        when(taskDistributionService.getNextImageForUser(anyString(), anyLong(), anyList()))
+        when(goldImagePolicy.shouldIncludeGoldImageInBatch("testuser", 1L, 5)).thenReturn(false);
+        when(taskDistributionService.getNextRegularImagePair(anyString(), anyLong(), anyList()))
                 .thenReturn(Optional.of(new TaskDistributionService.ImageSpeciesPair(image, null)))
                 .thenReturn(Optional.empty());
 
