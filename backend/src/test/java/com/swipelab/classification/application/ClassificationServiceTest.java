@@ -99,11 +99,15 @@ class ClassificationServiceTest {
         when(fraudDetectionService.analyzeClassification(anyString(), anyString(), anyLong(), anyLong()))
                 .thenReturn(new FraudAnalysisResult(false, null));
 
+        Classification savedClassification = new Classification();
+        savedClassification.setId(10L);
+        when(classificationRepository.save(any(Classification.class))).thenReturn(savedClassification);
+
         classificationService.submitClassification("testuser", "USER", 0.8, request);
 
         verify(fraudDetectionService, times(1)).analyzeClassification("testuser", "USER", 1500L, 1L);
         verify(goldImageEvaluatorService, times(1)).evaluate(any(), any(), any(), any());
-        verify(classificationRepository, never()).save(any());
+        verify(classificationRepository, times(1)).save(any(Classification.class));
 
         ArgumentCaptor<ClassificationSubmittedEvent> eventCaptor = ArgumentCaptor.forClass(ClassificationSubmittedEvent.class);
         verify(eventPublisher, times(1)).publishEvent(eventCaptor.capture());

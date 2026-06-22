@@ -60,14 +60,25 @@ public class ClassificationService {
         ClassificationSubmittedEvent event;
         if (goldResult.isPresent()) {
             GoldImageEvaluationResult result = goldResult.get();
+
+            Classification classification = Classification.builder()
+                    .username(username)
+                    .userRole(userRole)
+                    .taskId(request.getTaskId())
+                    .image(image)
+                    .querySpecies(result.species())
+                    .userResponse(request.getDecision())
+                    .build();
+            Classification saved = classificationRepository.save(classification);
+
             event = ClassificationSubmittedEvent.builder()
                     .username(username)
-                    .classificationId(null)
+                    .classificationId(saved.getId())
                     .imageId(image.getId())
                     .taskId(request.getTaskId())
                     .isCorrect(result.isCorrect())
                     .isGoldStandard(true)
-                    .submittedAt(LocalDateTime.now())
+                    .submittedAt(saved.getCreatedAt())
                     .species(result.species())
                     .userResponse(request.getDecision())
                     .responseTimeMs(request.getResponseTimeMs())
@@ -136,14 +147,25 @@ public class ClassificationService {
             ClassificationSubmittedEvent event;
             if (goldResult.isPresent()) {
                 GoldImageEvaluationResult result = goldResult.get();
+
+                Classification classification = Classification.builder()
+                        .username(username)
+                        .userRole(userRole)
+                        .taskId(taskId)
+                        .image(image)
+                        .querySpecies(result.species())
+                        .userResponse(response.getUserResponse())
+                        .build();
+                Classification saved = classificationRepository.save(classification);
+
                 event = ClassificationSubmittedEvent.builder()
                         .username(username)
-                        .classificationId(null)
+                        .classificationId(saved.getId())
                         .imageId(image.getId())
                         .taskId(taskId)
                         .isCorrect(result.isCorrect())
                         .isGoldStandard(true)
-                        .submittedAt(LocalDateTime.now())
+                        .submittedAt(saved.getCreatedAt())
                         .species(result.species())
                         .userResponse(response.getUserResponse())
                         .userCredibility(null)
