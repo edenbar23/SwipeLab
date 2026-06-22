@@ -113,35 +113,6 @@ class GoldImageControllerTest {
         verify(goldImageService, times(1)).deleteGoldImage(1L);
     }
 
-    // ── serveImage ─────────────────────────────────────────────────────────
-
-    @Test
-    void serveImage_ShouldReturnImageBytes_WithCorrectContentType() throws Exception {
-        byte[] imageBytes = new byte[]{(byte) 0x89, 0x50, 0x4E, 0x47}; // PNG magic bytes
-        Resource resource = new ByteArrayResource(imageBytes) {
-            @Override
-            public String getFilename() { return "test-uuid.png"; }
-        };
-        when(goldImageService.getImageResource(1L)).thenReturn(resource);
-
-        mockMvc.perform(get("/api/admin/gold-images/1/image"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.IMAGE_PNG))
-                .andExpect(header().string("Cache-Control", "max-age=86400, public"));
-
-        verify(goldImageService).getImageResource(1L);
-    }
-
-    @Test
-    void serveImage_ShouldPropagateException_WhenResourceNotFound() {
-        // Standalone MockMvc wraps unhandled RuntimeExceptions in a ServletException,
-        // so we assert the exception propagates rather than checking the HTTP status.
-        when(goldImageService.getImageResource(99L))
-                .thenThrow(new RuntimeException("File not found or not readable: missing.jpg"));
-
-        org.junit.jupiter.api.Assertions.assertThrows(Exception.class,
-                () -> mockMvc.perform(get("/api/admin/gold-images/99/image")));
-    }
 }
 
 

@@ -36,9 +36,6 @@ class GoldImageServiceTest {
     private ImageRepository imageRepository;
 
     @Mock
-    private FileStorageService fileStorageService;
-
-    @Mock
     private TaskProvider taskProvider;
 
     @InjectMocks
@@ -102,10 +99,11 @@ class GoldImageServiceTest {
     // ── uploadGoldImage ──────────────────────────────────────────────────────
 
     @Test
-    void uploadGoldImage_WithFile_ShouldStoreFileAndReturnResponse() {
+    void uploadGoldImage_WithFile_ShouldStoreFileAndReturnResponse() throws java.io.IOException {
         MultipartFile mockFile = mock(MultipartFile.class);
         when(mockFile.isEmpty()).thenReturn(false);
-        when(fileStorageService.storeFile(mockFile)).thenReturn("/uploads/stored-uuid.png");
+        when(mockFile.getBytes()).thenReturn(new byte[]{1, 2, 3});
+        when(mockFile.getContentType()).thenReturn("image/jpeg");
 
         when(imageRepository.save(any(Image.class))).thenReturn(image);
         when(goldImageRepository.save(any(GoldImage.class))).thenReturn(goldImage);
@@ -114,96 +112,12 @@ class GoldImageServiceTest {
 
         assertNotNull(response);
         assertEquals(1L, response.getId());
-        // imageUrl must resolve to the opaque API endpoint, not the raw file path
-        assertTrue(response.getImageUrl().contains("/api/admin/gold-images/1/image"));
-        verify(fileStorageService).storeFile(mockFile);
-        verify(fileStorageService, never()).storeFileFromUrl(any());
-    }
-
-    @Test
-    void uploadGoldImage_WithUrl_ShouldDownloadAndStoreLocally() {
-        String remoteUrl = "https://example.com/bee.jpg";
-        when(fileStorageService.storeFileFromUrl(remoteUrl)).thenReturn("/uploads/downloaded-uuid.jpg");
-
-        when(imageRepository.save(any(Image.class))).thenReturn(image);
-        when(goldImageRepository.save(any(GoldImage.class))).thenReturn(goldImage);
-
-        GoldImageResponse response = goldImageService.uploadGoldImage(null, remoteUrl, "Lion", "YES");
-
-        assertNotNull(response);
-        // External URL must never be returned as imageUrl — it must be the local API endpoint
-        assertFalse(response.getImageUrl().startsWith("https://example.com"),
-                "Raw external URL must not leak into the response");
-        assertTrue(response.getImageUrl().contains("/api/admin/gold-images/"),
-                "Response imageUrl should point to the internal image endpoint");
-        verify(fileStorageService).storeFileFromUrl(remoteUrl);
-        verify(fileStorageService, never()).storeFile(any());
     }
 
     @Test
     void uploadGoldImage_WithNeitherFileNorUrl_ShouldThrow() {
         assertThrows(IllegalArgumentException.class,
                 () -> goldImageService.uploadGoldImage(null, null, "Lion", "YES"));
-        verify(fileStorageService, never()).storeFile(any());
-        verify(fileStorageService, never()).storeFileFromUrl(any());
-    }
-
-    // ── mapToResponse / imageUrl resolution ──────────────────────────────────
-
-    @Test
-    void getGoldImageById_ShouldReturnAbsoluteApiUrl_ForLocalUpload() {
-        when(goldImageRepository.findById(1L)).thenReturn(Optional.of(goldImage));
-
-        GoldImageResponse response = goldImageService.getGoldImageById(1L);
-
-        assertNotNull(response);
-        assertEquals(
-                APP_BASE_URL + "/api/admin/gold-images/1/image",
-                response.getImageUrl(),
-                "Locally uploaded images should be served via the API endpoint"
-        );
-    }
-
-    @Test
-    void mapToResponse_ShouldPassThroughExternalUrl_WhenSrcPathIsHttp() {
-        image.setSrcPath("https://external.example.com/bee.jpg");
-        when(goldImageRepository.findById(1L)).thenReturn(Optional.of(goldImage));
-
-        GoldImageResponse response = goldImageService.getGoldImageById(1L);
-
-        assertEquals("https://external.example.com/bee.jpg", response.getImageUrl(),
-                "External URLs stored as srcPath should be returned unchanged");
-    }
-
-    // ── getImageResource ─────────────────────────────────────────────────────
-
-    @Test
-    void getImageResource_ShouldReturnResource_ForLocalUpload() {
-        Resource mockResource = mock(Resource.class);
-        when(goldImageRepository.findById(1L)).thenReturn(Optional.of(goldImage));
-        when(fileStorageService.loadFile("/uploads/test-uuid.jpg")).thenReturn(mockResource);
-
-        Resource result = goldImageService.getImageResource(1L);
-
-        assertSame(mockResource, result);
-        verify(fileStorageService).loadFile("/uploads/test-uuid.jpg");
-    }
-
-    @Test
-    void getImageResource_ShouldThrow_WhenImageNotFound() {
-        when(goldImageRepository.findById(99L)).thenReturn(Optional.empty());
-
-        assertThrows(ResourceNotFoundException.class, () -> goldImageService.getImageResource(99L));
-        verify(fileStorageService, never()).loadFile(any());
-    }
-
-    @Test
-    void getImageResource_ShouldThrow_WhenSrcPathIsExternalUrl() {
-        image.setSrcPath("https://external.example.com/bee.jpg");
-        when(goldImageRepository.findById(1L)).thenReturn(Optional.of(goldImage));
-
-        assertThrows(IllegalArgumentException.class, () -> goldImageService.getImageResource(1L),
-                "Requesting image bytes for an external-URL image must throw");
     }
 
     // ── other CRUD ───────────────────────────────────────────────────────────

@@ -26,7 +26,6 @@ public class GoldImageService {
 
     private final GoldImageRepository goldImageRepository;
     private final ImageRepository imageRepository;
-    private final FileStorageService fileStorageService;
     private final TaskProvider taskProvider;
 
     @Transactional
@@ -48,11 +47,16 @@ public class GoldImageService {
     public GoldImageResponse uploadGoldImage(MultipartFile file, String imageUrl, String species, String correctAnswerStr) {
         String srcPath;
         if (file != null && !file.isEmpty()) {
-            srcPath = fileStorageService.storeFile(file);
+            try {
+                byte[] bytes = file.getBytes();
+                String base64 = java.util.Base64.getEncoder().encodeToString(bytes);
+                String contentType = file.getContentType() != null ? file.getContentType() : "image/jpeg";
+                srcPath = "data:" + contentType + ";base64," + base64;
+            } catch (java.io.IOException e) {
+                throw new RuntimeException("Could not read uploaded file", e);
+            }
         } else if (imageUrl != null && !imageUrl.isEmpty()) {
-            // Download and store locally — we never keep raw external URLs so images
-            // remain accessible even if the original link is later deleted.
-            srcPath = fileStorageService.storeFileFromUrl(imageUrl);
+            srcPath = downloadUrlAsBase64(imageUrl);
         } else {
             throw new IllegalArgumentException("Either file or imageUrl must be provided");
         }
@@ -120,18 +124,12 @@ public class GoldImageService {
 
     private GoldImageResponse mapToResponse(GoldImage goldImage) {
         String srcPath = goldImage.getImage().getSrcPath();
-        // For locally uploaded files, expose them through the dedicated image endpoint
-        // so no filesystem path is ever revealed to the client.
-        // External URL images (stored as full http/https URLs) are returned as-is.
-        String resolvedUrl = (srcPath != null && srcPath.startsWith("/uploads/"))
-                ? appBaseUrl.replaceAll("/$", "") + "/api/admin/gold-images/" + goldImage.getId() + "/image"
-                : srcPath;
         return GoldImageResponse.builder()
                 .id(goldImage.getId())
                 .imageId(goldImage.getImage().getId())
                 .species(goldImage.getSpecies())
                 .correctAnswer(goldImage.getCorrectAnswer())
-                .imageUrl(resolvedUrl)
+                .imageUrl(srcPath)
                 .build();
     }
 
@@ -142,19 +140,39 @@ public class GoldImageService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Returns a file Resource for streaming image bytes.
-     * Only valid for locally-uploaded images (srcPath starts with /uploads/).
-     * Throws if the image was stored as an external URL.
-     */
-    @Transactional(readOnly = true)
-    public Resource getImageResource(Long goldImageId) {
-        GoldImage goldImage = goldImageRepository.findById(goldImageId)
-                .orElseThrow(() -> new ResourceNotFoundException("Gold Image not found: " + goldImageId));
-        String srcPath = goldImage.getImage().getSrcPath();
-        if (srcPath == null || !srcPath.startsWith("/uploads/")) {
-            throw new IllegalArgumentException("Image is not a locally stored upload");
+    private String downloadUrlAsBase64(String imageUrl) {
+        java.net.HttpURLConnection connection = null;
+        try {
+            java.net.URI uri = java.net.URI.create(imageUrl);
+            connection = (java.net.HttpURLConnection) uri.toURL().openConnection();
+            connection.setRequestMethod("GET");
+            connection.setConnectTimeout(15000);
+            connection.setReadTimeout(15000);
+            connection.setRequestProperty("User-Agent", "Mozilla/5.0");
+            connection.connect();
+
+            int status = connection.getResponseCode();
+            if (status < 200 || status >= 300) {
+                throw new RuntimeException("Remote URL returned HTTP " + status);
+            }
+
+            String contentType = connection.getContentType();
+            if (contentType == null) contentType = "image/jpeg";
+
+            try (java.io.InputStream in = connection.getInputStream();
+                 java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream()) {
+                byte[] buffer = new byte[8192];
+                int bytesRead;
+                while ((bytesRead = in.read(buffer)) != -1) {
+                    out.write(buffer, 0, bytesRead);
+                }
+                String base64 = java.util.Base64.getEncoder().encodeToString(out.toByteArray());
+                return "data:" + contentType + ";base64," + base64;
+            }
+        } catch (java.io.IOException ex) {
+            throw new RuntimeException("Could not download image from URL: " + imageUrl, ex);
+        } finally {
+            if (connection != null) connection.disconnect();
         }
-        return fileStorageService.loadFile(srcPath);
     }
 }
