@@ -1,0 +1,1 @@
+ALTER TABLE images ALTER COLUMN task_id DROP NOT NULL;
