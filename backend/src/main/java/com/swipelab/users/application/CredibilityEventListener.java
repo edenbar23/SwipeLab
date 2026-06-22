@@ -9,7 +9,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 /**
  * Listens to ClassificationSubmittedEvent and triggers credibility recalculation
@@ -45,8 +48,8 @@ public class CredibilityEventListener {
     private int minClassificationsForConsensus;
 
     @Async
-    @EventListener
-    @Transactional
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void onClassificationSubmitted(ClassificationSubmittedEvent event) {
         // Gold-image classifications are handled separately by GoldImageEvaluatorService
         // (they feed CredibilityRecord). Still trigger regular credibility refresh below.
