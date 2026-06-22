@@ -138,7 +138,14 @@ public class ImageService {
 
                 // Local file path — read from disk and return as base64
                 try {
-                        java.io.File file = new java.io.File(path);
+                        java.io.File file;
+                        if (path.startsWith("/uploads/")) {
+                                String filename = java.nio.file.Paths.get(path).getFileName().toString();
+                                file = java.nio.file.Paths.get("uploads").toAbsolutePath().normalize().resolve(filename).toFile();
+                        } else {
+                                file = new java.io.File(path);
+                        }
+                        
                         if (file.exists() && file.isFile()) {
                                 byte[] bytes = java.nio.file.Files.readAllBytes(file.toPath());
                                 return java.util.Base64.getEncoder().encodeToString(bytes);
@@ -280,7 +287,14 @@ public class ImageService {
                 }
 
                 try {
-                        java.io.File file = new java.io.File(path);
+                        java.io.File file;
+                        if (path.startsWith("/uploads/")) {
+                                String filename = java.nio.file.Paths.get(path).getFileName().toString();
+                                file = java.nio.file.Paths.get("uploads").toAbsolutePath().normalize().resolve(filename).toFile();
+                        } else {
+                                file = new java.io.File(path);
+                        }
+                        
                         if (file.exists() && file.isFile()) {
                                 byte[] bytes = java.nio.file.Files.readAllBytes(file.toPath());
                                 return ResponseEntity.ok()
