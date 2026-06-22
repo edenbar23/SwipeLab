@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -23,6 +24,7 @@ public class DataMigrationRunner implements CommandLineRunner {
     private final ClassificationRepository classificationRepository;
 
     @Override
+    @Transactional
     public void run(String... args) throws Exception {
         log.info("Running User Status data migration...");
         List<User> users = userRepository.findAll();
