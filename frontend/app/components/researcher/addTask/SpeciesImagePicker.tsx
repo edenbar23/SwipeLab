@@ -13,8 +13,11 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+import { useQueryClient } from '@tanstack/react-query';
 import { Colors } from '../../../../constants/theme';
 import { useThemeStore } from '../../../stores/themeStore';
+import { API_ENDPOINTS } from '../../../api/apiEndpoints';
+import { apiFetch } from '../../../api/apiFetch';
 import { SpeciesRefImage } from './addTaskTypes';
 import AuthenticatedImage from '../../ui/AuthenticatedImage';
 
@@ -48,8 +51,10 @@ export default function SpeciesImagePicker({
 }: SpeciesImagePickerProps) {
   const { theme } = useThemeStore();
   const c = Colors[theme as keyof typeof Colors];
+  const queryClient = useQueryClient();
   const [modalVisible, setModalVisible] = useState(false);
   const [previewUri, setPreviewUri]     = useState<string | null>(null);
+  const [uploading, setUploading]       = useState(false);
 
   const isAtMax  = selectedImages.length >= MAX_IMAGES;
   const isValid  = selectedImages.length >= MIN_IMAGES;
@@ -76,13 +81,94 @@ export default function SpeciesImagePicker({
     }
   };
 
-  // ── Upload new image from device ───────────────────────────────────────────
+  // ── Upload new image(s) from device ────────────────────────────────────────
+  // Images are uploaded to the species pool *immediately* (not deferred to task
+  // submit). This makes the new image instantly selectable from the pool — and
+  // we invalidate the cached pool query so the grid refreshes without a reload.
+
+  /**
+   * Uploads picked files to the species pool, adds the returned pool images as
+   * selected (fromPool) entries, and refreshes the pool cache.
+   */
+  const uploadToPool = async (
+    files: { file?: File; uri?: string; name?: string }[],
+  ) => {
+    if (files.length === 0) return;
+    const remaining = MAX_IMAGES - selectedImages.length;
+    const toUpload = files.slice(0, remaining);
+
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      toUpload.forEach((f) => {
+        if (Platform.OS === 'web') {
+          if (f.file) fd.append('files', f.file);
+        } else {
+          fd.append('files', {
+            uri: f.uri,
+            name: f.name || 'ref.jpg',
+            type: 'image/jpeg',
+          } as any);
+        }
+      });
+
+      const res = await apiFetch(API_ENDPOINTS.SPECIES.REF_IMAGES(speciesId), {
+        method: 'POST',
+        body: fd,
+      });
+      if (!res.ok) throw new Error(`Upload failed (${res.status})`);
+
+      const saved: { id: number; thumbnailUrl: string; imageUrl: string; caption?: string }[] =
+        await res.json();
+
+      // Add the freshly-uploaded images as selected pool entries.
+      const newSelected: SpeciesRefImage[] = saved.map((s) => ({
+        poolId: s.id,
+        uri: s.thumbnailUrl,
+        fromPool: true,
+        caption: s.caption,
+      }));
+      onImagesChange(speciesId, [...selectedImages, ...newSelected]);
+
+      // Make the new image appear in the pool grid right away.
+      // 1) Optimistically merge it into every cached pool query that includes
+      //    this species, so it shows instantly without waiting for a network round-trip.
+      queryClient.setQueriesData<Record<string, PoolImage[]>>(
+        { queryKey: ['species', 'pool'] },
+        (old) => {
+          if (!old) return old;
+          const existing = old[speciesId] ?? [];
+          const merged = [
+            ...existing,
+            ...saved
+              .filter((s) => !existing.some((p) => p.id === s.id))
+              .map((s) => ({
+                id: s.id,
+                thumbnailUrl: s.thumbnailUrl,
+                imageUrl: s.imageUrl,
+                caption: s.caption,
+              })),
+          ];
+          return { ...old, [speciesId]: merged };
+        },
+      );
+      // 2) Force an immediate refetch (not lazy invalidation) so the cache is
+      //    reconciled with the server right away — fixes the stale-cache delay.
+      queryClient.refetchQueries({ queryKey: ['species', 'pool'] });
+    } catch (err) {
+      console.error('Reference image upload failed:', err);
+      Alert.alert('Upload failed', 'Could not upload the image. Please try again.');
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const handleUpload = async () => {
     if (isAtMax) {
       Alert.alert('Limit reached', `Maximum ${MAX_IMAGES} reference images per species.`);
       return;
     }
+    if (uploading) return;
 
     if (Platform.OS === 'web') {
       // Web: invisible file input
@@ -93,16 +179,7 @@ export default function SpeciesImagePicker({
       input.onchange = (e: Event) => {
         const files = (e.target as HTMLInputElement).files;
         if (!files) return;
-        const remaining = MAX_IMAGES - selectedImages.length;
-        const toAdd = Array.from(files).slice(0, remaining);
-        const newImages: SpeciesRefImage[] = toAdd.map((file) => ({
-          uri: URL.createObjectURL(file),
-          fromPool: false,
-          caption: file.name,
-          // Store file reference for FormData upload on submit
-          _file: file,
-        } as any));
-        onImagesChange(speciesId, [...selectedImages, ...newImages]);
+        void uploadToPool(Array.from(files).map((file) => ({ file, name: file.name })));
       };
       input.click();
     } else {
@@ -118,12 +195,9 @@ export default function SpeciesImagePicker({
         quality: 1, // Backend does compression; send full quality
       });
       if (!result.canceled) {
-        const newImages: SpeciesRefImage[] = result.assets.map((asset) => ({
-          uri: asset.uri,
-          fromPool: false,
-          caption: asset.fileName ?? undefined,
-        }));
-        onImagesChange(speciesId, [...selectedImages, ...newImages]);
+        await uploadToPool(
+          result.assets.map((asset) => ({ uri: asset.uri, name: asset.fileName ?? undefined })),
+        );
       }
     }
   };
@@ -254,13 +328,19 @@ export default function SpeciesImagePicker({
                 UPLOAD NEW
               </Text>
               <TouchableOpacity
-                style={[styles.uploadRow, { borderColor: c.border }, isAtMax && styles.uploadRowDisabled]}
+                style={[styles.uploadRow, { borderColor: c.border }, (isAtMax || uploading) && styles.uploadRowDisabled]}
                 onPress={handleUpload}
-                disabled={isAtMax}
+                disabled={isAtMax || uploading}
               >
-                <Ionicons name="cloud-upload-outline" size={20} color={isAtMax ? '#94a3b8' : '#10B981'} />
+                {uploading ? (
+                  <ActivityIndicator size="small" color="#10B981" />
+                ) : (
+                  <Ionicons name="cloud-upload-outline" size={20} color={isAtMax ? '#94a3b8' : '#10B981'} />
+                )}
                 <Text style={[styles.uploadText, { color: isAtMax ? '#94a3b8' : c.text }]}>
-                  {isAtMax
+                  {uploading
+                    ? 'Uploading…'
+                    : isAtMax
                     ? `Limit reached (${MAX_IMAGES} max)`
                     : `Choose image${MAX_IMAGES - selectedImages.length > 1 ? 's' : ''} from device`}
                 </Text>

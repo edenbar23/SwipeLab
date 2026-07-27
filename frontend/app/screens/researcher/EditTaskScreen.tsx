@@ -1,6 +1,7 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React, { useEffect, useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   ScrollView,
   StyleSheet,
@@ -16,6 +17,9 @@ import { apiFetch } from "../../api/apiFetch";
 import ScreenHeaderLayout from "../../components/layout/ScreenHeaderLayout";
 import { useQueryClient } from "@tanstack/react-query";
 import MultiSelect from "../../components/ui/MultiSelect";
+import SpeciesImagePicker from "../../components/researcher/addTask/SpeciesImagePicker";
+import { SpeciesRefImage } from "../../components/researcher/addTask/addTaskTypes";
+import { useSpeciesPoolImages, QUERY_KEYS } from "../../api/queries";
 import { researcherStackParamList } from "../../navigation/researcherStack.types";
 import { useThemeStore } from '../../stores/themeStore';
 
@@ -32,6 +36,8 @@ export default function EditTaskScreen({ route, navigation }: Props) {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [targetSpecies, setTargetSpecies] = useState<string[]>([]);
+  // Maps species name → its selected/uploaded reference images.
+  const [speciesReferenceImages, setSpeciesReferenceImages] = useState<Record<string, SpeciesRefImage[]>>({});
   const [selectedRecipients, setSelectedRecipients] = useState<string[]>([]);
   const [sharedWithResearchers, setSharedWithResearchers] = useState<string[]>([]);
   const [selectedExperiments, setSelectedExperiments] = useState<string[]>([]);
@@ -44,6 +50,14 @@ export default function EditTaskScreen({ route, navigation }: Props) {
   const [isPublic, setIsPublic] = useState(false);
   const { theme } = useThemeStore();
   const themeColors = Colors[theme as keyof typeof Colors];
+
+  // Fetch the reference-image pool for the currently-selected species (by name).
+  const { data: poolImagesRaw, isLoading: poolImagesLoading } = useSpeciesPoolImages(targetSpecies);
+  const poolImages = poolImagesRaw ?? {};
+
+  const handleImagesChange = (speciesName: string, images: SpeciesRefImage[]) => {
+    setSpeciesReferenceImages((prev) => ({ ...prev, [speciesName]: images }));
+  };
 
   useEffect(() => {
     const fetchOptions = async () => {
@@ -102,6 +116,30 @@ export default function EditTaskScreen({ route, navigation }: Props) {
             ?.map((s: any) => String(s.name)) || []
         );
 
+        // Seed the per-species reference images from the task's existing pool selections.
+        // The backend returns imageUrl as "/api/v1/species/reference-images/{id}/image";
+        // parse the pool id from it so the images show as pre-selected and round-trip on save.
+        const seeded: Record<string, SpeciesRefImage[]> = {};
+        (data.targetSpecies || []).forEach((s: any) => {
+          const imgs = (s.referenceImages || [])
+            .map((img: any): SpeciesRefImage | null => {
+              const match = typeof img.imageUrl === "string"
+                ? img.imageUrl.match(/reference-images\/(\d+)\//)
+                : null;
+              if (!match) return null;
+              const poolId = Number(match[1]);
+              return {
+                poolId,
+                uri: API_ENDPOINTS.SPECIES.REF_THUMB_URL(poolId),
+                fromPool: true,
+                caption: img.caption,
+              };
+            })
+            .filter(Boolean) as SpeciesRefImage[];
+          if (imgs.length > 0) seeded[String(s.name)] = imgs;
+        });
+        setSpeciesReferenceImages(seeded);
+
         setSelectedExperiments(data.experiments?.map((id: number) => String(id)) || []);
 
         setIsPublic(data.isPublic || false);
@@ -122,23 +160,55 @@ export default function EditTaskScreen({ route, navigation }: Props) {
       return;
     }
 
-    const payload = {
-      status: "ACTIVE",
-      name,
-      description,
-      experiments: selectedExperiments.map(Number),
-      targetSpecies: targetSpecies.map((s) => ({
-        name: s,
-        referenceImages: [],
-      })),
-      isPublic,
-      recipientGroups: selectedRecipients.filter(id => id.startsWith("G-")).map(id => Number(id.replace("G-", ""))),
-      assignedUsernames: selectedRecipients.filter(id => id.startsWith("U-")).map(id => id.replace("U-", "")),
-      sharedWithResearchers,
-    };
-
     try {
       setLoading(true);
+
+      // Resolve each species' reference images to pool image IDs. Uploads now happen
+      // immediately in SpeciesImagePicker, so entries are normally fromPool already;
+      // any local straggler is uploaded here (mirrors the create-task flow).
+      const speciesReferenceImageIds: Record<string, number[]> = {};
+      await Promise.all(
+        targetSpecies.map(async (speciesName) => {
+          const imgs = speciesReferenceImages[speciesName] ?? [];
+          const poolIds: number[] = [];
+          for (const img of imgs) {
+            if (img.fromPool && img.poolId != null) {
+              poolIds.push(img.poolId);
+            } else {
+              const fd = new FormData();
+              const file = (img as any)._file as File | undefined;
+              if (file) {
+                fd.append("files", file);
+              } else {
+                fd.append("files", { uri: img.uri, name: "ref.jpg", type: "image/jpeg" } as any);
+              }
+              if (img.caption) fd.append("caption", img.caption);
+              const res = await apiFetch(API_ENDPOINTS.SPECIES.REF_IMAGES(speciesName), {
+                method: "POST",
+                body: fd,
+              });
+              if (res.ok) {
+                const saved: { id: number }[] = await res.json();
+                saved.forEach((s) => poolIds.push(s.id));
+              }
+            }
+          }
+          speciesReferenceImageIds[speciesName] = poolIds;
+        })
+      );
+
+      const payload = {
+        status: "ACTIVE",
+        name,
+        description,
+        experiments: selectedExperiments.map(Number),
+        targetSpecies: targetSpecies.map((s) => ({ name: s })),
+        speciesReferenceImageIds,
+        isPublic,
+        recipientGroups: selectedRecipients.filter(id => id.startsWith("G-")).map(id => Number(id.replace("G-", ""))),
+        assignedUsernames: selectedRecipients.filter(id => id.startsWith("U-")).map(id => id.replace("U-", "")),
+        sharedWithResearchers,
+      };
 
       const res = await apiFetch(
         API_ENDPOINTS.TASKS.UPDATE_TASK(taskId),
@@ -157,8 +227,13 @@ export default function EditTaskScreen({ route, navigation }: Props) {
 
       await res.json();
 
-      queryClient.invalidateQueries({ queryKey: ["tasks"] });
-      queryClient.invalidateQueries({ queryKey: ["taskDetails", taskId] });
+      // Force immediate refetches (not lazy invalidation) so the task details
+      // page reflects the new reference images right away instead of waiting out
+      // the query's staleTime. The details/list queries all live under ['tasks'].
+      // Await the details refetch so the data is fresh before we navigate back.
+      await queryClient.refetchQueries({ queryKey: QUERY_KEYS.taskDetails(taskId) });
+      queryClient.refetchQueries({ queryKey: ["tasks"] });
+      queryClient.refetchQueries({ queryKey: ["species", "pool"] });
 
       Alert.alert("Success", "Task updated successfully");
       navigation.navigate("TasksManagement");
@@ -201,13 +276,50 @@ export default function EditTaskScreen({ route, navigation }: Props) {
           options={availableSpecies}
           selectedIds={targetSpecies}
           onToggle={(id) => {
+            const sid = id as string;
             setTargetSpecies((prev) =>
-              prev.includes(id as string) ? prev.filter((sid) => sid !== id) : [...prev, id as string]
+              prev.includes(sid) ? prev.filter((s) => s !== sid) : [...prev, sid]
             );
+            // Drop reference images for a species that was just deselected.
+            setSpeciesReferenceImages((prev) => {
+              if (!prev[sid]) return prev;
+              const { [sid]: _removed, ...rest } = prev;
+              return rest;
+            });
           }}
           placeholder="Search species..."
           loading={optionsLoading}
         />
+
+        {/* Reference image pickers — one per selected species */}
+        {targetSpecies.length > 0 && (
+          <View style={styles.pickersSection}>
+            <Text style={[styles.pickersHeading, { color: themeColors.textSecondary }]}>
+              REFERENCE IMAGES
+            </Text>
+
+            {poolImagesLoading && (
+              <View style={styles.poolLoadingRow}>
+                <ActivityIndicator size="small" color="#10B981" />
+                <Text style={[styles.poolLoadingText, { color: themeColors.textSecondary }]}>
+                  Loading pool images...
+                </Text>
+              </View>
+            )}
+
+            {targetSpecies.map((speciesName) => (
+              <SpeciesImagePicker
+                key={speciesName}
+                speciesId={speciesName}
+                speciesLabel={speciesName}
+                selectedImages={speciesReferenceImages[speciesName] ?? []}
+                poolImages={poolImages[speciesName] ?? []}
+                poolLoading={poolImagesLoading}
+                onImagesChange={handleImagesChange}
+              />
+            ))}
+          </View>
+        )}
 
         <Text style={[styles.label, { color: themeColors.text }]}>Experiments</Text>
         <MultiSelect
@@ -334,4 +446,8 @@ const styles = StyleSheet.create({
   toggleTextActive: {
     color: "#065f46",
   },
+  pickersSection: { marginTop: 8, gap: 4 },
+  pickersHeading: { fontSize: 11, fontWeight: "700", letterSpacing: 0.8, marginBottom: 8, marginTop: 12 },
+  poolLoadingRow: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 12 },
+  poolLoadingText: { fontSize: 13 },
 });
