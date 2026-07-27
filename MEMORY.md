@@ -31,6 +31,7 @@ Architecture: Modular Hexagonal/DDD.
 * Backend: Fixed task image count display in `TasksManagementScreen` (Issue #222). Replaced hardcoded zeros in `TaskMapper` by injecting `ImageRepository` and `ClassificationRepository` into `TaskService` to query real task image totals and distinct classified image counts.
 * Testing: Created `tests/e2e/researcher/dashboard.spec.ts` to verify the researcher View Dashboard flow, checking the task list, progress bars, and task details screen assertions.
 * Security: Remediated Medium severity security findings (secured Swagger UI in production, sanitized global exception handler, downgraded JWT logging, and unified login error messages).
+* System: Configured Docker containers (backend, frontend, db) to automatically restart after server reboot using 'restart: unless-stopped' policy in docker-compose.yml.
 ## Current Focus (Active GitHub Issues)
 * Issue #201: Refactor Backend roles to include Researchers and Super Admin.
 * Issue #226: [Frontend] fix recipients list not deleting users.
