@@ -44,6 +44,8 @@ public class TaskService {
     private final TaskMapper taskMapper;
     private final StardbiSyncService stardbiSyncService;
     private final SecurityAuthorizationService securityAuthorizationService;
+    private final com.swipelab.auth.external.StardbiAuthService stardbiAuthService;
+    private final com.swipelab.integration.stardbi.StardbiClientPort stardbiClient;
     private final ImageRepository imageRepository;
     private final ClassificationRepository classificationRepository;
 
@@ -175,6 +177,17 @@ public class TaskService {
     // Researcher Operations
     // =========================
 
+    public List<com.swipelab.integration.stardbi.dto.ExternalExperimentDto> getExperiments(String username) {
+        try {
+            return stardbiAuthService.executeWithStardbiToken(username, (accessToken) -> {
+                return stardbiClient.getExperiments(accessToken);
+            });
+        } catch (com.swipelab.exception.StardbiSessionExpiredException ex) {
+            log.info("No personal Stardbi token found for {}. Falling back to service account for fetching experiments.", username);
+            return stardbiClient.getExperiments(null);
+        }
+    }
+
     @Transactional(readOnly = true)
     public List<TaskResponse> getResearcherDashboard(String username) {
         List<Task> tasks;
@@ -199,7 +212,7 @@ public class TaskService {
     }
 
     @Transactional
-    public TaskResponse createTask(CreateTaskRequest request, String username, String stardbiAccessToken, String stardbiRefreshToken) {
+    public TaskResponse createTask(CreateTaskRequest request, String username) {
         // Validate uniqueness
         if (taskRepository.existsByCreatedByAndName(username, request.getName().trim())) {
             throw new IllegalStateException("Task name already exists for your account");
@@ -239,7 +252,7 @@ public class TaskService {
         // catch block somehow rethrows.
         final Task savedTask = task;
         CompletableFuture
-                .runAsync(() -> stardbiSyncService.syncExperimentsForTask(savedTask, stardbiAccessToken, stardbiRefreshToken))
+                .runAsync(() -> stardbiSyncService.syncExperimentsForTask(savedTask, username))
                 .exceptionally(ex -> {
                     log.error("[TaskService] Async crop sync failed for task {}. Task may remain in PROCESSING state.", savedTask.getId(), ex);
                     return null;

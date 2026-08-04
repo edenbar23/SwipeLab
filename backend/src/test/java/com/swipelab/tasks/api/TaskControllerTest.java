@@ -121,7 +121,7 @@ class TaskControllerTest {
         request.setName("New Task");
         request.setDescription("This is a valid task description");
 
-        when(taskService.createTask(any(CreateTaskRequest.class), anyString(), any(), any())).thenReturn(taskResponse);
+        when(taskService.createTask(any(CreateTaskRequest.class), anyString())).thenReturn(taskResponse);
 
         mockMvc.perform(post("/api/v1/tasks/create")
                 .contentType(MediaType.APPLICATION_JSON)

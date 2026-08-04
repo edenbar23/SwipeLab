@@ -16,22 +16,36 @@ public class ExternalAuthController {
 
     private final StardbiAuthService stardbiAuthService;
     private final AuthMapper authMapper;
+    private final com.swipelab.auth.application.JwtService jwtService;
 
     /**
      * Called by the frontend immediately after a successful Stardbi login.
      * Validates the Stardbi access token, auto-provisions a local SwipeLab
-     * user if this is their first time, and returns the user profile.
+     * user if this is their first time, caches the Stardbi token, and returns
+     * a native SwipeLab JWT.
      *
      * Expected request body: the full Stardbi login response object.
      */
     @PostMapping("/stardbi/loginExternal")
-    public ResponseEntity<UserProfileResponse> loginExternal(
+    public ResponseEntity<com.swipelab.dto.response.AuthResponse> loginExternal(
             @Valid @RequestBody ExternalLoginRequest request) {
 
         User user = stardbiAuthService.loginExternal(request);
         if (user != null) {
+            String accessToken = jwtService.generateAccessToken(user);
+            String refreshToken = jwtService.generateRefreshToken(user);
+
             UserProfileResponse profile = authMapper.toUserProfileResponse(user);
-            return ResponseEntity.ok(profile);
+            
+            com.swipelab.dto.response.AuthResponse response = com.swipelab.dto.response.AuthResponse.builder()
+                    .accessToken(accessToken)
+                    .refreshToken(refreshToken)
+                    .expiresIn(jwtService.getAccessTokenExpirySeconds())
+                    .message("External login successful")
+                    .user(profile)
+                    .build();
+                    
+            return ResponseEntity.ok(response);
         }
         return ResponseEntity.status(401).build();
     }

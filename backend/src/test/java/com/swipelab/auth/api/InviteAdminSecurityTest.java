@@ -6,7 +6,6 @@ import com.swipelab.auth.application.JwtService;
 import com.swipelab.auth.application.OAuth2Service;
 import com.swipelab.auth.application.SecurityAuthorizationService;
 import com.swipelab.auth.domain.AuthMapper;
-import com.swipelab.auth.external.ExternalAuthFilter;
 import com.swipelab.auth.infrastructure.BannedUserFilter;
 import com.swipelab.auth.infrastructure.CustomOAuth2UserService;
 import com.swipelab.auth.infrastructure.JwtAuthenticationFilter;
@@ -82,7 +81,6 @@ class InviteAdminSecurityTest {
 
     // ── SecurityConfig filter dependencies ────────────────────────────────────
     @MockBean private JwtAuthenticationFilter            jwtAuthenticationFilter;
-    @MockBean private ExternalAuthFilter                 externalAuthFilter;
     @MockBean private BannedUserFilter                   bannedUserFilter;
     @MockBean private RateLimitingFilter                 rateLimitingFilter;
     @MockBean private OAuth2AuthenticationSuccessHandler oAuth2SuccessHandler;
@@ -103,7 +101,6 @@ class InviteAdminSecurityTest {
         };
 
         doAnswer(proceed).when(jwtAuthenticationFilter).doFilter(any(), any(), any());
-        doAnswer(proceed).when(externalAuthFilter).doFilter(any(), any(), any());
         doAnswer(proceed).when(bannedUserFilter).doFilter(any(), any(), any());
         doAnswer(proceed).when(rateLimitingFilter).doFilter(any(), any(), any());
     }

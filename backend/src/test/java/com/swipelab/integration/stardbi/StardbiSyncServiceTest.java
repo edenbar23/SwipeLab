@@ -34,6 +34,7 @@ class StardbiSyncServiceTest {
     @Mock private TaskRepository taskRepository;
     @Mock private ImageRepository imageRepository;
     @Mock private UserRepository userRepository;
+    @Mock private com.swipelab.auth.external.StardbiAuthService stardbiAuthService;
 
     @InjectMocks
     private StardbiSyncService stardbiSyncService;
@@ -72,13 +73,16 @@ class StardbiSyncServiceTest {
         // Filename convention: {parentImageId}_{boxId}.ext
         byte[] zipBytes = buildZip("201_102.jpg", FAKE_IMAGE_BYTES);
 
-        when(stardbiClient.checkAuth(anyString())).thenReturn(false); // force service-account fallback
-        when(stardbiClient.downloadExperimentCropsZip(1L, null)).thenReturn(zipBytes);
+        when(stardbiAuthService.executeWithStardbiToken(eq("researcher_user"), any())).thenAnswer(inv -> {
+            java.util.function.Function<String, byte[]> action = inv.getArgument(1);
+            return action.apply("some-swipelab-jwt");
+        });
+        when(stardbiClient.downloadExperimentCropsZip(1L, "some-swipelab-jwt")).thenReturn(zipBytes);
         when(imageRepository.existsByExternalBoxIdAndTaskId(102L, 10L)).thenReturn(false);
         when(imageRepository.save(any(Image.class))).thenAnswer(inv -> inv.getArgument(0));
         when(taskRepository.save(any(Task.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        stardbiSyncService.syncExperimentsForTask(task, "some-swipelab-jwt", null);
+        stardbiSyncService.syncExperimentsForTask(task, "researcher_user");
 
         // Task should now be ACTIVE
         assertEquals(TaskStatus.ACTIVE, task.getStatus());
@@ -104,13 +108,13 @@ class StardbiSyncServiceTest {
     void syncExperimentsForTask_skipsAlreadyIngestedImages() throws Exception {
         byte[] zipBytes = buildZip("201_102.jpg", FAKE_IMAGE_BYTES);
 
-        when(stardbiClient.checkAuth(anyString())).thenReturn(false);
+        when(stardbiAuthService.executeWithStardbiToken(eq("researcher_user"), any())).thenThrow(new com.swipelab.exception.StardbiSessionExpiredException("Expired"));
         when(stardbiClient.downloadExperimentCropsZip(1L, null)).thenReturn(zipBytes);
         // Image already ingested
         when(imageRepository.existsByExternalBoxIdAndTaskId(102L, 10L)).thenReturn(true);
         when(taskRepository.save(any(Task.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        stardbiSyncService.syncExperimentsForTask(task, "token", null);
+        stardbiSyncService.syncExperimentsForTask(task, "researcher_user");
 
         // No new image should be saved
         verify(imageRepository, never()).save(any(Image.class));
@@ -121,12 +125,12 @@ class StardbiSyncServiceTest {
 
     @Test
     void syncExperimentsForTask_setsTaskFailed_whenDownloadThrows() {
-        when(stardbiClient.checkAuth(anyString())).thenReturn(false);
+        when(stardbiAuthService.executeWithStardbiToken(eq("researcher_user"), any())).thenThrow(new com.swipelab.exception.StardbiSessionExpiredException("Expired"));
         when(stardbiClient.downloadExperimentCropsZip(anyLong(), any()))
                 .thenThrow(new RuntimeException("Stardbi unreachable"));
         when(taskRepository.save(any(Task.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        stardbiSyncService.syncExperimentsForTask(task, "token", null);
+        stardbiSyncService.syncExperimentsForTask(task, "researcher_user");
 
         // Single experiment failed → ZIP loop catches it and continues;
         // after the loop, task is set ACTIVE (no global crash).
@@ -138,11 +142,11 @@ class StardbiSyncServiceTest {
 
     @Test
     void syncExperimentsForTask_setsTaskFailed_whenZipIsEmpty() throws Exception {
-        when(stardbiClient.checkAuth(anyString())).thenReturn(false);
+        when(stardbiAuthService.executeWithStardbiToken(eq("researcher_user"), any())).thenThrow(new com.swipelab.exception.StardbiSessionExpiredException("Expired"));
         when(stardbiClient.downloadExperimentCropsZip(1L, null)).thenReturn(new byte[0]);
         when(taskRepository.save(any(Task.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        stardbiSyncService.syncExperimentsForTask(task, "token", null);
+        stardbiSyncService.syncExperimentsForTask(task, "researcher_user");
 
         // Empty ZIP → no images, but task still transitions to ACTIVE (not an error)
         assertEquals(TaskStatus.ACTIVE, task.getStatus());
@@ -150,21 +154,19 @@ class StardbiSyncServiceTest {
     }
 
     @Test
-    void syncExperimentsForTask_usesRefreshToken_whenAccessTokenExpired() throws Exception {
+    void syncExperimentsForTask_fallsBackToServiceAccount_whenStardbiSessionExpired() throws Exception {
         byte[] zipBytes = buildZip("201_105.jpg", FAKE_IMAGE_BYTES);
 
-        // First checkAuth fails, then refresh succeeds
-        when(stardbiClient.checkAuth("old-token")).thenReturn(false);
-        com.swipelab.integration.stardbi.dto.StardbiAuthResponseDto newAuth =
-                new com.swipelab.integration.stardbi.dto.StardbiAuthResponseDto();
-        newAuth.setAccess("new-token");
-        when(stardbiClient.refreshToken(any())).thenReturn(newAuth);
-        when(stardbiClient.downloadExperimentCropsZip(1L, "new-token")).thenReturn(zipBytes);
+        // First attempt throws StardbiSessionExpiredException, fallback to service account (null token) succeeds
+        when(stardbiAuthService.executeWithStardbiToken(eq("researcher_user"), any()))
+                .thenThrow(new com.swipelab.exception.StardbiSessionExpiredException("Expired"));
+        
+        when(stardbiClient.downloadExperimentCropsZip(1L, null)).thenReturn(zipBytes);
         when(imageRepository.existsByExternalBoxIdAndTaskId(105L, 10L)).thenReturn(false);
         when(imageRepository.save(any(Image.class))).thenAnswer(inv -> inv.getArgument(0));
         when(taskRepository.save(any(Task.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        stardbiSyncService.syncExperimentsForTask(task, "old-token", "refresh-token");
+        stardbiSyncService.syncExperimentsForTask(task, "researcher_user");
 
         assertEquals(TaskStatus.ACTIVE, task.getStatus());
         verify(imageRepository, times(1)).save(any(Image.class));

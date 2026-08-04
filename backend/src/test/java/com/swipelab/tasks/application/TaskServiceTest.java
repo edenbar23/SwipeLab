@@ -183,7 +183,7 @@ class TaskServiceTest {
         when(classificationRepository.countDistinctImagesByTaskId(1L)).thenReturn(0L);
         when(taskMapper.toResponse(eq(task), eq(false), any(TaskProgressResponse.class))).thenReturn(taskResponse);
 
-        TaskResponse response = taskService.createTask(request, "admin_mock", null, null);
+        TaskResponse response = taskService.createTask(request, "admin_mock");
 
         assertNotNull(response);
         assertEquals(TaskStatus.PROCESSING, task.getStatus());
@@ -200,7 +200,7 @@ class TaskServiceTest {
         
         when(taskRepository.existsByCreatedByAndName(anyString(), anyString())).thenReturn(true);
 
-        assertThrows(IllegalStateException.class, () -> taskService.createTask(request, "admin_mock", null, null));
+        assertThrows(IllegalStateException.class, () -> taskService.createTask(request, "admin_mock"));
     }
 
     @Test
