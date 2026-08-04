@@ -13,7 +13,7 @@ import useResponsive from '../../hooks/useResponsive';
 import { AddTaskFormData } from "../../components/researcher/addTask/addTaskTypes";
 import StepConfirm from "../../components/researcher/addTask/StepConfirm";
 import StepDescription from "../../components/researcher/addTask/StepDescription";
-import { useAuthStore } from "../../stores/authStore";
+
 import StepName from "../../components/researcher/addTask/StepName";
 import StepRecipients from "../../components/researcher/addTask/StepRecipients";
 import StepSpecies from "../../components/researcher/addTask/StepSpecies";
@@ -186,15 +186,7 @@ export default function AddTaskScreen({ route, navigation }: any) {
         sharedWithResearchers: formData.sharedWithResearchers,
       };
 
-      const authState = useAuthStore.getState();
-      const isStardbi = authState.authProvider === "STARDBI";
       let headers: any = { "Content-Type": "application/json" };
-      if (isStardbi && authState.token) {
-        headers["X-Stardbi-Access-Token"] = authState.token;
-        if (Platform.OS === 'web') {
-          headers["X-Stardbi-Refresh-Token"] = localStorage.getItem("refreshToken") || "";
-        }
-      }
 
       const res = await apiFetch(API_ENDPOINTS.TASKS.CREATE_TASK, {
         method: "POST",
