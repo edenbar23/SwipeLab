@@ -184,7 +184,7 @@ public class TaskService {
             });
         } catch (com.swipelab.exception.StardbiSessionExpiredException ex) {
             log.info("No personal Stardbi token found for {}. Falling back to service account for fetching experiments.", username);
-            return stardbiClient.getExperiments(null);
+            return stardbiClient.getExperiments();
         }
     }
 
