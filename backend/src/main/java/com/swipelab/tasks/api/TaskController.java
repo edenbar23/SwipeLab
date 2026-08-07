@@ -28,7 +28,6 @@ import java.util.List;
 public class TaskController {
 
     private final TaskService taskService;
-    private final StardbiClientPort stardbiClient;
 
     // =========================
     // User Endpoints
@@ -86,30 +85,18 @@ public class TaskController {
 
     @GetMapping("/dashboard/experiments")
     @PreAuthorize("hasRole('RESEARCHER') or @securityAuthorizationService.isSuperAdmin(authentication.name)")
-    public ResponseEntity<List<ExternalExperimentDto>> getExperiments(@RequestHeader(value = "Authorization", required = false) String authHeader) {
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-        String token = authHeader.substring(7);
-        return ResponseEntity.ok(stardbiClient.getExperiments(token));
+    public ResponseEntity<List<ExternalExperimentDto>> getExperiments(@AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(taskService.getExperiments(userDetails.getUsername()));
     }
 
     @PostMapping("/create")
     @PreAuthorize("hasRole('RESEARCHER') or @securityAuthorizationService.isSuperAdmin(authentication.name)")
     public ResponseEntity<TaskResponse> createTask(
             @AuthenticationPrincipal UserDetails userDetails,
-            @RequestHeader(value = "Authorization", required = false) String authHeader,
-            @RequestHeader(value = "X-Stardbi-Access-Token", required = false) String explicitStardbiToken,
-            @RequestHeader(value = "X-Stardbi-Refresh-Token", required = false) String stardbiRefreshToken,
             @Valid @RequestBody CreateTaskRequest request) {
         
-        String stardbiAccessToken = explicitStardbiToken;
-        if ((stardbiAccessToken == null || stardbiAccessToken.isEmpty()) && authHeader != null && authHeader.startsWith("Bearer ")) {
-            stardbiAccessToken = authHeader.substring(7);
-        }
-
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(taskService.createTask(request, userDetails.getUsername(), stardbiAccessToken, stardbiRefreshToken));
+                .body(taskService.createTask(request, userDetails.getUsername()));
     }
 
     @PostMapping("/{taskId}/archive")

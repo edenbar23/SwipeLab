@@ -183,10 +183,11 @@ export default function LoginScreen() {
         return;
       }
 
-      // 3. Store authentication context locally
-      await setExternalAuth(stardbiData.access, stardbiData.refresh, stardbiData.lifetime || 0, stardbiData.username || username);
-      
       const backendData = await backendRes.json();
+      
+      // 3. Store authentication context locally (using the native SwipeLab JWT from the backend)
+      await setExternalAuth(backendData.accessToken, backendData.refreshToken, stardbiData.username || username);
+      
       useAuthStore.getState().setIsSuperAdmin(backendData.user?.isSuperAdmin || false);
 
       // Blocking prefetch before navigate

@@ -44,51 +44,26 @@ export async function forceTokenRefresh(): Promise<boolean> {
   }
 
   try {
-    if (authProvider === "STARDBI") {
-      const refreshResponse = await fetch(backendUrl + API_ENDPOINTS.STARDBI.REFRESH, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ refresh: refreshToken }),
-      });
+    // SwipeLab backend refresh (works for both local users and Stardbi researchers via BFF)
+    const refreshResponse = await fetch(backendUrl + API_ENDPOINTS.AUTH.REFRESH, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${refreshToken}`,
+      },
+    });
 
-      if (refreshResponse.ok) {
-        const data = await refreshResponse.json();
-        const newAccess = data.access;
-        const newRefresh = data.refresh || refreshToken;
+    if (refreshResponse.ok) {
+      const data = await refreshResponse.json();
+      const newAccess = data.accessToken;
+      const newRefresh = data.refreshToken || refreshToken;
 
-        if (newAccess) {
-          const { useAuthStore } = require("../stores/authStore");
-          await useAuthStore.getState().updateTokens(newAccess, newRefresh);
+      if (newAccess) {
+        const { useAuthStore } = require("../stores/authStore");
+        await useAuthStore.getState().updateTokens(newAccess, newRefresh);
 
-          isRefreshing = false;
-          onRefreshed(newAccess);
-          return true;
-        }
-      }
-    } else {
-      // SwipeLab backend refresh
-      const refreshResponse = await fetch(backendUrl + API_ENDPOINTS.AUTH.REFRESH, {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${refreshToken}`,
-        },
-      });
-
-      if (refreshResponse.ok) {
-        const data = await refreshResponse.json();
-        const newAccess = data.accessToken;
-        const newRefresh = data.refreshToken || refreshToken;
-
-        if (newAccess) {
-          const { useAuthStore } = require("../stores/authStore");
-          await useAuthStore.getState().updateTokens(newAccess, newRefresh);
-
-          isRefreshing = false;
-          onRefreshed(newAccess);
-          return true;
-        }
+        isRefreshing = false;
+        onRefreshed(newAccess);
+        return true;
       }
     }
   } catch (e) {
@@ -136,6 +111,21 @@ export async function apiFetch(
   });
 
   if (response.status === 401) {
+    // Check for Stardbi session expiration before attempting refresh
+    try {
+      const cloned = response.clone();
+      const body = await cloned.json();
+      if (body?.errorCode === 'STARDBI_SESSION_EXPIRED') {
+        const { useAuthStore } = require("../stores/authStore");
+        useAuthStore.getState().setSessionExpiredMessage(true);
+        setTimeout(() => {
+          useAuthStore.getState().logout();
+          useAuthStore.getState().setSessionExpiredMessage(false);
+        }, 2000);
+        return response; // Exit early, do not try to refresh SwipeLab JWT
+      }
+    } catch {}
+
     // Do not intercept 401s for login, refresh, or logout endpoints
     const urlString = input.toString();
     if (

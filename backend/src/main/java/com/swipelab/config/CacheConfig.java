@@ -44,6 +44,7 @@ public class CacheConfig {
     public static final String CACHE_PLATFORM_OVERVIEW      = "platformOverview";
     /** Single-entry cache for malicious-labeling + fraud-detection config. */
     public static final String CACHE_MALICIOUS_LABELING_CFG = "maliciousLabelingConfig";
+    public static final String CACHE_STARDBI_TOKENS         = "stardbiTokens";
 
     // ── CacheManager ──────────────────────────────────────────────────────────
 
@@ -108,6 +109,14 @@ public class CacheConfig {
                 Caffeine.newBuilder()
                         .maximumSize(1)
                         .expireAfterWrite(5, TimeUnit.MINUTES)
+                        .build());
+
+        // Cache for Stardbi tokens (BFF architecture). Keys: usernames.
+        // TTL should match or be slightly shorter than the Stardbi access token lifetime.
+        manager.registerCustomCache(CACHE_STARDBI_TOKENS,
+                Caffeine.newBuilder()
+                        .maximumSize(1000)
+                        .expireAfterWrite(24, TimeUnit.HOURS)
                         .build());
 
         return manager;

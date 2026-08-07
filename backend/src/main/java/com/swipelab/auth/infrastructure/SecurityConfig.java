@@ -4,7 +4,6 @@ import com.swipelab.auth.infrastructure.CustomOAuth2UserService;
 import com.swipelab.auth.infrastructure.JwtAuthenticationFilter;
 import com.swipelab.auth.infrastructure.BannedUserFilter;
 import com.swipelab.auth.infrastructure.RateLimitingFilter;
-import com.swipelab.auth.external.ExternalAuthFilter;
 import com.swipelab.auth.infrastructure.OAuth2AuthenticationFailureHandler;
 import com.swipelab.auth.infrastructure.OAuth2AuthenticationSuccessHandler;
 import jakarta.servlet.http.HttpServletResponse;
@@ -33,8 +32,6 @@ public class SecurityConfig {
         @Autowired
         private JwtAuthenticationFilter jwtAuthenticationFilter;
 
-        @Autowired
-        private ExternalAuthFilter externalAuthFilter;
 
         @Autowired
         private OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
@@ -123,9 +120,8 @@ public class SecurityConfig {
                                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                                 // Rate limiting runs first — reject abusive IPs before any token work
                                 .addFilterBefore(rateLimitingFilter, JwtAuthenticationFilter.class)
-                                .addFilterAfter(externalAuthFilter, JwtAuthenticationFilter.class)
-                                // Ban check runs last — after both auth filters have set the SecurityContext
-                                .addFilterAfter(bannedUserFilter, ExternalAuthFilter.class);
+                                // Ban check runs last — after auth filter has set the SecurityContext
+                                .addFilterAfter(bannedUserFilter, JwtAuthenticationFilter.class);
 
                 return http.build();
         }

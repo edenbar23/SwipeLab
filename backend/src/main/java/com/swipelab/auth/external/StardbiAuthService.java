@@ -23,6 +23,7 @@ public class StardbiAuthService {
     private final StardbiAuthProvider stardbiAuthProvider;
     private final StardbiClientPort stardbiClient;
     private final UserRepository userRepository;
+    private final org.springframework.cache.CacheManager cacheManager;
 
     /**
      * Validates the Stardbi access token, then provisions a local SwipeLab user
@@ -41,8 +42,11 @@ public class StardbiAuthService {
             return null;
         }
 
-        // 2. Eagerly cache user details so subsequent filter checks are free
-        stardbiAuthProvider.cacheUserDetails(accessToken, username);
+        // 2. Cache the Stardbi access and refresh tokens for BFF proxying
+        org.springframework.cache.Cache cache = cacheManager.getCache(com.swipelab.config.CacheConfig.CACHE_STARDBI_TOKENS);
+        if (cache != null) {
+            cache.put(username, new StardbiTokensDto(accessToken, request.getRefresh()));
+        }
 
         // 3. Provision local user if this is first login
         Optional<User> existing = userRepository.findByUsername(username);
@@ -86,16 +90,50 @@ public class StardbiAuthService {
     }
 
     /**
-     * Called by {@link ExternalAuthFilter} on every authenticated request.
-     * Returns Spring {@link UserDetails} if the token is valid; {@code null} otherwise.
+     * Executes a given action using the cached Stardbi token for the user.
+     * Automatically handles token refresh on 401 Unauthorized errors from Stardbi.
+     *
+     * @param username The local SwipeLab username
+     * @param action The operation to perform using the Stardbi access token
+     * @return The result of the action
      */
-    public UserDetails processStardbiToken(String accessToken) {
-        if (stardbiAuthProvider.validateToken(accessToken)) {
-            UserDetails details = stardbiAuthProvider.getUserDetails(accessToken);
-            if (details != null) {
-                return details;
+    public <T> T executeWithStardbiToken(String username, java.util.function.Function<String, T> action) {
+        org.springframework.cache.Cache cache = cacheManager.getCache(com.swipelab.config.CacheConfig.CACHE_STARDBI_TOKENS);
+        if (cache == null) {
+            throw new com.swipelab.exception.StardbiSessionExpiredException("Stardbi tokens cache is not configured.");
+        }
+
+        StardbiTokensDto tokens = cache.get(username, StardbiTokensDto.class);
+        if (tokens == null || tokens.accessToken() == null) {
+            throw new com.swipelab.exception.StardbiSessionExpiredException("Stardbi session expired (token not in cache).");
+        }
+
+        try {
+            return action.apply(tokens.accessToken());
+        } catch (org.springframework.web.client.HttpClientErrorException.Unauthorized e) {
+            log.info("Stardbi access token expired for user '{}'. Attempting refresh...", username);
+
+            if (tokens.refreshToken() == null) {
+                cache.evict(username);
+                throw new com.swipelab.exception.StardbiSessionExpiredException("Stardbi session expired and no refresh token is available.");
+            }
+
+            try {
+                String newAccessToken = stardbiAuthProvider.refreshToken(tokens.refreshToken());
+                if (newAccessToken == null || newAccessToken.isBlank()) {
+                    throw new RuntimeException("Refresh token response was null/empty");
+                }
+                
+                cache.put(username, new StardbiTokensDto(newAccessToken, tokens.refreshToken()));
+                log.info("Stardbi token refreshed successfully for user '{}'. Retrying operation.", username);
+                
+                return action.apply(newAccessToken);
+                
+            } catch (Exception refreshEx) {
+                log.warn("Failed to refresh Stardbi token for user '{}'. Logging out.", username, refreshEx);
+                cache.evict(username);
+                throw new com.swipelab.exception.StardbiSessionExpiredException("Stardbi session expired and refresh failed.");
             }
         }
-        return null;
     }
 }

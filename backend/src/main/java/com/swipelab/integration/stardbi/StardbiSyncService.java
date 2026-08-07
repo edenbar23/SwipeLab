@@ -28,6 +28,7 @@ public class StardbiSyncService {
     private final TaskRepository taskRepository;
     private final ImageRepository imageRepository;
     private final UserRepository userRepository;
+    private final com.swipelab.auth.external.StardbiAuthService stardbiAuthService;
 
 
 
@@ -103,41 +104,30 @@ public class StardbiSyncService {
         }
     }
 
-    public void syncExperimentsForTask(Task task, String accessToken, String refreshToken) {
+    public void syncExperimentsForTask(Task task, String username) {
         log.info("Starting STARdbi experiment ZIP download for task: {}", task.getId());
-
-        String currentAccessToken = accessToken;
-        // If access token is a non-null but non-Stardbi token (e.g. a SwipeLab JWT),
-        // checkAuth against the real Stardbi will return false and we fall back to
-        // the service account — which is fine. We deliberately pass null so the client
-        // uses its own getServiceAccountToken() fallback.
-        if (currentAccessToken != null && !currentAccessToken.isEmpty()
-                && !stardbiClient.checkAuth(currentAccessToken)) {
-            log.info("Provided token failed Stardbi auth check for task {}; falling back to service account.", task.getId());
-            if (refreshToken != null && !refreshToken.isEmpty()) {
-                try {
-                    com.swipelab.integration.stardbi.dto.StardbiAuthResponseDto newAuth =
-                            stardbiClient.refreshToken(new com.swipelab.integration.stardbi.dto.StardbiRefreshTokenRequestDto(refreshToken));
-                    currentAccessToken = newAuth.getAccess();
-                    log.info("Stardbi token refreshed successfully for task {}", task.getId());
-                } catch (Exception e) {
-                    log.warn("Token refresh failed for task {}; falling back to service account.", task.getId(), e);
-                    currentAccessToken = null;
-                }
-            } else {
-                currentAccessToken = null; // Let StardbiClient use service account
-            }
-        }
 
         int totalSaved = 0;
         try {
             for (Long expId : task.getExperiments()) {
-                byte[] zipBytes;
+                byte[] zipBytes = null;
+                
                 try {
-                    zipBytes = stardbiClient.downloadExperimentCropsZip(expId, currentAccessToken);
-                } catch (Exception e) {
-                    log.error("Failed to download ZIP for experiment {} (task {}): {}", expId, task.getId(), e.getMessage());
-                    continue;
+                    // 1. Try with user's personal cached token
+                    zipBytes = stardbiAuthService.executeWithStardbiToken(username, (accessToken) -> {
+                        return stardbiClient.downloadExperimentCropsZip(expId, accessToken);
+                    });
+                } catch (Exception authEx) {
+                    log.info("Personal Stardbi token not available/valid for user '{}'. Falling back to service account for task {}. Reason: {}", 
+                             username, task.getId(), authEx.getMessage());
+                    
+                    // 2. Fallback to service account
+                    try {
+                        zipBytes = stardbiClient.downloadExperimentCropsZip(expId, null);
+                    } catch (Exception fallbackEx) {
+                        log.error("Failed to download ZIP for experiment {} (task {}) using service account fallback: {}", expId, task.getId(), fallbackEx.getMessage());
+                        continue;
+                    }
                 }
 
                 if (zipBytes == null || zipBytes.length == 0) {

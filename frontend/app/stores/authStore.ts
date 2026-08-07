@@ -18,7 +18,7 @@ interface AuthState {
   authProvider: "LOCAL" | "STARDBI" | null;
   isLoading: boolean;
   setAuth: (token: string, role: Role, refreshToken?: string) => Promise<void>;
-  setExternalAuth: (token: string, refreshToken: string, lifetime: number, username: string) => Promise<void>;
+  setExternalAuth: (token: string, refreshToken: string, username: string) => Promise<void>;
   updateTokens: (token: string, refreshToken: string) => Promise<void>;
   logout: () => Promise<void>;
   initialize: () => Promise<void>;
@@ -69,7 +69,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     }
   },
 
-  setExternalAuth: async (token, refreshToken, lifetime, username) => {
+  setExternalAuth: async (token, refreshToken, username) => {
     set({ token, role: "RESEARCHER", authProvider: "STARDBI" });
     if (Platform.OS === 'web') {
       localStorage.setItem("token", token);
@@ -77,14 +77,12 @@ export const useAuthStore = create<AuthState>((set) => ({
       localStorage.setItem("authProvider", "STARDBI");
       localStorage.setItem("refreshToken", refreshToken);
       localStorage.setItem("username", username);
-      localStorage.setItem("lifetime", lifetime.toString());
     } else {
       await SecureStore.setItemAsync("token", token);
       await SecureStore.setItemAsync("role", "RESEARCHER");
       await SecureStore.setItemAsync("authProvider", "STARDBI");
       await SecureStore.setItemAsync("refreshToken", refreshToken);
       await SecureStore.setItemAsync("username", username);
-      await SecureStore.setItemAsync("lifetime", lifetime.toString());
     }
     useModeStore.getState().setMode("researcher");
   },

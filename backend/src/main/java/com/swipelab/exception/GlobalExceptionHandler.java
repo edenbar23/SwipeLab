@@ -55,6 +55,22 @@ public class GlobalExceptionHandler {
                 return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
         }
 
+        @ExceptionHandler(StardbiSessionExpiredException.class)
+        public ResponseEntity<ErrorResponse> handleStardbiSessionExpiredException(
+                        StardbiSessionExpiredException ex, HttpServletRequest request) {
+
+                ErrorResponse errorResponse = ErrorResponse.builder()
+                                .timestamp(LocalDateTime.now())
+                                .status(HttpStatus.UNAUTHORIZED.value())
+                                .error("Unauthorized")
+                                .message(ex.getMessage())
+                                .path(request.getRequestURI())
+                                .errorCode("STARDBI_SESSION_EXPIRED")
+                                .build();
+
+                return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
+        }
+
         @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
         public ResponseEntity<ErrorResponse> handleAccessDeniedException(
                         org.springframework.security.access.AccessDeniedException ex, HttpServletRequest request) {
