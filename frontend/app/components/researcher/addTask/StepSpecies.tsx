@@ -114,7 +114,7 @@ export default function StepSpecies({
           </Text>
           <View style={[styles.consensusContainer, { backgroundColor: c.card, borderColor: c.border }]}>
             <View style={styles.consensusTextWrapper}>
-              <Text style={[styles.consensusLabel, { color: c.text }]}>Target Credibility Score</Text>
+              <Text style={[styles.consensusLabel, { color: c.text }]}>Threshold</Text>
               <Text style={[styles.consensusHint, { color: c.textSecondary }]}>
                 Cumulative score required for an image to reach consensus (3 - 20). 
                 E.g., 3 requires 3 expert classifications.
