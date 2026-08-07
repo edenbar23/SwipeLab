@@ -37,7 +37,8 @@ class TaskDistributionServiceTest {
     @Mock
     private com.swipelab.classification.infrastructure.GoldImageRepository goldImageRepository;
 
-
+    @Mock
+    private com.swipelab.classification.infrastructure.ConsensusResultRepository consensusResultRepository;
 
     @InjectMocks
     private TaskDistributionService taskDistributionService;

@@ -68,7 +68,7 @@ class ImageServiceTest {
 
     @BeforeEach
     void setUp() {
-        taskInfo = new TaskProvider.TaskInfo(1L, "Classify this image", "MAMMALS", Collections.emptyList(), Collections.emptyList());
+        taskInfo = new TaskProvider.TaskInfo(1L, "Classify this image", "MAMMALS", Collections.emptyList(), Collections.emptyList(), 3.0);
 
         image = new Image();
         image.setId(1L);

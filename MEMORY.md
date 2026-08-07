@@ -33,6 +33,7 @@ Architecture: Modular Hexagonal/DDD.
 * Testing: Created `tests/e2e/researcher/dashboard.spec.ts` to verify the researcher View Dashboard flow, checking the task list, progress bars, and task details screen assertions.
 * Security: Remediated Medium severity security findings (secured Swagger UI in production, sanitized global exception handler, downgraded JWT logging, and unified login error messages).
 * System: Configured Docker containers (backend, frontend, db) to automatically restart after server reboot using 'restart: unless-stopped' policy in docker-compose.yml.
+* Backend: Implemented dynamic Image Consensus Threshold feature using an asynchronous `ThresholdEventListener` that intercepts `ClassificationSubmittedEvent`. It evaluates the weighted credibility of classifications and automatically excludes images from distribution (via `ConsensusResult` tracking) once the dynamic researcher-defined threshold is met.
 ## Current Focus (Active GitHub Issues)
 * Issue #201: Refactor Backend roles to include Researchers and Super Admin.
 * Issue #226: [Frontend] fix recipients list not deleting users.

@@ -37,8 +37,9 @@ public interface ImageRepository extends JpaRepository<Image, Long> {
     @Query("SELECT i FROM Image i " +
             "WHERE i.taskId = :taskId " +
             "AND i.id NOT IN (SELECT g.image.id FROM GoldImage g) " +
-            "AND (SELECT COUNT(DISTINCT c.querySpecies) FROM Classification c " +
-            "     WHERE c.image.id = i.id AND c.username = :username) < :speciesCount " +
+            "AND ((SELECT COUNT(DISTINCT c.querySpecies) FROM Classification c WHERE c.image.id = i.id AND c.username = :username) + " +
+            "     (SELECT COUNT(cr.species) FROM ConsensusResult cr WHERE cr.imageId = i.id AND cr.species NOT IN " +
+            "         (SELECT c2.querySpecies FROM Classification c2 WHERE c2.image.id = i.id AND c2.username = :username))) < :speciesCount " +
             "GROUP BY i.id " +
             "ORDER BY i.priority DESC, " +
             "(SELECT COUNT(c2.id) FROM Classification c2 WHERE c2.image.id = i.id) ASC")

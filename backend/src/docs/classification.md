@@ -29,9 +29,12 @@ The primary use case is when a user submits a classification (e.g., swiping righ
 3. **Gold Image Evaluation**: The `GoldImageEvaluatorService` checks if the submitted image was a "Gold Image" (a test image with a known answer). If so, the user's answer is evaluated for correctness.
 4. **Persistence**: A `Classification` entity is constructed and saved to the database.
 5. **Event Publishing**: A `ClassificationSubmittedEvent` is published. This is a crucial decoupling point. Other components listen to this event to perform asynchronous tasks, such as:
-   - Adjusting the user's credibility score based on their Gold Image performance.
-   - Updating the threshold state of the image (checking if the `ThresholdPolicy` is met).
-6. **Next Batch Delivery**: The service automatically fetches and returns the next batch of images for the user to classify, ensuring a seamless UI experience.
+   - Adjusting the user's credibility score (`CredibilityEventListener`).
+   - Evaluating if the image has reached a definitive classification result (`ThresholdEventListener`).
+6. **Consensus Evaluation (Async)**: The `ThresholdEventListener` catches the event, fetches the dynamic `consensusThreshold` from the task, and checks if the combined credibility weight of all answers for a specific species meets or exceeds the threshold.
+   - If consensus is reached, a `ConsensusResult` is saved to the database.
+   - Images with a `ConsensusResult` for all valid task species are automatically excluded by the `TaskDistributionService` from future user feeds.
+7. **Next Batch Delivery**: The service automatically fetches and returns the next batch of images for the user to classify, ensuring a seamless UI experience.
 
 ---
 

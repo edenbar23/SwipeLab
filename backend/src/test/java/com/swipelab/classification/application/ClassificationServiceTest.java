@@ -70,7 +70,7 @@ class ClassificationServiceTest {
         request.setDecision(Classification.UserResponse.YES);
         request.setResponseTimeMs(1500L);
 
-        taskInfo = new TaskProvider.TaskInfo(1L, "Question", "Lion", Collections.emptyList(), Collections.emptyList());
+        taskInfo = new TaskProvider.TaskInfo(1L, "Question", "Lion", Collections.emptyList(), Collections.emptyList(), 3.0);
 
         image = new Image();
         image.setId(1L);
@@ -167,7 +167,7 @@ class ClassificationServiceTest {
 
     @Test
     void submitClassification_ShouldFallbackToTargetSpeciesNames_WhenQuerySpeciesIsEmpty() {
-        TaskProvider.TaskInfo emptyQueryTaskInfo = new TaskProvider.TaskInfo(1L, "Question", "", List.of("Tiger", "Bear"), Collections.emptyList());
+        TaskProvider.TaskInfo emptyQueryTaskInfo = new TaskProvider.TaskInfo(1L, "Question", "", List.of("Tiger", "Bear"), Collections.emptyList(), 3.0);
         
         when(imageRepository.findById(1L)).thenReturn(Optional.of(image));
         when(goldImageEvaluatorService.evaluate(any(), any(), any(), any())).thenReturn(Optional.empty());

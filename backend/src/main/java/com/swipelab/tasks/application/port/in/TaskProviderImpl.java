@@ -30,6 +30,6 @@ public class TaskProviderImpl implements TaskProvider {
         List<TargetSpeciesResponse> species = targetSpeciesProvider.getSpeciesByIdsAndRefImages(task.getTargetSpeciesIds(), task.getSpeciesReferenceImageIds());
         List<String> speciesNames = species.stream().map(TargetSpeciesResponse::getName).collect(Collectors.toList());
 
-        return new TaskInfo(task.getId(), task.getQuestion(), task.getQuerySpecies(), speciesNames, species);
+        return new TaskInfo(task.getId(), task.getQuestion(), task.getQuerySpecies(), speciesNames, species, task.getConsensusThreshold());
     }
 }

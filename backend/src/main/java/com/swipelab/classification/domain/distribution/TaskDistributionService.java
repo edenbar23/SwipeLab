@@ -12,6 +12,19 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import com.swipelab.classification.domain.image.Image;
+
+import com.swipelab.classification.infrastructure.ClassificationRepository;
+import com.swipelab.classification.infrastructure.ImageRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class TaskDistributionService {
@@ -19,6 +32,7 @@ public class TaskDistributionService {
     private final ImageRepository imageRepository;
     private final ClassificationRepository classificationRepository;
     private final com.swipelab.classification.infrastructure.GoldImageRepository goldImageRepository;
+    private final com.swipelab.classification.infrastructure.ConsensusResultRepository consensusResultRepository;
 
     /**
      * Holds the selected image and the species to query for that image.
@@ -72,9 +86,13 @@ public class TaskDistributionService {
 
         List<String> alreadyQueried = classificationRepository
                 .findQueriedSpeciesByUsernameAndImageId(username, imageId);
+                
+        List<String> alreadyCompleted = consensusResultRepository
+                .findCompletedSpeciesByImageId(imageId);
 
         List<String> remaining = taskSpecies.stream()
                 .filter(s -> !alreadyQueried.contains(s))
+                .filter(s -> !alreadyCompleted.contains(s))
                 .collect(java.util.stream.Collectors.toList());
 
         if (remaining.isEmpty()) return null;
