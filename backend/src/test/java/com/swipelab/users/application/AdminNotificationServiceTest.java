@@ -1,6 +1,6 @@
 package com.swipelab.users.application;
 
-import com.swipelab.classification.domain.WarningLevel;
+import com.swipelab.classification.domain.fraud.WarningLevel;
 import com.swipelab.users.domain.AdminNotification;
 import com.swipelab.users.domain.NotificationSeverity;
 import com.swipelab.users.domain.NotificationType;

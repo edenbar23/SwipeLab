@@ -1,4 +1,5 @@
-package com.swipelab.classification.domain;
+package com.swipelab.classification.domain.goldimage;
+import com.swipelab.classification.domain.image.Image;
 
 import com.swipelab.classification.infrastructure.GoldImageRepository;
 import com.swipelab.classification.infrastructure.ImageRepository;

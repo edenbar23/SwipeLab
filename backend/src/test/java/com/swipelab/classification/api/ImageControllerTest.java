@@ -1,7 +1,7 @@
 package com.swipelab.classification.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.swipelab.classification.domain.ImageService;
+import com.swipelab.classification.domain.image.ImageService;
 import com.swipelab.dto.request.ImageUploadRequest;
 import com.swipelab.dto.response.ImageBatchResponse;
 import com.swipelab.dto.response.ImageResponse;

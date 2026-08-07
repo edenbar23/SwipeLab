@@ -1,7 +1,7 @@
 package com.swipelab.classification.domain.util;
 
-import com.swipelab.classification.domain.Classification;
-import com.swipelab.classification.domain.Image;
+import com.swipelab.classification.domain.core.Classification;
+import com.swipelab.classification.domain.image.Image;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

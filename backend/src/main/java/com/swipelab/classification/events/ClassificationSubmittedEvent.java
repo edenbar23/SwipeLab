@@ -1,6 +1,6 @@
 package com.swipelab.classification.events;
 
-import com.swipelab.classification.domain.Classification.UserResponse;
+import com.swipelab.classification.domain.core.Classification.UserResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

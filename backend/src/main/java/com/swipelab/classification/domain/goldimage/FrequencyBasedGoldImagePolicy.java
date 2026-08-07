@@ -1,4 +1,4 @@
-package com.swipelab.classification.domain;
+package com.swipelab.classification.domain.goldimage;
 
 import com.swipelab.classification.infrastructure.ClassificationRepository;
 import lombok.RequiredArgsConstructor;

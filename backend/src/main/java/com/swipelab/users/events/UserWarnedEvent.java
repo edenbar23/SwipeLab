@@ -1,6 +1,6 @@
 package com.swipelab.users.events;
 
-import com.swipelab.classification.domain.WarningLevel;
+import com.swipelab.classification.domain.fraud.WarningLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

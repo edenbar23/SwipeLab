@@ -1,4 +1,5 @@
-package com.swipelab.classification.domain;
+package com.swipelab.classification.domain.distribution;
+import com.swipelab.classification.domain.image.Image;
 
 import com.swipelab.classification.infrastructure.ClassificationRepository;
 import com.swipelab.classification.infrastructure.ImageRepository;
@@ -36,7 +37,7 @@ public class TaskDistributionService {
         if (goldImages.isEmpty()) return Optional.empty();
 
         for (Image image : goldImages) {
-            Optional<com.swipelab.classification.domain.GoldImage> goldOpt = goldImageRepository.findByImageIdAndActiveTrue(image.getId());
+            Optional<com.swipelab.classification.domain.goldimage.GoldImage> goldOpt = goldImageRepository.findByImageIdAndActiveTrue(image.getId());
             if (goldOpt.isPresent()) {
                 return Optional.of(new ImageSpeciesPair(image, goldOpt.get().getSpecies()));
             }

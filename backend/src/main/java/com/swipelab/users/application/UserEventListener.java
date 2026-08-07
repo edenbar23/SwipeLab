@@ -1,6 +1,6 @@
 package com.swipelab.users.application;
 
-import com.swipelab.classification.domain.WarningLevel;
+import com.swipelab.classification.domain.fraud.WarningLevel;
 import com.swipelab.model.enums.UserStatus;
 import com.swipelab.users.domain.User;
 import com.swipelab.users.events.UserBannedBySystemEvent;

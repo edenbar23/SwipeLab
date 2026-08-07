@@ -1,6 +1,6 @@
 package com.swipelab.classification.application.port.in;
 
-import com.swipelab.classification.domain.Label;
+import com.swipelab.classification.domain.core.Label;
 import com.swipelab.classification.infrastructure.LabelRepository;
 import com.swipelab.dto.response.TargetSpeciesResponse;
 import com.swipelab.tasks.application.port.out.TargetSpeciesProvider;
@@ -56,17 +56,17 @@ public class TargetSpeciesProviderImpl implements TargetSpeciesProvider {
         
         List<Label> labels = labelRepository.findAllById(speciesIds);
         
-        List<com.swipelab.classification.domain.SpeciesReferenceImage> allRefImages = Collections.emptyList();
+        List<com.swipelab.classification.domain.image.SpeciesReferenceImage> allRefImages = Collections.emptyList();
         if (refImageIds != null && !refImageIds.isEmpty()) {
             allRefImages = speciesReferenceImageRepository.findAllById(refImageIds);
         }
         
-        java.util.Map<Long, List<com.swipelab.classification.domain.SpeciesReferenceImage>> refImagesByLabelId = allRefImages.stream()
-                .collect(Collectors.groupingBy(com.swipelab.classification.domain.SpeciesReferenceImage::getLabelId));
+        java.util.Map<Long, List<com.swipelab.classification.domain.image.SpeciesReferenceImage>> refImagesByLabelId = allRefImages.stream()
+                .collect(Collectors.groupingBy(com.swipelab.classification.domain.image.SpeciesReferenceImage::getLabelId));
                 
         return labels.stream()
                 .map(label -> {
-                    List<com.swipelab.classification.domain.SpeciesReferenceImage> imagesForLabel = refImagesByLabelId.getOrDefault(label.getId(), Collections.emptyList());
+                    List<com.swipelab.classification.domain.image.SpeciesReferenceImage> imagesForLabel = refImagesByLabelId.getOrDefault(label.getId(), Collections.emptyList());
                     List<com.swipelab.dto.response.ReferenceImageResponse> refImageResponses = imagesForLabel.stream()
                             .map(img -> com.swipelab.dto.response.ReferenceImageResponse.builder()
                                     .imageUrl("/api/v1/species/reference-images/" + img.getId() + "/image")

@@ -1,7 +1,7 @@
 package com.swipelab.users.infrastructure;
 
-import com.swipelab.classification.domain.Classification;
-import com.swipelab.classification.domain.CredibilityRecord;
+import com.swipelab.classification.domain.core.Classification;
+import com.swipelab.classification.domain.fraud.CredibilityRecord;
 import com.swipelab.classification.infrastructure.ClassificationRepository;
 import com.swipelab.classification.infrastructure.CredibilityRepository;
 import com.swipelab.model.enums.UserStatus;

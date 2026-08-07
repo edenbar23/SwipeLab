@@ -1,4 +1,5 @@
-package com.swipelab.classification.domain;
+package com.swipelab.classification.domain.threshold;
+import com.swipelab.classification.domain.core.Classification;
 
 import com.swipelab.classification.infrastructure.ClassificationRepository;
 import com.swipelab.users.application.UserService;

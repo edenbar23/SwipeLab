@@ -5,7 +5,7 @@ import com.swipelab.classification.dto.api.NextBatchResponse;
 import com.swipelab.classification.dto.api.SubmitClassificationRequest;
 import com.swipelab.dto.request.ClassificationRequest;
 import com.swipelab.classification.application.ClassificationService;
-import com.swipelab.classification.domain.ImageService;
+import com.swipelab.classification.domain.image.ImageService;
 import com.swipelab.users.application.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

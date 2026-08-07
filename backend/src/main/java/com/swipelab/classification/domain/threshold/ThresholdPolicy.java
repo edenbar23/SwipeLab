@@ -1,4 +1,4 @@
-package com.swipelab.classification.domain;
+package com.swipelab.classification.domain.threshold;
 
 import java.util.Optional;
 

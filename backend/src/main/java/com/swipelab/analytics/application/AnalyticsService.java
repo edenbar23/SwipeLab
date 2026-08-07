@@ -3,7 +3,7 @@ package com.swipelab.analytics.application;
 import com.swipelab.analytics.domain.*;
 import com.swipelab.analytics.dto.*;
 import com.swipelab.analytics.infrastructure.*;
-import com.swipelab.classification.domain.Classification.UserResponse;
+import com.swipelab.classification.domain.core.Classification.UserResponse;
 import com.swipelab.classification.infrastructure.ClassificationRepository;
 import com.swipelab.classification.infrastructure.ImageRepository;
 import com.swipelab.config.CacheConfig;

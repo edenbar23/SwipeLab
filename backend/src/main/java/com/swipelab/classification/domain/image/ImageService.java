@@ -1,4 +1,8 @@
-package com.swipelab.classification.domain;
+package com.swipelab.classification.domain.image;
+import com.swipelab.classification.domain.core.Label;
+import com.swipelab.classification.domain.goldimage.GoldImage;
+import com.swipelab.classification.domain.distribution.TaskDistributionService;
+import com.swipelab.classification.domain.goldimage.GoldImagePolicy;
 
 import com.swipelab.classification.dto.api.*;
 import com.swipelab.classification.infrastructure.GoldImageRepository;

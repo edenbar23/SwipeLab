@@ -1,6 +1,6 @@
 package com.swipelab.collection.application;
 
-import com.swipelab.classification.domain.Classification.UserResponse;
+import com.swipelab.classification.domain.core.Classification.UserResponse;
 import com.swipelab.classification.events.ClassificationSubmittedEvent;
 import com.swipelab.classification.infrastructure.ImageRepository;
 import lombok.RequiredArgsConstructor;

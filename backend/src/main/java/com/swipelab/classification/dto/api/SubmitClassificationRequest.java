@@ -1,6 +1,6 @@
 package com.swipelab.classification.dto.api;
 
-import com.swipelab.classification.domain.Classification;
+import com.swipelab.classification.domain.core.Classification;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 

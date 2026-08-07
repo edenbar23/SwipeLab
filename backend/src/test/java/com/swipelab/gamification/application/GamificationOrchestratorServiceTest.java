@@ -1,6 +1,6 @@
 package com.swipelab.gamification.application;
 
-import com.swipelab.classification.domain.Classification.UserResponse;
+import com.swipelab.classification.domain.core.Classification.UserResponse;
 import com.swipelab.classification.events.ClassificationSubmittedEvent;
 import com.swipelab.gamification.challenge.ChallengeEngine;
 import com.swipelab.gamification.challenge.MetricType;

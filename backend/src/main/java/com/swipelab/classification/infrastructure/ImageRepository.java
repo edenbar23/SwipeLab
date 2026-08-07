@@ -1,6 +1,6 @@
 package com.swipelab.classification.infrastructure;
 
-import com.swipelab.classification.domain.Image;
+import com.swipelab.classification.domain.image.Image;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

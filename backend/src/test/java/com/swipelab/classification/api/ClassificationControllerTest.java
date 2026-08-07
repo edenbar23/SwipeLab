@@ -2,7 +2,7 @@ package com.swipelab.classification.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.swipelab.classification.application.ClassificationService;
-import com.swipelab.classification.domain.ImageService;
+import com.swipelab.classification.domain.image.ImageService;
 import com.swipelab.classification.dto.UserClassification;
 import com.swipelab.classification.dto.api.NextBatchResponse;
 import com.swipelab.classification.dto.api.SubmitClassificationRequest;
@@ -84,7 +84,7 @@ class ClassificationControllerTest {
         SubmitClassificationRequest request = new SubmitClassificationRequest();
         request.setImageId(1L);
         request.setTaskId(1L);
-        request.setDecision(com.swipelab.classification.domain.Classification.UserResponse.YES);
+        request.setDecision(com.swipelab.classification.domain.core.Classification.UserResponse.YES);
         
         NextBatchResponse batchResponse = NextBatchResponse.builder().build();
 
@@ -104,7 +104,7 @@ class ClassificationControllerTest {
     void submitBatchClassificationsLegacy_ShouldReturnCreated_WhenValidRequest() throws Exception {
         ClassificationRequest req = new ClassificationRequest();
         req.setImageId(1L);
-        req.setUserResponse(com.swipelab.classification.domain.Classification.UserResponse.YES);
+        req.setUserResponse(com.swipelab.classification.domain.core.Classification.UserResponse.YES);
         
         List<ClassificationRequest> requests = Collections.singletonList(req);
 

@@ -1,6 +1,6 @@
 package com.swipelab.classification.domain.util;
 
-import com.swipelab.classification.domain.Classification;
+import com.swipelab.classification.domain.core.Classification;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 

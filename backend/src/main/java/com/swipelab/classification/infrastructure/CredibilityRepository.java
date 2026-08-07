@@ -1,6 +1,6 @@
 package com.swipelab.classification.infrastructure;
 
-import com.swipelab.classification.domain.CredibilityRecord;
+import com.swipelab.classification.domain.fraud.CredibilityRecord;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

@@ -1,4 +1,11 @@
 package com.swipelab.classification.domain;
+import com.swipelab.classification.domain.image.Image;
+import com.swipelab.classification.domain.image.ImageService;
+import com.swipelab.classification.domain.goldimage.GoldImage;
+import com.swipelab.classification.domain.goldimage.GoldImageService;
+import com.swipelab.classification.domain.goldimage.GoldImagePolicy;
+import com.swipelab.classification.domain.distribution.TaskDistributionService;
+import com.swipelab.classification.domain.core.LabelService;
 
 import com.swipelab.classification.infrastructure.ClassificationRepository;
 import com.swipelab.classification.infrastructure.ImageRepository;
@@ -75,7 +82,7 @@ class TaskDistributionServiceTest {
         when(imageRepository.findUnclassifiedGoldImages("testuser", SPECIES))
                 .thenReturn(List.of(goldImage));
         
-        com.swipelab.classification.domain.GoldImage mockGoldImage = new com.swipelab.classification.domain.GoldImage();
+        com.swipelab.classification.domain.goldimage.GoldImage mockGoldImage = new com.swipelab.classification.domain.goldimage.GoldImage();
         mockGoldImage.setSpecies("Bat");
         when(goldImageRepository.findByImageIdAndActiveTrue(3L)).thenReturn(Optional.of(mockGoldImage));
 

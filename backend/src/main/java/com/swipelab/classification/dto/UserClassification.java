@@ -1,6 +1,6 @@
 package com.swipelab.classification.dto;
 
-import com.swipelab.classification.domain.Classification;
+import com.swipelab.classification.domain.core.Classification;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

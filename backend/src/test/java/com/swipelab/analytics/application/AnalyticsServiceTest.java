@@ -5,7 +5,7 @@ import com.swipelab.analytics.dto.PlatformOverviewResponse;
 import com.swipelab.analytics.dto.TaskAnalyticsResponse;
 import com.swipelab.analytics.dto.UserProgressResponse;
 import com.swipelab.analytics.infrastructure.*;
-import com.swipelab.classification.domain.Classification.UserResponse;
+import com.swipelab.classification.domain.core.Classification.UserResponse;
 import com.swipelab.classification.infrastructure.ClassificationRepository;
 import com.swipelab.classification.infrastructure.ImageRepository;
 import com.swipelab.dto.response.DashboardStatsResponse;
