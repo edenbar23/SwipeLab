@@ -39,6 +39,7 @@ export default function AddTaskScreen({ route, navigation }: any) {
     isPublic: false,
     selectedRecipients: [],
     sharedWithResearchers: [],
+    consensusThreshold: 3,
   });
 
   const [availableOptions, setAvailableOptions] = useState<{ id: string; label: string }[]>([]);
@@ -184,6 +185,7 @@ export default function AddTaskScreen({ route, navigation }: any) {
           .filter((id) => id.startsWith("U-"))
           .map((id) => id.replace("U-", "")),
         sharedWithResearchers: formData.sharedWithResearchers,
+        consensusThreshold: formData.consensusThreshold,
       };
 
       let headers: any = { "Content-Type": "application/json" };
@@ -232,6 +234,7 @@ export default function AddTaskScreen({ route, navigation }: any) {
                   isPublic: false,
                   selectedRecipients: [],
                   sharedWithResearchers: [],
+                  consensusThreshold: 3,
                 });
               }}
             >

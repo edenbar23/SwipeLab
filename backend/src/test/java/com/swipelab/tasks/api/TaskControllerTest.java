@@ -120,6 +120,7 @@ class TaskControllerTest {
         CreateTaskRequest request = new CreateTaskRequest();
         request.setName("New Task");
         request.setDescription("This is a valid task description");
+        request.setConsensusThreshold(3.0);
 
         when(taskService.createTask(any(CreateTaskRequest.class), anyString())).thenReturn(taskResponse);
 

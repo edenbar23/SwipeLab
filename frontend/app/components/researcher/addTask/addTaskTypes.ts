@@ -22,6 +22,7 @@ export interface AddTaskFormData {
   selectedRecipients: string[];
   selectedExperiments: string[];
   sharedWithResearchers: string[];
+  consensusThreshold: number;
 }
 
 export interface StepProps {

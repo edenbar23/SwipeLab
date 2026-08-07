@@ -163,7 +163,7 @@ public class MockDataSeeder implements CommandLineRunner {
                     .createdBy(admin.getUsername())
                     .status(TaskStatus.ACTIVE)
                     .minClassificationsPerImage(3)
-                    .consensusThreshold(80.0)
+                    .consensusThreshold(3.0)
                     .isPublic(false)
                     .deadline(LocalDateTime.now().plusDays(30))
                     .build();
@@ -193,7 +193,7 @@ public class MockDataSeeder implements CommandLineRunner {
                     .createdBy(admin.getUsername())
                     .status(TaskStatus.ACTIVE)
                     .minClassificationsPerImage(3)
-                    .consensusThreshold(80.0)
+                    .consensusThreshold(3.0)
                     .isPublic(true)
                     .deadline(LocalDateTime.now().plusDays(30))
                     .build();

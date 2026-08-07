@@ -62,9 +62,16 @@ public class Task {
     @Builder.Default
     private Integer minClassificationsPerImage = 3;
 
+    /**
+     * The target credibility score required for an image to reach consensus.
+     * E.g., 3.0 means it requires the equivalent of 3 experts (credibility 1.0) 
+     * voting identically.
+     */
     @Column(name = "consensus_threshold", nullable = false)
+    @jakarta.validation.constraints.Min(3)
+    @jakarta.validation.constraints.Max(20)
     @Builder.Default
-    private Double consensusThreshold = 80.0;
+    private Double consensusThreshold = 3.0;
 
     // =========================
     // Relationships
