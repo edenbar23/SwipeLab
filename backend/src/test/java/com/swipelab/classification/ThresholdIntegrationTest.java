@@ -80,7 +80,7 @@ public class ThresholdIntegrationTest {
 
         // Create an image
         testImage = Image.builder()
-                .srcPath("test-image.jpg")
+                .imageData("test-image.jpg")
                 .taskId(testTask.getId())
                 .build();
         testImage = imageRepository.save(testImage);

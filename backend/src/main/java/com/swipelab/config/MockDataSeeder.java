@@ -171,13 +171,13 @@ public class MockDataSeeder implements CommandLineRunner {
             taskRepository.save(task);
 
             Image img1 = Image.builder()
-                    .srcPath("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=") // Mock Stardbi ID 101
+                    .imageData("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=") // Mock Stardbi ID 101
                     .taskId(task.getId())
                     .priority(1)
                     .build();
 
             Image img2 = Image.builder()
-                    .srcPath("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=") // Mock Stardbi ID 102
+                    .imageData("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=") // Mock Stardbi ID 102
                     .taskId(task.getId())
                     .priority(1)
                     .build();
@@ -201,7 +201,7 @@ public class MockDataSeeder implements CommandLineRunner {
             taskRepository.save(exploreTask);
 
             Image img3 = Image.builder()
-                    .srcPath("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=")
+                    .imageData("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=")
                     .taskId(exploreTask.getId())
                     .priority(1)
                     .build();
@@ -276,7 +276,7 @@ public class MockDataSeeder implements CommandLineRunner {
             List<Image> images = imageRepository.findAll();
             
             if (!images.isEmpty()) {
-                Image beeImage = images.stream().filter(img -> img.getSrcPath().contains("BEE")).findFirst().orElse(images.get(0));
+                Image beeImage = images.stream().filter(img -> img.getImageData().contains("BEE")).findFirst().orElse(images.get(0));
                 
                 GoldImage goldImage = GoldImage.builder()
                         .image(beeImage)

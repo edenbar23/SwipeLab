@@ -15,7 +15,7 @@ Gold Images are managed by users with the `RESEARCHER` or `SuperAdmin` role via 
   - All gold images are stored inline within the database as **Base64 encoded Data URIs**. 
   - If a file is uploaded directly, it is converted to a Base64 string. 
   - If an external URL is provided, the backend downloads the image over HTTP, converts it to Base64, and stores the resulting string. 
-  - A standard `Image` entity is created with `taskId = null` (to distinguish it from normal task images) and its `srcPath` contains the Base64 string. The `GoldImage` entity then holds a foreign key reference to this `Image` alongside the correct answer.
+  - A standard `Image` entity is created with `taskId = null` (to distinguish it from normal task images) and its `imageData` contains the Base64 string. The `GoldImage` entity then holds a foreign key reference to this `Image` alongside the correct answer.
 - **Association**: Gold Images are tied to specific species. When tasks are generated, the system maps available Gold Images that match the task's target species.
 - **Soft Deletion**: When a Gold Image is deleted, it is only soft-deleted (`active = false`). This prevents violating foreign key constraints for historical credibility records where users have previously classified that specific image.
 

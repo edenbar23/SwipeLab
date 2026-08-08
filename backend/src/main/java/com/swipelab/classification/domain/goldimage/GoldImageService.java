@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.web.multipart.MultipartFile;
-import com.swipelab.infrastructure.FileStorageService;
 import com.swipelab.classification.application.port.out.TaskProvider;
 
 @Service
@@ -46,24 +45,24 @@ public class GoldImageService {
 
     @Transactional
     public GoldImageResponse uploadGoldImage(MultipartFile file, String imageUrl, String species, String correctAnswerStr) {
-        String srcPath;
+        String imageData;
         if (file != null && !file.isEmpty()) {
             try {
                 byte[] bytes = file.getBytes();
                 String base64 = java.util.Base64.getEncoder().encodeToString(bytes);
                 String contentType = file.getContentType() != null ? file.getContentType() : "image/jpeg";
-                srcPath = "data:" + contentType + ";base64," + base64;
+                imageData = "data:" + contentType + ";base64," + base64;
             } catch (java.io.IOException e) {
                 throw new RuntimeException("Could not read uploaded file", e);
             }
         } else if (imageUrl != null && !imageUrl.isEmpty()) {
-            srcPath = downloadUrlAsBase64(imageUrl);
+            imageData = downloadUrlAsBase64(imageUrl);
         } else {
             throw new IllegalArgumentException("Either file or imageUrl must be provided");
         }
 
         Image image = Image.builder()
-                .srcPath(srcPath)
+                .imageData(imageData)
                 .taskId(null)
                 .build();
         Image savedImage = imageRepository.save(image);
@@ -124,13 +123,13 @@ public class GoldImageService {
     }
 
     private GoldImageResponse mapToResponse(GoldImage goldImage) {
-        String srcPath = goldImage.getImage().getSrcPath();
+        String imageData = goldImage.getImage().getImageData();
         return GoldImageResponse.builder()
                 .id(goldImage.getId())
                 .imageId(goldImage.getImage().getId())
                 .species(goldImage.getSpecies())
                 .correctAnswer(goldImage.getCorrectAnswer())
-                .imageUrl(srcPath)
+                .imageUrl(imageData)
                 .build();
     }
 

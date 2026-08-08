@@ -72,7 +72,7 @@ class ImageServiceTest {
 
         image = new Image();
         image.setId(1L);
-        image.setSrcPath("http://example.com/img.jpg");
+        image.setImageData("http://example.com/img.jpg");
         image.setTaskId(1L);
         image.setPriority(1);
     }

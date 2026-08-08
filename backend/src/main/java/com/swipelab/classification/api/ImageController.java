@@ -37,9 +37,4 @@ public class ImageController {
     public ResponseEntity<ImageResponse> getImageById(@PathVariable Long id) {
         return ResponseEntity.ok(imageService.getImageById(id));
     }
-
-    @GetMapping("/{id}/content")
-    public ResponseEntity<byte[]> getImageContent(@PathVariable Long id) {
-        return imageService.getImageContent(id);
-    }
 }

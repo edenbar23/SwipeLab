@@ -227,7 +227,7 @@ public class E2eDataSeeder implements CommandLineRunner {
                             }
 
                             e2eImages.add(Image.builder()
-                                    .srcPath(file.getPath().replace("\\", "/"))
+                                    .imageData(file.getPath().replace("\\", "/"))
                                     .taskId(task.getId())
                                     .priority(1)
                                     .experimentId(experimentId)
@@ -241,7 +241,7 @@ public class E2eDataSeeder implements CommandLineRunner {
             
             if (e2eImages.isEmpty()) {
                 e2eImages.add(Image.builder()
-                        .srcPath("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=")
+                        .imageData("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=")
                         .taskId(task.getId())
                         .priority(1)
                         .build());
@@ -268,7 +268,7 @@ public class E2eDataSeeder implements CommandLineRunner {
             taskRepository.save(exploreTask);
 
             Image img3 = Image.builder()
-                    .srcPath("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=")
+                    .imageData("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=")
                     .taskId(exploreTask.getId())
                     .priority(1)
                     .build();
@@ -302,7 +302,7 @@ public class E2eDataSeeder implements CommandLineRunner {
             taskRepository.save(archiveTask);
 
             e2eImages.add(Image.builder()
-                    .srcPath("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=")
+                    .imageData("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=")
                     .taskId(archiveTask.getId())
                     .priority(1)
                     .build());
@@ -415,7 +415,7 @@ public class E2eDataSeeder implements CommandLineRunner {
             List<Image> images = imageRepository.findAll();
             
             if (!images.isEmpty()) {
-                Image beeImage = images.stream().filter(img -> img.getSrcPath().contains("BEE")).findFirst().orElse(images.get(0));
+                Image beeImage = images.stream().filter(img -> img.getImageData().contains("BEE")).findFirst().orElse(images.get(0));
                 
                 GoldImage goldImage = GoldImage.builder()
                         .image(beeImage)
