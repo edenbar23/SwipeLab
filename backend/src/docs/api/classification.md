@@ -39,9 +39,6 @@ Core endpoints for uploading and serving regular images to be classified.
 - **`GET /{id}`**
   - Gets the metadata of a specific image.
 
-- **`GET /{id}/content`**
-  - Streams the actual byte content of the image.
-
 ---
 
 ## 3. Gold Images (`/api/admin/gold-images`)

@@ -29,7 +29,7 @@ Base path: `/api/v1/images`
 | `POST` | `/upload` | Upload a task image |
 | `GET` | `/batch` | Get a batch of images |
 | `GET` | `/{id}` | Get image details |
-| `GET` | `/{id}/content` | Serve raw image content |
+
 
 ## Gold Images
 Base path: `/api/admin/gold-images`
