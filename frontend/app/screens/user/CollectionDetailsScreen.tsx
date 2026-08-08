@@ -5,6 +5,7 @@ import ScreenHeaderLayout from '../../components/layout/ScreenHeaderLayout/Scree
 import { CollectionItem, SwipeDirection } from '../../types';
 import { useThemeStore } from '../../stores/themeStore';
 import { Colors } from '../../../constants/theme';
+import { parseImageUrl } from '../../utils/imageUtils';
 
 export default function CollectionDetailsScreen() {
     const route = useRoute<any>();
@@ -47,7 +48,7 @@ export default function CollectionDetailsScreen() {
 
                 {/* Image Section */}
                 <View style={[styles.imageContainer, { backgroundColor: themeColors.card }]}>
-                    <Image source={{ uri: item.imageUrl }} style={styles.image} resizeMode="cover" />
+                    <Image source={{ uri: parseImageUrl(item.imageUrl) }} style={styles.image} resizeMode="cover" />
                     <View style={[styles.labelBadge, { backgroundColor: getLabelColor(item.label) }]}>
                         <Text style={styles.labelText}>{getLabelText(item.label)}</Text>
                     </View>

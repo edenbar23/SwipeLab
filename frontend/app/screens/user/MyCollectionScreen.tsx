@@ -14,21 +14,15 @@ import { useThemeStore } from '../../stores/themeStore';
 import { Colors } from '../../../constants/theme';
 import AuthenticatedImage from '../../components/ui/AuthenticatedImage';
 
+import { parseImageUrl } from '../../utils/imageUtils';
+
 function formatDate(iso: string): string {
     const d = new Date(iso);
     return d.toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
 function CollectionCard({ item, themeColors }: { item: CollectionEntry; themeColors: any }) {
-    let parsedImageUrl = item.imageUrl;
-    if (parsedImageUrl) {
-        if (parsedImageUrl.startsWith('http') || parsedImageUrl.startsWith('data:image') || parsedImageUrl.startsWith('/')) {
-            // Already a valid URL, data URI, or relative API path — AuthenticatedImage handles resolution
-        } else if (/^[A-Za-z0-9+/]/.test(parsedImageUrl) || parsedImageUrl.startsWith('/9')) {
-            // raw base64 jpeg
-            parsedImageUrl = `data:image/jpeg;base64,${parsedImageUrl}`;
-        }
-    }
+    const parsedImageUrl = parseImageUrl(item.imageUrl ?? undefined);
 
     return (
         <View style={[styles.card, { backgroundColor: themeColors.card }]}>
