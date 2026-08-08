@@ -1,6 +1,6 @@
 package com.swipelab.dto.request;
 
-import com.swipelab.classification.domain.GoldImage;
+import com.swipelab.classification.domain.goldimage.GoldImage;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

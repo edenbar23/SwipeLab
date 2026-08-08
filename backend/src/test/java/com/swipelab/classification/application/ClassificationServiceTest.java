@@ -1,14 +1,14 @@
 package com.swipelab.classification.application;
 
-import com.swipelab.classification.domain.Classification;
-import com.swipelab.classification.domain.FraudDetectionService;
-import com.swipelab.classification.domain.Image;
-import com.swipelab.classification.domain.ImageService;
+import com.swipelab.classification.domain.core.Classification;
+import com.swipelab.classification.domain.fraud.FraudDetectionService;
+import com.swipelab.classification.domain.image.Image;
+import com.swipelab.classification.domain.image.ImageService;
 import com.swipelab.classification.dto.UserClassification;
 import com.swipelab.classification.dto.api.NextBatchResponse;
 import com.swipelab.classification.dto.api.SubmitClassificationRequest;
 import com.swipelab.classification.events.ClassificationSubmittedEvent;
-import com.swipelab.classification.domain.FraudAnalysisResult;
+import com.swipelab.classification.domain.fraud.FraudAnalysisResult;
 import com.swipelab.classification.infrastructure.ClassificationRepository;
 import com.swipelab.classification.infrastructure.ImageRepository;
 import com.swipelab.exception.ResourceNotFoundException;
@@ -70,7 +70,7 @@ class ClassificationServiceTest {
         request.setDecision(Classification.UserResponse.YES);
         request.setResponseTimeMs(1500L);
 
-        taskInfo = new TaskProvider.TaskInfo(1L, "Question", "Lion", Collections.emptyList(), Collections.emptyList());
+        taskInfo = new TaskProvider.TaskInfo(1L, "Question", "Lion", Collections.emptyList(), Collections.emptyList(), 3.0);
 
         image = new Image();
         image.setId(1L);
@@ -167,7 +167,7 @@ class ClassificationServiceTest {
 
     @Test
     void submitClassification_ShouldFallbackToTargetSpeciesNames_WhenQuerySpeciesIsEmpty() {
-        TaskProvider.TaskInfo emptyQueryTaskInfo = new TaskProvider.TaskInfo(1L, "Question", "", List.of("Tiger", "Bear"), Collections.emptyList());
+        TaskProvider.TaskInfo emptyQueryTaskInfo = new TaskProvider.TaskInfo(1L, "Question", "", List.of("Tiger", "Bear"), Collections.emptyList(), 3.0);
         
         when(imageRepository.findById(1L)).thenReturn(Optional.of(image));
         when(goldImageEvaluatorService.evaluate(any(), any(), any(), any())).thenReturn(Optional.empty());

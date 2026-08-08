@@ -1,9 +1,9 @@
 package com.swipelab.classification.application;
 
-import com.swipelab.classification.domain.Classification;
-import com.swipelab.classification.domain.CredibilityRecord;
-import com.swipelab.classification.domain.GoldImage;
-import com.swipelab.classification.domain.Image;
+import com.swipelab.classification.domain.core.Classification;
+import com.swipelab.classification.domain.fraud.CredibilityRecord;
+import com.swipelab.classification.domain.goldimage.GoldImage;
+import com.swipelab.classification.domain.image.Image;
 import com.swipelab.classification.infrastructure.CredibilityRepository;
 import com.swipelab.classification.infrastructure.GoldImageRepository;
 import com.swipelab.users.application.WarningRecoveryService;

@@ -106,6 +106,46 @@ export default function StepSpecies({
             ))}
           </View>
         )}
+        
+        {/* Consensus Settings */}
+        <View style={styles.consensusSection}>
+          <Text style={[styles.pickersHeading, { color: c.textSecondary }]}>
+            CONSENSUS SETTINGS
+          </Text>
+          <View style={[styles.consensusContainer, { backgroundColor: c.card, borderColor: c.border }]}>
+            <View style={styles.consensusTextWrapper}>
+              <Text style={[styles.consensusLabel, { color: c.text }]}>Threshold</Text>
+              <Text style={[styles.consensusHint, { color: c.textSecondary }]}>
+                Cumulative score required for an image to reach consensus (3 - 20). 
+                E.g., 3 requires 3 expert classifications.
+              </Text>
+            </View>
+            <View style={styles.stepperContainer}>
+              <TouchableOpacity
+                style={[styles.stepperBtn, { borderColor: c.border, backgroundColor: c.background }]}
+                onPress={() => {
+                  const val = Math.max(3, (formData.consensusThreshold || 3) - 1);
+                  onUpdate({ consensusThreshold: val });
+                }}
+                disabled={(formData.consensusThreshold || 3) <= 3}
+              >
+                <Text style={[styles.stepperBtnText, { color: (formData.consensusThreshold || 3) <= 3 ? c.textSecondary : c.text }]}>-</Text>
+              </TouchableOpacity>
+              <Text style={[styles.stepperValue, { color: c.text }]}>{formData.consensusThreshold || 3}</Text>
+              <TouchableOpacity
+                style={[styles.stepperBtn, { borderColor: c.border, backgroundColor: c.background }]}
+                onPress={() => {
+                  const val = Math.min(20, (formData.consensusThreshold || 3) + 1);
+                  onUpdate({ consensusThreshold: val });
+                }}
+                disabled={(formData.consensusThreshold || 3) >= 20}
+              >
+                <Text style={[styles.stepperBtnText, { color: (formData.consensusThreshold || 3) >= 20 ? c.textSecondary : c.text }]}>+</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+
       </ScrollView>
 
       <View style={[styles.footer, isWeb && styles.footerWeb]}>
@@ -157,4 +197,14 @@ const styles = StyleSheet.create({
   nextButton:        { flex: 1, backgroundColor: '#10B981', paddingVertical: 14, borderRadius: 12, alignItems: 'center' },
   buttonDisabled:    { backgroundColor: '#94D3B3' },
   nextButtonText:    { color: '#fff', fontWeight: '700', fontSize: 16 },
+  
+  consensusSection:  { marginTop: 32, paddingBottom: 16 },
+  consensusContainer:{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, borderRadius: 12, borderWidth: 1, gap: 16 },
+  consensusTextWrapper: { flex: 1 },
+  consensusLabel:    { fontSize: 16, fontWeight: '600', marginBottom: 4 },
+  consensusHint:     { fontSize: 13, lineHeight: 18 },
+  stepperContainer:  { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  stepperBtn:        { width: 36, height: 36, borderRadius: 18, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
+  stepperBtnText:    { fontSize: 18, fontWeight: '700' },
+  stepperValue:      { fontSize: 18, fontWeight: '700', minWidth: 24, textAlign: 'center' },
 });

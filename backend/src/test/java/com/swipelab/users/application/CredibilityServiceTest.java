@@ -1,7 +1,7 @@
 package com.swipelab.users.application;
 
-import com.swipelab.classification.domain.Classification;
-import com.swipelab.classification.domain.Image;
+import com.swipelab.classification.domain.core.Classification;
+import com.swipelab.classification.domain.image.Image;
 import com.swipelab.classification.domain.util.CredibilityCalculator;
 import com.swipelab.classification.infrastructure.ClassificationRepository;
 import com.swipelab.classification.infrastructure.CredibilityRepository;

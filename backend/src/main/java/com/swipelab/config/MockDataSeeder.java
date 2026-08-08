@@ -1,11 +1,11 @@
 package com.swipelab.config;
 
 import com.swipelab.auth.infrastructure.AuthProvider;
-import com.swipelab.classification.domain.Image;
-import com.swipelab.classification.domain.Label;
-import com.swipelab.classification.domain.Classification;
-import com.swipelab.classification.domain.GoldImage;
-import com.swipelab.classification.domain.CredibilityRecord;
+import com.swipelab.classification.domain.image.Image;
+import com.swipelab.classification.domain.core.Label;
+import com.swipelab.classification.domain.core.Classification;
+import com.swipelab.classification.domain.goldimage.GoldImage;
+import com.swipelab.classification.domain.fraud.CredibilityRecord;
 import com.swipelab.classification.infrastructure.ImageRepository;
 import com.swipelab.classification.infrastructure.LabelRepository;
 import com.swipelab.classification.infrastructure.ClassificationRepository;
@@ -163,7 +163,7 @@ public class MockDataSeeder implements CommandLineRunner {
                     .createdBy(admin.getUsername())
                     .status(TaskStatus.ACTIVE)
                     .minClassificationsPerImage(3)
-                    .consensusThreshold(80.0)
+                    .consensusThreshold(3.0)
                     .isPublic(false)
                     .deadline(LocalDateTime.now().plusDays(30))
                     .build();
@@ -193,7 +193,7 @@ public class MockDataSeeder implements CommandLineRunner {
                     .createdBy(admin.getUsername())
                     .status(TaskStatus.ACTIVE)
                     .minClassificationsPerImage(3)
-                    .consensusThreshold(80.0)
+                    .consensusThreshold(3.0)
                     .isPublic(true)
                     .deadline(LocalDateTime.now().plusDays(30))
                     .build();

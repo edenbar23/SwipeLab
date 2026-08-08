@@ -1,7 +1,7 @@
 package com.swipelab.classification.api;
 
 import com.swipelab.classification.application.SpeciesReferenceImageService;
-import com.swipelab.classification.domain.SpeciesReferenceImage;
+import com.swipelab.classification.domain.image.SpeciesReferenceImage;
 import com.swipelab.classification.dto.api.SpeciesReferenceImageDto;
 import com.swipelab.auth.application.SecurityAuthorizationService;
 import lombok.RequiredArgsConstructor;

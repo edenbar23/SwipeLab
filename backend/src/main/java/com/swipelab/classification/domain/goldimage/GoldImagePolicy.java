@@ -1,4 +1,4 @@
-package com.swipelab.classification.domain;
+package com.swipelab.classification.domain.goldimage;
 
 /**
  * Policy interface that decides whether the next image served to a user

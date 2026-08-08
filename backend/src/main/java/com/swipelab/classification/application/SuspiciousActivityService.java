@@ -1,7 +1,7 @@
 package com.swipelab.classification.application;
 
-import com.swipelab.classification.domain.SuspiciousActivityRecord;
-import com.swipelab.classification.domain.WarningLevel;
+import com.swipelab.classification.domain.fraud.SuspiciousActivityRecord;
+import com.swipelab.classification.domain.fraud.WarningLevel;
 import com.swipelab.classification.infrastructure.SuspiciousActivityRepository;
 import com.swipelab.dto.response.SuspiciousActivityResponse;
 import com.swipelab.users.domain.User;

@@ -22,6 +22,9 @@ public class CreateTaskRequest {
     private List<String> sharedWithResearchers;
     private Boolean isPublic;
     private int minClassificationsPerImage;
+
+    @jakarta.validation.constraints.Min(value = 3, message = "Consensus threshold must be at least 3")
+    @jakarta.validation.constraints.Max(value = 20, message = "Consensus threshold must be at most 20")
     private double consensusThreshold;
 
     /**

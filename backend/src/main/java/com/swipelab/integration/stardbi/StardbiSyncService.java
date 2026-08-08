@@ -5,7 +5,7 @@ import com.swipelab.integration.stardbi.dto.ExternalCropDto;
 import com.swipelab.tasks.domain.Task;
 import com.swipelab.tasks.domain.TaskStatus;
 import com.swipelab.tasks.infrastructure.TaskRepository;
-import com.swipelab.classification.domain.Image;
+import com.swipelab.classification.domain.image.Image;
 import com.swipelab.classification.infrastructure.ImageRepository;
 import com.swipelab.users.domain.User;
 import com.swipelab.users.infrastructure.UserRepository;

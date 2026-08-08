@@ -1,4 +1,11 @@
 package com.swipelab.classification.domain;
+import com.swipelab.classification.domain.image.Image;
+import com.swipelab.classification.domain.image.ImageService;
+import com.swipelab.classification.domain.goldimage.GoldImage;
+import com.swipelab.classification.domain.goldimage.GoldImageService;
+import com.swipelab.classification.domain.goldimage.GoldImagePolicy;
+import com.swipelab.classification.domain.distribution.TaskDistributionService;
+import com.swipelab.classification.domain.core.LabelService;
 
 import com.swipelab.classification.infrastructure.GoldImageRepository;
 import com.swipelab.classification.infrastructure.ImageRepository;
@@ -53,7 +60,7 @@ class GoldImageServiceTest {
         // Inject @Value field that Mockito cannot set automatically
         ReflectionTestUtils.setField(goldImageService, "appBaseUrl", APP_BASE_URL);
 
-        taskInfo = new TaskProvider.TaskInfo(1L, "Question", "Lion", Collections.emptyList(), Collections.emptyList());
+        taskInfo = new TaskProvider.TaskInfo(1L, "Question", "Lion", Collections.emptyList(), Collections.emptyList(), 3.0);
 
         image = new Image();
         image.setId(1L);
@@ -124,7 +131,7 @@ class GoldImageServiceTest {
 
     @Test
     void getGoldImagesByTask_ShouldReturnValidList() {
-        when(taskProvider.getTaskInfo(1L)).thenReturn(new TaskProvider.TaskInfo(1L, "Q", "S", Collections.singletonList("Lion"), Collections.emptyList()));
+        when(taskProvider.getTaskInfo(1L)).thenReturn(new TaskProvider.TaskInfo(1L, "Q", "S", Collections.singletonList("Lion"), Collections.emptyList(), 3.0));
         when(goldImageRepository.findAllByActiveTrue()).thenReturn(Collections.singletonList(goldImage));
 
         List<GoldImageResponse> responses = goldImageService.getGoldImagesByTask(1L);

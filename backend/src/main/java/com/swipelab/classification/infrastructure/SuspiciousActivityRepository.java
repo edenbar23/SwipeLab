@@ -1,7 +1,7 @@
 package com.swipelab.classification.infrastructure;
 
-import com.swipelab.classification.domain.SuspiciousActivityRecord;
-import com.swipelab.classification.domain.WarningLevel;
+import com.swipelab.classification.domain.fraud.SuspiciousActivityRecord;
+import com.swipelab.classification.domain.fraud.WarningLevel;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

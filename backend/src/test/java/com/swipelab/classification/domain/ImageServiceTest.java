@@ -1,4 +1,12 @@
 package com.swipelab.classification.domain;
+import com.swipelab.classification.domain.core.Label;
+import com.swipelab.classification.domain.image.Image;
+import com.swipelab.classification.domain.image.ImageService;
+import com.swipelab.classification.domain.goldimage.GoldImage;
+import com.swipelab.classification.domain.goldimage.GoldImageService;
+import com.swipelab.classification.domain.goldimage.GoldImagePolicy;
+import com.swipelab.classification.domain.distribution.TaskDistributionService;
+import com.swipelab.classification.domain.core.LabelService;
 
 import com.swipelab.classification.dto.api.BatchImageDto;
 import com.swipelab.classification.dto.api.NextBatchResponse;
@@ -60,7 +68,7 @@ class ImageServiceTest {
 
     @BeforeEach
     void setUp() {
-        taskInfo = new TaskProvider.TaskInfo(1L, "Classify this image", "MAMMALS", Collections.emptyList(), Collections.emptyList());
+        taskInfo = new TaskProvider.TaskInfo(1L, "Classify this image", "MAMMALS", Collections.emptyList(), Collections.emptyList(), 3.0);
 
         image = new Image();
         image.setId(1L);

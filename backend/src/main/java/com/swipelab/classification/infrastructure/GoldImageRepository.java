@@ -1,6 +1,6 @@
 package com.swipelab.classification.infrastructure;
 
-import com.swipelab.classification.domain.GoldImage;
+import com.swipelab.classification.domain.goldimage.GoldImage;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

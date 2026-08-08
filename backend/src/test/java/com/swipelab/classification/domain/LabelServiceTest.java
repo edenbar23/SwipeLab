@@ -1,4 +1,12 @@
 package com.swipelab.classification.domain;
+import com.swipelab.classification.domain.core.Label;
+import com.swipelab.classification.domain.image.Image;
+import com.swipelab.classification.domain.image.ImageService;
+import com.swipelab.classification.domain.goldimage.GoldImage;
+import com.swipelab.classification.domain.goldimage.GoldImageService;
+import com.swipelab.classification.domain.goldimage.GoldImagePolicy;
+import com.swipelab.classification.domain.distribution.TaskDistributionService;
+import com.swipelab.classification.domain.core.LabelService;
 
 import com.swipelab.classification.infrastructure.LabelRepository;
 import org.junit.jupiter.api.Test;

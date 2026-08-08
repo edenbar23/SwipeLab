@@ -1,7 +1,7 @@
 package com.swipelab.classification.application;
 
-import com.swipelab.classification.domain.Label;
-import com.swipelab.classification.domain.SpeciesReferenceImage;
+import com.swipelab.classification.domain.core.Label;
+import com.swipelab.classification.domain.image.SpeciesReferenceImage;
 import com.swipelab.classification.dto.api.SpeciesReferenceImageDto;
 import com.swipelab.classification.infrastructure.LabelRepository;
 import com.swipelab.classification.infrastructure.SpeciesReferenceImageRepository;

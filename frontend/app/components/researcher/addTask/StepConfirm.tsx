@@ -38,6 +38,10 @@ export default function StepConfirm({ formData, onBack, onSubmit, loading, avail
           </View>
         </View>
         <View style={[styles.reviewCard, { backgroundColor: themeColors.card, borderColor: themeColors.border }]}>
+          <Text style={[styles.reviewLabel, { color: themeColors.textSecondary }]}>Threshold</Text>
+          <Text style={[styles.reviewValue, { color: themeColors.text }]}>{formData.consensusThreshold || 3}</Text>
+        </View>
+        <View style={[styles.reviewCard, { backgroundColor: themeColors.card, borderColor: themeColors.border }]}>
           <Text style={[styles.reviewLabel, { color: themeColors.textSecondary }]}>Visibility</Text>
           {formData.isPublic ? (
             <Text style={[styles.reviewValue, { color: themeColors.text }]}>🌍 Public — All users</Text>

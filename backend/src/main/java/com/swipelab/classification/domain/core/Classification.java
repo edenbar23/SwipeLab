@@ -1,4 +1,5 @@
-package com.swipelab.classification.domain;
+package com.swipelab.classification.domain.core;
+import com.swipelab.classification.domain.image.Image;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

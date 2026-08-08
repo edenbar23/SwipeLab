@@ -1,14 +1,14 @@
 package com.swipelab.classification.application;
 
-import com.swipelab.classification.domain.Classification;
-import com.swipelab.classification.domain.FraudDetectionService;
-import com.swipelab.classification.domain.Image;
-import com.swipelab.classification.domain.ImageService;
+import com.swipelab.classification.domain.core.Classification;
+import com.swipelab.classification.domain.fraud.FraudDetectionService;
+import com.swipelab.classification.domain.image.Image;
+import com.swipelab.classification.domain.image.ImageService;
 import com.swipelab.classification.dto.UserClassification;
 import com.swipelab.classification.dto.api.NextBatchResponse;
 import com.swipelab.classification.dto.api.SubmitClassificationRequest;
 import com.swipelab.classification.events.ClassificationSubmittedEvent;
-import com.swipelab.classification.domain.FraudAnalysisResult;
+import com.swipelab.classification.domain.fraud.FraudAnalysisResult;
 import com.swipelab.classification.infrastructure.ClassificationRepository;
 import com.swipelab.classification.infrastructure.ImageRepository;
 import com.swipelab.classification.application.port.out.TaskProvider;

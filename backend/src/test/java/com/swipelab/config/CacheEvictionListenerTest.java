@@ -1,6 +1,6 @@
 package com.swipelab.config;
 
-import com.swipelab.classification.domain.Classification.UserResponse;
+import com.swipelab.classification.domain.core.Classification.UserResponse;
 import com.swipelab.classification.events.ClassificationSubmittedEvent;
 import com.swipelab.gamification.events.GamificationUpdatedEvent;
 import org.junit.jupiter.api.BeforeEach;

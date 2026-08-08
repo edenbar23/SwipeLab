@@ -1,4 +1,6 @@
-package com.swipelab.classification.domain;
+package com.swipelab.classification.domain.fraud;
+import com.swipelab.classification.domain.goldimage.GoldImage;
+import com.swipelab.classification.domain.core.Classification;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

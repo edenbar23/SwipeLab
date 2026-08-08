@@ -1,6 +1,6 @@
 package com.swipelab.dto.response;
 
-import com.swipelab.classification.domain.GoldImage;
+import com.swipelab.classification.domain.goldimage.GoldImage;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

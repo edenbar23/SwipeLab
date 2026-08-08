@@ -1,7 +1,7 @@
 package com.swipelab.classification.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.swipelab.classification.domain.GoldImageService;
+import com.swipelab.classification.domain.goldimage.GoldImageService;
 import com.swipelab.dto.request.GoldImageRequest;
 import com.swipelab.dto.response.GoldImageResponse;
 import org.junit.jupiter.api.BeforeEach;
@@ -58,7 +58,7 @@ class GoldImageControllerTest {
         GoldImageRequest request = new GoldImageRequest();
         request.setImageId(1L);
         request.setSpecies("Lion");
-        request.setCorrectAnswer(com.swipelab.classification.domain.GoldImage.UserResponse.YES);
+        request.setCorrectAnswer(com.swipelab.classification.domain.goldimage.GoldImage.UserResponse.YES);
         
         GoldImageResponse response = GoldImageResponse.builder().id(1L).build();
         when(goldImageService.createGoldImage(any(GoldImageRequest.class))).thenReturn(response);

@@ -1,4 +1,4 @@
-package com.swipelab.classification.domain;
+package com.swipelab.classification.domain.fraud;
 
 import com.swipelab.classification.dto.api.ClassificationWarningDto;
 import lombok.AllArgsConstructor;

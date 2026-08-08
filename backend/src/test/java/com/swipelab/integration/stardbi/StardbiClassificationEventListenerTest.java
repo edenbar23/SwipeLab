@@ -1,6 +1,6 @@
 package com.swipelab.integration.stardbi;
 
-import com.swipelab.classification.domain.Image;
+import com.swipelab.classification.domain.image.Image;
 import com.swipelab.classification.events.ClassificationSubmittedEvent;
 import com.swipelab.classification.infrastructure.ImageRepository;
 import com.swipelab.integration.stardbi.dto.ExternalLabelDto;
