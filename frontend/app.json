@@ -4,7 +4,7 @@
     "slug": "SwipeLab",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/icon-opaque.png",
     "scheme": "SwipeLab",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
