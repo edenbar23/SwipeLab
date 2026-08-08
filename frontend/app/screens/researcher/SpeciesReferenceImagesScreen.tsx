@@ -187,7 +187,7 @@ export default function SpeciesReferenceImagesScreen() {
           </View>
         </TouchableOpacity>
         <View style={styles.cardActions}>
-          <Text style={[styles.uploaderText, { color: themeColors.textSecondary }]} numberOfLines={1}>
+          <Text style={[styles.uploaderText, { color: themeColors.textSecondary }]} numberOfLines={2}>
             By: {item.uploadedBy}
           </Text>
           {canDelete && (
@@ -372,12 +372,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 12,
+    padding: 8,
   },
   uploaderText: {
-    fontSize: 12,
-    flex: 1,
-    marginRight: 8,
+    fontSize: 11,
+    flexShrink: 1,
+    marginRight: 4,
   },
   deleteBtn: {
     padding: 4,

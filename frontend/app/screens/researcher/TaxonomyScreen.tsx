@@ -84,7 +84,7 @@ export default function TaxonomyScreen() {
                         size={24} 
                         color={isSelected ? "#10B981" : themeColors.textSecondary} 
                     />
-                    <Text style={[styles.speciesName, { color: themeColors.text }]} numberOfLines={1}>
+                    <Text style={[styles.speciesName, { color: themeColors.text }]} numberOfLines={2}>
                         {item.label}
                     </Text>
                 </TouchableOpacity>
@@ -258,14 +258,14 @@ const styles = StyleSheet.create({
     createBtn: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingVertical: 8,
-        paddingHorizontal: 14,
+        paddingVertical: 6,
+        paddingHorizontal: 10,
         borderRadius: 20,
     },
     createBtnText: {
         color: '#fff',
         fontWeight: '600',
-        fontSize: 14,
+        fontSize: 13,
         marginLeft: 4,
     },
     emptyContainer: {
