@@ -255,6 +255,7 @@ export default function SpeciesReferenceImagesScreen() {
           </View>
         ) : (
           <FlatList
+            style={{ width: '100%' }}
             data={images}
             keyExtractor={(item) => String(item.id)}
             renderItem={renderItem}
@@ -336,6 +337,7 @@ const styles = StyleSheet.create({
   listContainer: {
     width: '100%',
     maxWidth: 800,
+    alignSelf: 'center',
     paddingHorizontal: 16,
     paddingBottom: 40,
   },

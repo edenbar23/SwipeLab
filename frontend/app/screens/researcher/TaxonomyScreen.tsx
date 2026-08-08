@@ -47,7 +47,7 @@ export default function TaxonomyScreen() {
     const filteredSpecies = useMemo(() => {
         if (!searchQuery.trim()) return [];
         const queryTerms = searchQuery.toLowerCase().split(/\s+/).filter(Boolean);
-        return availableSpecies.filter(s => {
+        return availableSpecies.filter((s: { label: string, searchTerms: string }) => {
             const lowerLabel = s.label.toLowerCase();
             const lowerTerms = s.searchTerms.toLowerCase();
             return queryTerms.every(term => lowerLabel.includes(term) || lowerTerms.includes(term));
@@ -149,6 +149,7 @@ export default function TaxonomyScreen() {
                     </View>
                 ) : (
                     <FlatList
+                        style={{ width: '100%' }}
                         data={filteredSpecies}
                         keyExtractor={item => item.id}
                         renderItem={renderItem}
@@ -223,10 +224,10 @@ const styles = StyleSheet.create({
     },
     listContainer: {
         width: '100%',
+        maxWidth: 800,
+        alignSelf: 'center',
         paddingHorizontal: 16,
         paddingBottom: 100, // accommodate bottom button
-        maxWidth: 800,
-        marginHorizontal: 'auto',
     },
     card: {
         flexDirection: 'row',
