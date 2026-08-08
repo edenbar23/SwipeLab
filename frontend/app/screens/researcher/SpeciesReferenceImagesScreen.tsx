@@ -19,7 +19,8 @@ import ScreenHeaderLayout from "../../components/layout/ScreenHeaderLayout/Scree
 import { useThemeStore } from "../../stores/themeStore";
 import { Colors } from "../../../constants/theme";
 import AuthenticatedImage from "../../components/ui/AuthenticatedImage";
-import { useSpeciesPoolImages, useDeleteSpeciesRefImage } from "../../api/queries";
+import { useSpeciesPoolImages, useDeleteSpeciesRefImage, useProfile } from "../../api/queries";
+import { useAuthStore } from "../../stores/authStore";
 import { apiFetch } from "../../api/apiFetch";
 import { API_ENDPOINTS } from "../../api/apiEndpoints";
 import { researcherStackParamList } from "../../navigation/researcherStack.types";
@@ -43,6 +44,9 @@ export default function SpeciesReferenceImagesScreen() {
 
   const { data: poolImagesMap, isLoading } = useSpeciesPoolImages([speciesId]);
   const deleteMutation = useDeleteSpeciesRefImage();
+  const { data: userProfile } = useProfile();
+  const currentUsername = userProfile?.username;
+  const isSuperAdmin = useAuthStore(state => state.isSuperAdmin);
   
   const [uploading, setUploading] = useState(false);
   const [previewUri, setPreviewUri] = useState<string | null>(null);
@@ -54,15 +58,28 @@ export default function SpeciesReferenceImagesScreen() {
   // ── Delete ─────────────────────────────────────────────────────────────────
 
   const handleDelete = (id: number) => {
+    const message = "Are you sure you want to delete this image? It will be removed from the pool (but preserved on existing tasks).";
+    
+    if (Platform.OS === 'web') {
+      if (window.confirm(message)) {
+        deleteMutation.mutate(id, {
+          onError: (err: any) => alert(err.message || "Failed to delete image")
+        });
+      }
+      return;
+    }
+
     Alert.alert(
       "Delete Reference Image",
-      "Are you sure you want to delete this image? It will be removed from the pool (but preserved on existing tasks).",
+      message,
       [
         { text: "Cancel", style: "cancel" },
         {
           text: "Delete",
           style: "destructive",
-          onPress: () => deleteMutation.mutate(id),
+          onPress: () => deleteMutation.mutate(id, {
+            onError: (err: any) => Alert.alert("Error", err.message || "Failed to delete image")
+          }),
         },
       ]
     );
@@ -142,34 +159,50 @@ export default function SpeciesReferenceImagesScreen() {
 
   // ── Render ─────────────────────────────────────────────────────────────────
 
-  const renderItem = ({ item }: { item: any }) => (
-    <View style={[styles.imageCard, { backgroundColor: themeColors.card, borderColor: themeColors.border }]}>
-      <TouchableOpacity 
-        style={styles.imageWrap}
-        onPress={() => setPreviewUri(item.imageUrl)}
-      >
-        <AuthenticatedImage 
-          uri={item.thumbnailUrl}
-          style={styles.thumbnail} 
-        />
-        <View style={styles.zoomOverlay}>
-          <Ionicons name="search" size={24} color="white" />
-        </View>
-      </TouchableOpacity>
-      <View style={styles.cardActions}>
-        <Text style={[styles.uploaderText, { color: themeColors.textSecondary }]} numberOfLines={1}>
-          By: {item.uploadedBy}
-        </Text>
+  const isWeb = Platform.OS === 'web';
+  
+  const renderItem = ({ item }: { item: any }) => {
+    const canDelete = isSuperAdmin || (currentUsername && item.uploadedBy === currentUsername);
+    
+    return (
+      <View style={[
+        styles.imageCard, 
+        { 
+          backgroundColor: themeColors.card, 
+          borderColor: themeColors.border,
+          maxWidth: isWeb ? '23.5%' : '48%' 
+        }
+      ]}>
         <TouchableOpacity 
-          style={styles.deleteBtn}
-          onPress={() => handleDelete(item.id)}
-          disabled={deleteMutation.isPending}
+          style={styles.imageWrap}
+          onPress={() => setPreviewUri(item.imageUrl)}
         >
-          <Ionicons name="trash-outline" size={20} color="#ef4444" />
+          <AuthenticatedImage 
+            uri={item.thumbnailUrl}
+            style={styles.thumbnail} 
+            resizeMode="cover"
+          />
+          <View style={styles.zoomOverlay}>
+            <Ionicons name="search" size={24} color="white" />
+          </View>
         </TouchableOpacity>
+        <View style={styles.cardActions}>
+          <Text style={[styles.uploaderText, { color: themeColors.textSecondary }]} numberOfLines={1}>
+            By: {item.uploadedBy}
+          </Text>
+          {canDelete && (
+            <TouchableOpacity 
+              style={styles.deleteBtn}
+              onPress={() => handleDelete(item.id)}
+              disabled={deleteMutation.isPending}
+            >
+              <Ionicons name="trash-outline" size={20} color="#ef4444" />
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
-    </View>
-  );
+    );
+  };
 
   return (
     <ScreenHeaderLayout
@@ -225,7 +258,7 @@ export default function SpeciesReferenceImagesScreen() {
             data={images}
             keyExtractor={(item) => String(item.id)}
             renderItem={renderItem}
-            numColumns={Platform.OS === 'web' ? 4 : 2}
+            numColumns={isWeb ? 4 : 2}
             contentContainerStyle={styles.listContainer}
             columnWrapperStyle={styles.columnWrapper}
             showsVerticalScrollIndicator={false}

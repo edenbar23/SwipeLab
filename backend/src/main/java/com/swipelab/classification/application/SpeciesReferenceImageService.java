@@ -67,7 +67,7 @@ public class SpeciesReferenceImageService {
                 .orElseGet(() -> labelRepository.save(Label.builder().name(speciesName).build()))
                 .getId();
 
-        long existingCount = repository.countByLabelId(labelId);
+        long existingCount = repository.countByLabelIdAndIsDeletedFalse(labelId);
         if (existingCount + files.size() > MAX_POOL_SIZE) {
             throw new IllegalArgumentException(
                     "Pool for this species already has " + existingCount +
@@ -101,7 +101,7 @@ public class SpeciesReferenceImageService {
     @Transactional(readOnly = true)
     public List<SpeciesReferenceImageDto> getImagesForSpecies(String speciesName) {
         return labelRepository.findByName(speciesName)
-                .map(label -> repository.findByLabelId(label.getId()).stream()
+                .map(label -> repository.findByLabelIdAndIsDeletedFalse(label.getId()).stream()
                         .map(this::toDto)
                         .collect(Collectors.toList()))
                 .orElse(List.of());
@@ -128,7 +128,7 @@ public class SpeciesReferenceImageService {
 
         List<Long> labelIds = labels.stream().map(Label::getId).collect(Collectors.toList());
 
-        return repository.findByLabelIdIn(labelIds).stream()
+        return repository.findByLabelIdInAndIsDeletedFalse(labelIds).stream()
                 .collect(Collectors.groupingBy(
                         image -> labelIdToName.get(image.getLabelId()),
                         Collectors.mapping(this::toDto, Collectors.toList())
@@ -159,8 +159,9 @@ public class SpeciesReferenceImageService {
             throw new AccessDeniedException("You can only delete images you uploaded.");
         }
 
-        repository.delete(image);
-        log.info("Deleted reference image id={} by username={}", id, username);
+        image.setDeleted(true);
+        repository.save(image);
+        log.info("Soft-deleted reference image id={} by username={}", id, username);
     }
 
     // ── Mapping ───────────────────────────────────────────────────────────────
