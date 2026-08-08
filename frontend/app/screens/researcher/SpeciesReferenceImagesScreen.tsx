@@ -255,7 +255,7 @@ export default function SpeciesReferenceImagesScreen() {
           </View>
         ) : (
           <FlatList
-            style={{ width: '100%' }}
+            style={{ width: '100%', flex: 1 }}
             data={images}
             keyExtractor={(item) => String(item.id)}
             renderItem={renderItem}

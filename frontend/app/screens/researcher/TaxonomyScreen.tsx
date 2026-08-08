@@ -149,7 +149,7 @@ export default function TaxonomyScreen() {
                     </View>
                 ) : (
                     <FlatList
-                        style={{ width: '100%' }}
+                        style={{ width: '100%', flex: 1 }}
                         data={filteredSpecies}
                         keyExtractor={item => item.id}
                         renderItem={renderItem}
@@ -189,14 +189,13 @@ export default function TaxonomyScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        width: '100%',
-        alignItems: 'center',
     },
     searchContainer: {
         flexDirection: 'row',
         alignItems: 'center',
         width: '100%',
         maxWidth: 800,
+        alignSelf: 'center',
         marginVertical: 16,
         paddingHorizontal: 16,
         paddingVertical: 12,
