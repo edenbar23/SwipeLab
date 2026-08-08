@@ -226,8 +226,16 @@ public class E2eDataSeeder implements CommandLineRunner {
                                 log.warn("Could not parse image name for metadata: {}", file.getName());
                             }
 
+                            String base64Data = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=";
+                            try {
+                                byte[] fileContent = java.nio.file.Files.readAllBytes(file.toPath());
+                                base64Data = java.util.Base64.getEncoder().encodeToString(fileContent);
+                            } catch (Exception e) {
+                                log.warn("Could not read file to base64: {}", file.getName());
+                            }
+
                             e2eImages.add(Image.builder()
-                                    .imageData(file.getPath().replace("\\", "/"))
+                                    .imageData(base64Data)
                                     .taskId(task.getId())
                                     .priority(1)
                                     .experimentId(experimentId)
