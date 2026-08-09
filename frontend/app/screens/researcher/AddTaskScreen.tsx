@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Alert, KeyboardAvoidingView, Platform, StyleSheet, View, Text, TouchableOpacity } from "react-native";
+import { Alert, KeyboardAvoidingView, Platform, StyleSheet, View, Text, TouchableOpacity, Keyboard } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../../constants/theme';
 import { API_ENDPOINTS } from "@/api/apiEndpoints";
@@ -116,6 +116,11 @@ export default function AddTaskScreen({ route, navigation }: any) {
   };
 
   const handleSubmit = async () => {
+    Keyboard.dismiss();
+    if (Platform.OS === 'web' && document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+
     if (!formData.name || !formData.description) {
       Alert.alert("Validation Error", "Task name and description are required");
       return;

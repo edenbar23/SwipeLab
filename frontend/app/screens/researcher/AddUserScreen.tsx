@@ -8,6 +8,8 @@ import {
     TextInput,
     TouchableOpacity,
     View,
+    Platform,
+    Keyboard,
 } from 'react-native';
 import { useThemeStore } from '@/stores/themeStore';
 import { Colors } from '../../../constants/theme';
@@ -32,6 +34,11 @@ export default function AddUserScreen() {
     const [loading, setLoading] = useState(false);
 
     const handleSubmit = async () => {
+        Keyboard.dismiss();
+        if (Platform.OS === 'web' && document.activeElement instanceof HTMLElement) {
+            document.activeElement.blur();
+        }
+
         if (!username.trim() || !email.trim()) {
             Alert.alert("Error", "Please fill in all fields");
             return;

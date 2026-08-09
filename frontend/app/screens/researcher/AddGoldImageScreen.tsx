@@ -10,6 +10,7 @@ import {
     View,
     Image as RNImage,
     Platform,
+    Keyboard,
 } from "react-native";
 import * as ImagePicker from 'expo-image-picker';
 import { apiFetch } from "@/api/apiFetch";
@@ -135,6 +136,12 @@ export default function AddGoldImageScreen({ navigation }: any) {
     };
 
     const handleSubmit = async () => {
+        Keyboard.dismiss();
+        if (Platform.OS === 'web' && document.activeElement instanceof HTMLElement) {
+            document.activeElement.blur();
+        }
+
+        if (loading) return;
         setStatusMessage(null);
 
         if (uploadType === "url" && !imageUrl) {

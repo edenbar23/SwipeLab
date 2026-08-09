@@ -1,6 +1,6 @@
 import { useNavigation } from "@react-navigation/native";
 import React, { useState } from "react";
-import { ActivityIndicator, Alert, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Alert, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, Keyboard, Platform } from "react-native";
 import { apiFetch } from "@/api/apiFetch";
 import ScreenHeaderLayout from "@/components/layout/ScreenHeaderLayout/ScreenHeaderLayout";
 import useResponsive from "@/hooks/useResponsive";
@@ -42,6 +42,10 @@ export default function ProfileScreen() {
     };
 
     const handleCancelChangePassword = () => {
+        Keyboard.dismiss();
+        if (Platform.OS === 'web' && document.activeElement instanceof HTMLElement) {
+            document.activeElement.blur();
+        }
         setIsChangingPassword(false);
         setNewPassword("");
         setConfirmPassword("");
@@ -49,6 +53,10 @@ export default function ProfileScreen() {
     };
 
     const handleSavePassword = async () => {
+        Keyboard.dismiss();
+        if (Platform.OS === 'web' && document.activeElement instanceof HTMLElement) {
+            document.activeElement.blur();
+        }
         setPasswordError("");
 
         if (!newPassword || !confirmPassword) {

@@ -3,6 +3,8 @@ import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Keyboard,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -155,6 +157,11 @@ export default function EditTaskScreen({ route, navigation }: Props) {
   }, [taskId]);
 
   const handleSubmit = async () => {
+    Keyboard.dismiss();
+    if (Platform.OS === 'web' && document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+
     if (!name || !description) {
       Alert.alert("Validation Error", "Task name and description are required");
       return;
