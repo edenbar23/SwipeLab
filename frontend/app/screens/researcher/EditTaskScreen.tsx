@@ -50,6 +50,7 @@ export default function EditTaskScreen({ route, navigation }: Props) {
   const [optionsLoading, setOptionsLoading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isPublic, setIsPublic] = useState(false);
+  const [consensusThreshold, setConsensusThreshold] = useState<number>(3);
   const { theme } = useThemeStore();
   const themeColors = Colors[theme as keyof typeof Colors];
 
@@ -145,6 +146,7 @@ export default function EditTaskScreen({ route, navigation }: Props) {
         setSelectedExperiments(data.experiments?.map((id: number) => String(id)) || []);
 
         setIsPublic(data.isPublic || false);
+        setConsensusThreshold(data.consensusThreshold || 3);
 
         const loadedGroups = data.recipientGroups?.map((id: number) => `G-${id}`) || [];
         const loadedUsers = data.assignedUsernames?.map((un: string) => `U-${un}`) || [];
@@ -215,6 +217,7 @@ export default function EditTaskScreen({ route, navigation }: Props) {
         recipientGroups: selectedRecipients.filter(id => id.startsWith("G-")).map(id => Number(id.replace("G-", ""))),
         assignedUsernames: selectedRecipients.filter(id => id.startsWith("U-")).map(id => id.replace("U-", "")),
         sharedWithResearchers,
+        consensusThreshold,
       };
 
       const res = await apiFetch(
@@ -327,6 +330,17 @@ export default function EditTaskScreen({ route, navigation }: Props) {
             ))}
           </View>
         )}
+
+        <Text style={[styles.label, { color: themeColors.text, marginTop: 16 }]}>Consensus Threshold</Text>
+        <TextInput
+          style={[styles.input, { backgroundColor: themeColors.card, borderColor: themeColors.border, color: themeColors.text, marginBottom: 16 }]}
+          value={String(consensusThreshold)}
+          onChangeText={(text) => {
+            const num = parseInt(text.replace(/[^0-9]/g, ''), 10);
+            setConsensusThreshold(isNaN(num) ? 1 : Math.max(1, Math.min(10, num)));
+          }}
+          keyboardType="numeric"
+        />
 
         <Text style={[styles.label, { color: themeColors.text }]}>Experiments</Text>
         <MultiSelect

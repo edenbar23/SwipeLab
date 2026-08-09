@@ -149,7 +149,7 @@ export default function TaskDetailsScreen({ route, navigation }: Props) {
             <StatChip
               icon="checkmark-done-outline"
               label="Consensus"
-              value={`${task.consensusThreshold}%`}
+              value={String(task.consensusThreshold)}
               isDark={isDark}
               themeSecondary={themeColors.textSecondary}
             />

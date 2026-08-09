@@ -14,6 +14,7 @@ public class UpdateTaskRequest {
     private List<String> assignedUsernames;
     private List<String> sharedWithResearchers;
     private Boolean isPublic;
+    private Double consensusThreshold;
 
     /**
      * Map of Species Name -> List of SpeciesReferenceImage IDs
