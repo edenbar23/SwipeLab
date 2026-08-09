@@ -48,8 +48,8 @@ export default function NotificationBell() {
   const onBellPress = () => {
     // Brief scale pulse for tactile feedback
     Animated.sequence([
-      Animated.timing(scaleAnim, { toValue: 1.2, duration: 100, useNativeDriver: true }),
-      Animated.timing(scaleAnim, { toValue: 1, duration: 100, useNativeDriver: true }),
+      Animated.timing(scaleAnim, { toValue: 1.2, duration: 100, useNativeDriver: false }),
+      Animated.timing(scaleAnim, { toValue: 1, duration: 100, useNativeDriver: false }),
     ]).start();
     setOpen(true);
   };
