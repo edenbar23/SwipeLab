@@ -1,9 +1,9 @@
 package com.swipelab.tasks.application;
 
-import com.swipelab.dto.request.CreateTaskRequest;
-import com.swipelab.dto.request.UpdateTaskRequest;
-import com.swipelab.dto.response.TaskPageResponse;
-import com.swipelab.dto.response.TaskResponse;
+import com.swipelab.tasks.dto.CreateTaskRequest;
+import com.swipelab.tasks.dto.UpdateTaskRequest;
+import com.swipelab.tasks.dto.TaskPageResponse;
+import com.swipelab.tasks.dto.TaskResponse;
 import com.swipelab.exception.DuplicateResourceException;
 import com.swipelab.exception.ResourceNotFoundException;
 import com.swipelab.recipients.domain.RecipientGroup;
@@ -16,7 +16,7 @@ import com.swipelab.tasks.application.port.out.TargetSpeciesProvider;
 import com.swipelab.integration.stardbi.StardbiSyncService;
 import com.swipelab.classification.infrastructure.ImageRepository;
 import com.swipelab.classification.infrastructure.ClassificationRepository;
-import com.swipelab.dto.response.TaskProgressResponse;
+import com.swipelab.tasks.dto.TaskProgressResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -232,7 +232,7 @@ public class TaskService {
         
         if (request.getTargetSpecies() != null && !request.getTargetSpecies().isEmpty()) {
             List<String> speciesNames = request.getTargetSpecies().stream()
-                    .map(com.swipelab.dto.request.TargetSpeciesRequest::getName)
+                    .map(com.swipelab.tasks.dto.TargetSpeciesRequest::getName)
                     .collect(Collectors.toList());
             List<Long> speciesIds = targetSpeciesProvider.getOrCreateSpeciesIds(speciesNames);
             task.setTargetSpeciesIds(speciesIds);
@@ -298,7 +298,7 @@ public class TaskService {
         
         if (request.getTargetSpecies() != null) {
             List<String> speciesNames = request.getTargetSpecies().stream()
-                    .map(com.swipelab.dto.request.TargetSpeciesRequest::getName)
+                    .map(com.swipelab.tasks.dto.TargetSpeciesRequest::getName)
                     .collect(Collectors.toList());
             List<Long> speciesIds = targetSpeciesProvider.getOrCreateSpeciesIds(speciesNames);
             task.setTargetSpeciesIds(speciesIds);
@@ -377,3 +377,20 @@ public class TaskService {
     }
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

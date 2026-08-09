@@ -1,6 +1,6 @@
 package com.swipelab.users.api;
 
-import com.swipelab.dto.response.AdminNotificationResponse;
+import com.swipelab.users.dto.AdminNotificationResponse;
 import com.swipelab.users.application.AdminNotificationService;
 import com.swipelab.users.domain.NotificationSeverity;
 import com.swipelab.users.domain.NotificationType;
@@ -76,3 +76,6 @@ public class AdminNotificationController {
         return ResponseEntity.ok(Map.of("updated", updated));
     }
 }
+
+
+

@@ -1,10 +1,10 @@
 package com.swipelab.tasks.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.swipelab.dto.request.CreateTaskRequest;
-import com.swipelab.dto.request.UpdateTaskRequest;
-import com.swipelab.dto.response.TaskPageResponse;
-import com.swipelab.dto.response.TaskResponse;
+import com.swipelab.tasks.dto.CreateTaskRequest;
+import com.swipelab.tasks.dto.UpdateTaskRequest;
+import com.swipelab.tasks.dto.TaskPageResponse;
+import com.swipelab.tasks.dto.TaskResponse;
 import com.swipelab.tasks.application.TaskService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -168,3 +168,4 @@ class TaskControllerTest {
                 .andExpect(status().isOk());
     }
 }
+

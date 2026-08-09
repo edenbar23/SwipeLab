@@ -3,7 +3,7 @@ package com.swipelab.classification.api;
 import com.swipelab.classification.dto.UserClassification;
 import com.swipelab.classification.dto.api.NextBatchResponse;
 import com.swipelab.classification.dto.api.SubmitClassificationRequest;
-import com.swipelab.dto.request.ClassificationRequest;
+import com.swipelab.classification.dto.ClassificationRequest;
 import com.swipelab.classification.application.ClassificationService;
 import com.swipelab.classification.domain.image.ImageService;
 import com.swipelab.users.application.UserService;
@@ -126,3 +126,6 @@ public class ClassificationController {
                 return ResponseEntity.status(HttpStatus.CREATED).build();
         }
 }
+
+
+

@@ -7,8 +7,8 @@ import com.swipelab.classification.domain.core.Classification.UserResponse;
 import com.swipelab.classification.infrastructure.ClassificationRepository;
 import com.swipelab.classification.infrastructure.ImageRepository;
 import com.swipelab.config.CacheConfig;
-import com.swipelab.dto.response.DashboardStatsResponse;
-import com.swipelab.dto.response.UserPerformanceResponse;
+import com.swipelab.analytics.dto.DashboardStatsResponse;
+import com.swipelab.analytics.dto.UserPerformanceResponse;
 import com.swipelab.tasks.domain.TaskStatus;
 import com.swipelab.tasks.infrastructure.TaskRepository;
 import com.swipelab.users.infrastructure.UserRepository;
@@ -383,3 +383,9 @@ public class AnalyticsService {
                 .build();
     }
 }
+
+
+
+
+
+

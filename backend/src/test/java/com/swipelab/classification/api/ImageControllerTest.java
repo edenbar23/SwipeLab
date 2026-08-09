@@ -2,9 +2,9 @@ package com.swipelab.classification.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.swipelab.classification.domain.image.ImageService;
-import com.swipelab.dto.request.ImageUploadRequest;
-import com.swipelab.dto.response.ImageBatchResponse;
-import com.swipelab.dto.response.ImageResponse;
+import com.swipelab.classification.dto.ImageUploadRequest;
+import com.swipelab.classification.dto.ImageBatchResponse;
+import com.swipelab.classification.dto.ImageResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -94,3 +94,4 @@ class ImageControllerTest {
                 .andExpect(jsonPath("$.id").value(1L));
     }
 }
+

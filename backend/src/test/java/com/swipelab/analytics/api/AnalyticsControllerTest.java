@@ -2,8 +2,8 @@ package com.swipelab.analytics.api;
 
 import com.swipelab.analytics.application.AnalyticsService;
 import com.swipelab.analytics.dto.*;
-import com.swipelab.dto.response.DashboardStatsResponse;
-import com.swipelab.dto.response.UserPerformanceResponse;
+import com.swipelab.analytics.dto.DashboardStatsResponse;
+import com.swipelab.analytics.dto.UserPerformanceResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -213,3 +213,4 @@ class AnalyticsControllerTest {
                 .andExpect(jsonPath("$.summary.accuracy").value(0.8));
     }
 }
+

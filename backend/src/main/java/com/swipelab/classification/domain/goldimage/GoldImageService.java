@@ -3,8 +3,8 @@ import com.swipelab.classification.domain.image.Image;
 
 import com.swipelab.classification.infrastructure.GoldImageRepository;
 import com.swipelab.classification.infrastructure.ImageRepository;
-import com.swipelab.dto.request.GoldImageRequest;
-import com.swipelab.dto.response.GoldImageResponse;
+import com.swipelab.classification.dto.GoldImageRequest;
+import com.swipelab.classification.dto.GoldImageResponse;
 import com.swipelab.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -176,3 +176,9 @@ public class GoldImageService {
         }
     }
 }
+
+
+
+
+
+

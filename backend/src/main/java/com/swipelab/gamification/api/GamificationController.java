@@ -1,6 +1,6 @@
 package com.swipelab.gamification.api;
 
-import com.swipelab.dto.response.GamificationUserInfoResponse;
+import com.swipelab.gamification.dto.GamificationUserInfoResponse;
 import com.swipelab.gamification.domain.Gamification;
 import com.swipelab.gamification.domain.LeaderboardService;
 import com.swipelab.gamification.domain.RankService;
@@ -64,4 +64,7 @@ public class GamificationController {
                 .build());
     }
 }
+
+
+
 

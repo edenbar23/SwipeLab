@@ -1,9 +1,9 @@
 package com.swipelab.tasks.api;
 
-import com.swipelab.dto.request.CreateTaskRequest;
-import com.swipelab.dto.request.UpdateTaskRequest;
-import com.swipelab.dto.response.TaskPageResponse;
-import com.swipelab.dto.response.TaskResponse;
+import com.swipelab.tasks.dto.CreateTaskRequest;
+import com.swipelab.tasks.dto.UpdateTaskRequest;
+import com.swipelab.tasks.dto.TaskPageResponse;
+import com.swipelab.tasks.dto.TaskResponse;
 import com.swipelab.integration.stardbi.StardbiClientPort;
 import com.swipelab.integration.stardbi.dto.ExternalExperimentDto;
 import com.swipelab.tasks.application.TaskService;
@@ -143,3 +143,15 @@ public class TaskController {
     // public ResponseEntity<List<TaskResponse>> getAll() ...
     // This is replaced by /dashboard for admins or /my-tasks for users.
 }
+
+
+
+
+
+
+
+
+
+
+
+

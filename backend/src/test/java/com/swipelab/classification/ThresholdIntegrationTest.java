@@ -6,7 +6,7 @@ import com.swipelab.classification.domain.threshold.ConsensusResult;
 import com.swipelab.classification.infrastructure.ConsensusResultRepository;
 import com.swipelab.classification.infrastructure.ImageRepository;
 import com.swipelab.classification.dto.api.SubmitClassificationRequest;
-import com.swipelab.dto.request.ImageUploadRequest;
+import com.swipelab.classification.dto.ImageUploadRequest;
 import com.swipelab.tasks.application.port.out.TargetSpeciesProvider;
 import com.swipelab.tasks.domain.Task;
 import com.swipelab.tasks.infrastructure.TaskRepository;
@@ -157,3 +157,4 @@ public class ThresholdIntegrationTest {
         assertThat(pair2).isEmpty();
     }
 }
+
