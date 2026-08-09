@@ -83,6 +83,9 @@ export const useAuthStore = create<AuthState>((set) => ({
       return;
     }
 
+    const { getRefreshToken } = require("@/utils/tokenUtils");
+    const refreshToken = await getRefreshToken();
+
     // 1. Clear frontend state immediately to prevent re-entry
     set({ token: null, role: null, authProvider: null, isSuperAdmin: false, isBanned: false });
     await clearTokens();
@@ -92,14 +95,14 @@ export const useAuthStore = create<AuthState>((set) => ({
     await removeItem("username");
 
     // 2. Call the backend to invalidate the refresh token / clear cookies (fire-and-forget)
-    // We import apiFetch inline here because we just need to hit the logout endpoint,
-    // but we can also just use standard fetch to avoid circular deps if needed.
     const { backendUrl } = require("@/api/apiFetch");
     fetch(backendUrl + API_ENDPOINTS.AUTH.LOGOUT, {
       method: "POST",
-      credentials: "omit" // or "include" depending on backend implementation
-    })
-    .catch(e => console.error("Logout request failed", e));
+      credentials: "include", // Essential for web HttpOnly cookies
+      headers: {
+        ...(refreshToken && Platform.OS !== "web" ? { Authorization: `Bearer ${refreshToken}` } : {})
+      }
+    }).catch(e => console.error("Logout request failed", e));
 
     // 4. Clear mode and query cache
     useModeStore.getState().resetMode?.();
