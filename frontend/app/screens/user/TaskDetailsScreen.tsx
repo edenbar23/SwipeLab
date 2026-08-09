@@ -25,8 +25,12 @@ export default function TaskDetailsScreen() {
     const borderCol = isDark ? themeColors.border : '#BFDBFE';
 
     const handlePlay = () => {
+<<<<<<< Updated upstream
         setActiveTaskId(task.id ?? task.taskId);
         navigation.navigate('SwipeLab');
+=======
+        navigation.navigate('SwipeLab', { taskId: task.taskId ?? task.id });
+>>>>>>> Stashed changes
     };
 
     return (

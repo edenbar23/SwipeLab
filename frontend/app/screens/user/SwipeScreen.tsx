@@ -37,7 +37,13 @@ export default function SwipeScreen() {
     useSwipeStore();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+<<<<<<< Updated upstream
   const [activeWarning, setActiveWarning] = useState<ClassificationWarning | null>(null);
+=======
+
+  const route = useRoute<any>();
+  const taskId: number | undefined = route?.params?.taskId;
+>>>>>>> Stashed changes
 
   const { isPhone, isDesktop } = useResponsive();
   const { theme } = useThemeStore();

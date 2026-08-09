@@ -280,17 +280,22 @@ export const useGoldImages = () => {
   });
 };
 
+<<<<<<< Updated upstream
 export const useSwipeBatch = (
   taskId: string | number,
   options?: { enabled?: boolean }
 ) => {
+=======
+export const useSwipeBatch = (taskId: string | number | undefined) => {
+>>>>>>> Stashed changes
   return useQuery({
-    queryKey: QUERY_KEYS.swipeBatch(taskId),
+    queryKey: QUERY_KEYS.swipeBatch(taskId ?? 0),
     queryFn: async () => {
-      const res = await apiFetch(API_ENDPOINTS.TASKS.PLAY_TASK(taskId), { method: 'POST' });
+      const res = await apiFetch(API_ENDPOINTS.TASKS.PLAY_TASK(taskId!), { method: 'POST' });
       if (!res.ok) throw new Error("Failed to load batch");
       return res.json();
     },
+    enabled: !!taskId,
     staleTime: 5 * 60 * 1000,
     // Caller can opt out (e.g. when no task is selected yet)
     enabled: options?.enabled !== false,
