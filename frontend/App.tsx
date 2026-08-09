@@ -12,7 +12,6 @@ import { MaintenanceScreen } from "@/screens/shared/MaintenanceScreen";
 import { useHealthCheck } from "@/hooks/useHealthCheck";
 
 export default function App() {
-  console.log("App.tsx IS LOADING!");
 
   // Use inline imports for stores that might cause circular dependency if imported top-level
   const initialize = require("@/stores/authStore").useAuthStore((state: any) => state.initialize);

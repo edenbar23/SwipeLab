@@ -16,6 +16,7 @@ import {
   useMarkNotificationRead,
   useNotificationUnreadCount,
 } from '@/hooks/useAdminNotifications';
+import { useThemeColor } from '@/hooks/use-theme-color';
 import { AdminNotification } from '@/types/fraudTypes';
 
 const SEVERITY_COLORS: Record<string, string> = {
@@ -33,6 +34,7 @@ const SEVERITY_COLORS: Record<string, string> = {
 export default function NotificationBell() {
   const [open, setOpen] = useState(false);
   const scaleAnim = useRef(new Animated.Value(1)).current;
+  const iconColor = useThemeColor({ light: '#000', dark: '#fff' }, 'text');
 
   const { data: countData } = useNotificationUnreadCount();
   const unreadCount = countData?.unreadCount ?? 0;
@@ -77,7 +79,9 @@ export default function NotificationBell() {
       >
         <Ionicons name={severityIcon(item.severity)} size={20} color={color} style={styles.notifIcon} />
         <View style={styles.notifText}>
-          <Text style={styles.notifTitle} numberOfLines={1}>{item.title}</Text>
+          <Text style={styles.notifTitle} numberOfLines={1}>
+            {item.title.replace(/[⚠️🚫✅🚨🔔]/g, '').trim()}
+          </Text>
           <Text style={styles.notifMsg} numberOfLines={2}>{item.message}</Text>
           {item.targetUsername && (
             <Text style={styles.notifUser}>@{item.targetUsername}</Text>
@@ -99,7 +103,7 @@ export default function NotificationBell() {
         activeOpacity={0.75}
       >
         <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
-          <Ionicons name="notifications" size={24} color="#fff" />
+          <Ionicons name="notifications" size={24} color={iconColor} />
           {unreadCount > 0 && (
             <View style={styles.badge} accessibilityLabel={`${unreadCount} unread notifications`}>
               <Text style={styles.badgeText}>{unreadCount > 99 ? '99+' : unreadCount}</Text>
@@ -125,7 +129,7 @@ export default function NotificationBell() {
         <View style={styles.panel}>
           {/* Panel header */}
           <View style={styles.panelHeader}>
-            <Text style={styles.panelTitle}>🔔 Notifications</Text>
+            <Text style={styles.panelTitle}>Notifications</Text>
             <TouchableOpacity
               onPress={handleMarkAllRead}
               disabled={markAll.isPending || unreadCount === 0}

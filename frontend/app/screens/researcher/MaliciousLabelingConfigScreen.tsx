@@ -230,7 +230,7 @@ export default function MaliciousLabelingConfigScreen() {
 
   return (
     <ScreenHeaderLayout
-      leftIcon={require('../../../assets/images/settings.png')}
+      leftIcon={require('../../../assets/images/config.png')}
       leftTitle="Malicious Labeling Config"
       rightIcon={require('../../../assets/images/settings.png')}
       rightTitle="Settings"
