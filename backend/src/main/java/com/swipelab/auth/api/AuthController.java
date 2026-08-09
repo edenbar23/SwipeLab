@@ -77,8 +77,12 @@ public class AuthController {
      * Register a new user
      */
     @PostMapping("/register")
-    public ResponseEntity<java.util.Map<String, Object>> register(@Valid @RequestBody RegisterRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(authenticationService.register(request));
+    public ResponseEntity<java.util.Map<String, Object>> register(@Valid @RequestBody RegisterRequest request, HttpServletResponse response) {
+        java.util.Map<String, Object> result = authenticationService.register(request);
+        if (result.containsKey("accessToken") && result.containsKey("refreshToken")) {
+            setAuthCookies(response, (String) result.get("accessToken"), (String) result.get("refreshToken"));
+        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
     /**

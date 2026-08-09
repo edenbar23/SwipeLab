@@ -44,8 +44,8 @@ test.describe('[E2E] U7 View Collection', () => {
       // YES-classified images appear: at least one collection card with an image.
       await expect.poll(() => collectionImageCount(page), { timeout: 20000 }).toBeGreaterThan(0);
 
-      // Image metadata is displayed: the seeded entry's species ("BEE") is shown.
-      await expect(page.getByText('BEE').locator('visible=true').first()).toBeVisible({ timeout: 10000 });
+      // Image metadata is displayed: the seeded entry's species ("Cat") is shown.
+      await expect(page.getByText('Cat', { exact: true }).locator('visible=true').first()).toBeVisible({ timeout: 10000 });
 
       // Collection count matches the number of rendered cards.
       await expect.poll(() => collectionImageCount(page), { timeout: 10000 }).toBe(count);

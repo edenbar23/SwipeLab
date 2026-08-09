@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Image, ImageProps, Platform, StyleSheet, View, ActivityIndicator } from 'react-native';
 import { useAuthStore } from '@/stores/authStore';
-import { backendUrl } from '@/api/apiFetch';
+import { apiFetch, backendUrl } from '@/api/apiFetch';
 
 interface AuthenticatedImageProps extends Omit<ImageProps, 'source'> {
   uri: string | null | undefined;
@@ -46,11 +46,7 @@ export default function AuthenticatedImage({
         setLoading(true);
         setError(false);
         try {
-          const headers: Record<string, string> = {};
-          if (token) {
-            headers['Authorization'] = `Bearer ${token}`;
-          }
-          const response = await fetch(resolvedUri, { headers });
+          const response = await apiFetch(resolvedUri);
           if (!response.ok) {
             throw new Error(`Failed to fetch image: ${response.statusText}`);
           }

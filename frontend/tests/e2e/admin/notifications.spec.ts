@@ -60,7 +60,7 @@ test.describe('[E2E] A3 Notifications', () => {
     await bell.click();
 
     // Notifications load successfully: the panel opens.
-    await expect(page.getByText('🔔 Notifications').locator('visible=true').first()).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText('Notifications', { exact: true }).locator('visible=true').first()).toBeVisible({ timeout: 10000 });
 
     // Notification details can be viewed: at least one notification row is shown
     // (referencing the warned user), and it's not the empty state.
@@ -87,38 +87,33 @@ test.describe('[E2E] A3 Notifications', () => {
   });
 });
 
-/** Reads the session token from the page's localStorage. */
-async function sessionToken(page: Page): Promise<string | null> {
-  return page.evaluate(() => window.localStorage.getItem('token'));
-}
-
 /**
  * Marks all notifications read via the app's own endpoint (the panel's "Mark all read"
- * button → PATCH /api/admin/notifications/read-all). Uses Playwright's request API
- * (Node-side HTTP, so no browser CORS/preflight) with the session bearer token.
+ * button → PATCH /api/admin/notifications/read-all). Uses browser fetch with credentials.
  */
 async function markAllRead(page: Page): Promise<boolean> {
-  const token = await sessionToken(page);
-  if (!token) return false;
-  const res = await page.request.patch('http://localhost:8080/api/admin/notifications/read-all', {
-    headers: { Authorization: `Bearer ${token}` },
+  return page.evaluate(async () => {
+    const res = await fetch('http://localhost:8080/api/admin/notifications/read-all', {
+      method: 'PATCH',
+      credentials: 'include'
+    });
+    return res.ok;
   });
-  return res.ok();
 }
 
 /**
- * Reads the current unread count from /unread-count via Playwright's request API
- * (Node-side, no browser caching) using the session bearer token.
+ * Reads the current unread count from /unread-count via browser fetch with credentials.
  */
 async function unreadCount(page: Page): Promise<number> {
-  const token = await sessionToken(page);
-  if (!token) return -1;
-  const res = await page.request.get('http://localhost:8080/api/admin/notifications/unread-count', {
-    headers: { Authorization: `Bearer ${token}` },
+  return page.evaluate(async () => {
+    const res = await fetch('http://localhost:8080/api/admin/notifications/unread-count?_=' + Date.now(), {
+      credentials: 'include',
+      cache: 'no-store'
+    });
+    if (!res.ok) return -1;
+    const data = await res.json();
+    return typeof data?.unreadCount === 'number' ? data.unreadCount : -1;
   });
-  if (!res.ok()) return -1;
-  const data = await res.json();
-  return typeof data?.unreadCount === 'number' ? data.unreadCount : -1;
 }
 
 /**
