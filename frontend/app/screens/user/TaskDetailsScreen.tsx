@@ -6,16 +6,26 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-nati
 import { Colors } from '../../../constants/theme';
 import { useThemeStore } from '@/stores/themeStore';
 import { useSwipeStore } from '@/stores/swipeStore';
+import { useMyTasks, useAvailableTasks } from '@/api/queries';
 import AuthenticatedImage from '@/components/ui/AuthenticatedImage';
 
 export default function TaskDetailsScreen() {
     const navigation = useNavigation<any>();
     const route = useRoute<any>();
-    const { task } = route.params;
+    const { task: initialTask } = route.params;
     const { theme } = useThemeStore();
     const themeColors = Colors[theme as keyof typeof Colors];
     const isDark = theme === 'dark';
     const { setActiveTaskId } = useSwipeStore();
+
+    // Fetch live data so progress updates after classification
+    const { data: myTasks } = useMyTasks();
+    const { data: availableTasks } = useAvailableTasks();
+    
+    const taskId = initialTask.id ?? initialTask.taskId;
+    const task = myTasks?.find((t: any) => (t.id ?? t.taskId) === taskId) 
+              || availableTasks?.find((t: any) => (t.id ?? t.taskId) === taskId) 
+              || initialTask;
 
     const totalImages      = task.progress?.totalImages    ?? task.totalImages    ?? 0;
     const imagesClassified = task.progress?.imagesClassified ?? task.imagesClassified ?? 0;
