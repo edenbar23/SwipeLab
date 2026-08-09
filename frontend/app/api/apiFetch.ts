@@ -87,7 +87,7 @@ export async function apiFetch(
   // Get token from storage (null on web if cookies are used)
   const token = await getAccessToken();
 
-  const fullUrl = backendUrl + input;
+  const fullUrl = url.startsWith('http') ? url : backendUrl + url;
   if (__DEV__) {
     console.log("[apiFetch] Full exact URL being fetch'ed:", fullUrl);
   }
