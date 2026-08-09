@@ -241,9 +241,9 @@ export default function EditTaskScreen({ route, navigation }: Props) {
       // page reflects the new reference images right away instead of waiting out
       // the query's staleTime. The details/list queries all live under ['tasks'].
       // Await the details refetch so the data is fresh before we navigate back.
-      await queryClient.refetchQueries({ queryKey: QUERY_KEYS.taskDetails(taskId) });
-      queryClient.refetchQueries({ queryKey: ["tasks"] });
-      queryClient.refetchQueries({ queryKey: ["species", "pool"] });
+      await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.taskDetails(taskId) });
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["species", "pool"] });
 
       Alert.alert("Success", "Task updated successfully");
       navigation.navigate("TasksManagement");
@@ -331,16 +331,43 @@ export default function EditTaskScreen({ route, navigation }: Props) {
           </View>
         )}
 
-        <Text style={[styles.label, { color: themeColors.text, marginTop: 16 }]}>Consensus Threshold</Text>
-        <TextInput
-          style={[styles.input, { backgroundColor: themeColors.card, borderColor: themeColors.border, color: themeColors.text, marginBottom: 16 }]}
-          value={String(consensusThreshold)}
-          onChangeText={(text) => {
-            const num = parseInt(text.replace(/[^0-9]/g, ''), 10);
-            setConsensusThreshold(isNaN(num) ? 1 : Math.max(1, Math.min(10, num)));
-          }}
-          keyboardType="numeric"
-        />
+        <View style={{ marginTop: 16, marginBottom: 16 }}>
+          <Text style={[styles.pickersHeading, { color: themeColors.textSecondary }]}>
+            CONSENSUS SETTINGS
+          </Text>
+          <View style={[styles.consensusContainer, { backgroundColor: themeColors.card, borderColor: themeColors.border }]}>
+            <View style={styles.consensusTextWrapper}>
+              <Text style={[styles.consensusLabel, { color: themeColors.text }]}>Threshold</Text>
+              <Text style={[styles.consensusHint, { color: themeColors.textSecondary }]}>
+                Cumulative score required for an image to reach consensus (3 - 20). 
+                E.g., 3 requires 3 expert classifications.
+              </Text>
+            </View>
+            <View style={styles.stepperContainer}>
+              <TouchableOpacity
+                style={[styles.stepperBtn, { borderColor: themeColors.border, backgroundColor: themeColors.background }]}
+                onPress={() => {
+                  const val = Math.max(3, consensusThreshold - 1);
+                  setConsensusThreshold(val);
+                }}
+                disabled={consensusThreshold <= 3}
+              >
+                <Text style={[styles.stepperBtnText, { color: consensusThreshold <= 3 ? themeColors.textSecondary : themeColors.text }]}>-</Text>
+              </TouchableOpacity>
+              <Text style={[styles.stepperValue, { color: themeColors.text }]}>{consensusThreshold}</Text>
+              <TouchableOpacity
+                style={[styles.stepperBtn, { borderColor: themeColors.border, backgroundColor: themeColors.background }]}
+                onPress={() => {
+                  const val = Math.min(20, consensusThreshold + 1);
+                  setConsensusThreshold(val);
+                }}
+                disabled={consensusThreshold >= 20}
+              >
+                <Text style={[styles.stepperBtnText, { color: consensusThreshold >= 20 ? themeColors.textSecondary : themeColors.text }]}>+</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
 
         <Text style={[styles.label, { color: themeColors.text }]}>Experiments</Text>
         <MultiSelect
@@ -471,4 +498,12 @@ const styles = StyleSheet.create({
   pickersHeading: { fontSize: 11, fontWeight: "700", letterSpacing: 0.8, marginBottom: 8, marginTop: 12 },
   poolLoadingRow: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 12 },
   poolLoadingText: { fontSize: 13 },
+  consensusContainer:{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, borderRadius: 12, borderWidth: 1, gap: 16 },
+  consensusTextWrapper: { flex: 1 },
+  consensusLabel:    { fontSize: 16, fontWeight: '600', marginBottom: 4 },
+  consensusHint:     { fontSize: 13, lineHeight: 18 },
+  stepperContainer:  { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  stepperBtn:        { width: 36, height: 36, borderRadius: 18, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
+  stepperBtnText:    { fontSize: 18, fontWeight: '700' },
+  stepperValue:      { fontSize: 18, fontWeight: '700', minWidth: 24, textAlign: 'center' },
 });

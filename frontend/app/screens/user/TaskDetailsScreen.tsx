@@ -6,6 +6,7 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-nati
 import { Colors } from '../../../constants/theme';
 import { useThemeStore } from '@/stores/themeStore';
 import { useSwipeStore } from '@/stores/swipeStore';
+import AuthenticatedImage from '@/components/ui/AuthenticatedImage';
 
 export default function TaskDetailsScreen() {
     const navigation = useNavigation<any>();
@@ -122,20 +123,51 @@ export default function TaskDetailsScreen() {
                                             index === (task.targetSpecies || []).length - 1 && { borderBottomWidth: 0 },
                                         ]}
                                     >
-                                        <View style={[styles.speciesIconWrap, { backgroundColor: isDark ? '#1e3a5f' : '#DBEAFE' }]}>
-                                            <Ionicons name="leaf" size={16} color="#3B82F6" />
-                                        </View>
-                                        <View style={{ flex: 1 }}>
-                                            <Text style={[styles.speciesName, { color: themeColors.text }]}>
-                                                {commonName || name}
-                                            </Text>
-                                            {commonName && name && commonName !== name && (
-                                                <Text style={[styles.speciesSci, { color: themeColors.textSecondary }]}>
-                                                    {name}
+                                        <View style={styles.speciesRowHeader}>
+                                            <View style={[styles.speciesIconWrap, { backgroundColor: isDark ? '#1e3a5f' : '#DBEAFE' }]}>
+                                                <Ionicons name="leaf" size={16} color="#3B82F6" />
+                                            </View>
+                                            <View style={{ flex: 1 }}>
+                                                <Text style={[styles.speciesName, { color: themeColors.text }]}>
+                                                    {commonName || name}
                                                 </Text>
-                                            )}
+                                                {commonName && name && commonName !== name && (
+                                                    <Text style={[styles.speciesSci, { color: themeColors.textSecondary }]}>
+                                                        {name}
+                                                    </Text>
+                                                )}
+                                            </View>
                                         </View>
-                                        <Ionicons name="chevron-forward" size={14} color={borderCol} />
+                                        {(s.referenceImages || []).length > 0 && (
+                                            <ScrollView
+                                                horizontal
+                                                showsHorizontalScrollIndicator={false}
+                                                style={{ marginTop: 12, paddingLeft: 46 }}
+                                                contentContainerStyle={{ gap: 10 }}
+                                            >
+                                                {s.referenceImages.map((img: any, idx: number) => {
+                                                    let imageUri = '';
+                                                    if (img.imageUrl) {
+                                                      imageUri = img.imageUrl;
+                                                    } else if (img.data) {
+                                                      imageUri = `data:${img.contentType || 'image/jpeg'};base64,${img.data}`;
+                                                    }
+                                                    return (
+                                                        <View key={idx} style={styles.imageCard}>
+                                                            <AuthenticatedImage
+                                                                uri={imageUri}
+                                                                style={[styles.image, { borderColor: borderCol }]}
+                                                            />
+                                                            {!!img.caption && (
+                                                                <Text style={[styles.imageCaption, { color: themeColors.textSecondary }]} numberOfLines={1}>
+                                                                    {img.caption}
+                                                                </Text>
+                                                            )}
+                                                        </View>
+                                                    );
+                                                })}
+                                            </ScrollView>
+                                        )}
                                     </View>
                                 );
                             })}
@@ -345,11 +377,15 @@ const styles = StyleSheet.create({
         elevation: 2,
     },
     speciesRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
+        flexDirection: 'column',
+        alignItems: 'stretch',
         paddingVertical: 12,
         paddingHorizontal: 14,
         borderBottomWidth: 1,
+    },
+    speciesRowHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
         gap: 12,
     },
     speciesIconWrap: {
@@ -367,6 +403,23 @@ const styles = StyleSheet.create({
         fontSize: 12,
         fontStyle: 'italic',
         marginTop: 1,
+    },
+    imageCard: {
+        alignItems: 'center',
+        width: 100,
+    },
+    image: {
+        width: 100,
+        height: 100,
+        borderRadius: 10,
+        backgroundColor: '#DBEAFE',
+        borderWidth: 1,
+    },
+    imageCaption: {
+        fontSize: 11,
+        marginTop: 5,
+        textAlign: 'center',
+        maxWidth: 100,
     },
 
     // Footer
