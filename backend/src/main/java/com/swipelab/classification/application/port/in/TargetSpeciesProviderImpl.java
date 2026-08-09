@@ -2,7 +2,7 @@ package com.swipelab.classification.application.port.in;
 
 import com.swipelab.classification.domain.core.Label;
 import com.swipelab.classification.infrastructure.LabelRepository;
-import com.swipelab.dto.response.TargetSpeciesResponse;
+import com.swipelab.tasks.dto.TargetSpeciesResponse;
 import com.swipelab.tasks.application.port.out.TargetSpeciesProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -67,8 +67,8 @@ public class TargetSpeciesProviderImpl implements TargetSpeciesProvider {
         return labels.stream()
                 .map(label -> {
                     List<com.swipelab.classification.domain.image.SpeciesReferenceImage> imagesForLabel = refImagesByLabelId.getOrDefault(label.getId(), Collections.emptyList());
-                    List<com.swipelab.dto.response.ReferenceImageResponse> refImageResponses = imagesForLabel.stream()
-                            .map(img -> com.swipelab.dto.response.ReferenceImageResponse.builder()
+                    List<com.swipelab.tasks.dto.ReferenceImageResponse> refImageResponses = imagesForLabel.stream()
+                            .map(img -> com.swipelab.tasks.dto.ReferenceImageResponse.builder()
                                     .imageUrl("/api/v1/species/reference-images/" + img.getId() + "/image")
                                     .caption(img.getCaption())
                                     .build())
@@ -83,3 +83,6 @@ public class TargetSpeciesProviderImpl implements TargetSpeciesProvider {
                 .collect(Collectors.toList());
     }
 }
+
+
+

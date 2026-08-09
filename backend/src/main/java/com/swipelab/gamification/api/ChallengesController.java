@@ -1,6 +1,6 @@
 package com.swipelab.gamification.api;
 
-import com.swipelab.gamification.challenge.ChallengeQueryService;
+import com.swipelab.gamification.application.challenge.ChallengeQueryService;
 import com.swipelab.gamification.dto.ChallengeDto;
 import com.swipelab.gamification.dto.UserBadgeDto;
 import lombok.RequiredArgsConstructor;
@@ -42,3 +42,4 @@ public class ChallengesController {
         return principal.getName();
     }
 }
+

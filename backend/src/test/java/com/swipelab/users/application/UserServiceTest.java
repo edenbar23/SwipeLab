@@ -2,8 +2,8 @@ package com.swipelab.users.application;
 
 import com.swipelab.auth.domain.AuthMapper;
 import com.swipelab.auth.application.SecurityAuthorizationService;
-import com.swipelab.dto.request.UpdateProfileRequest;
-import com.swipelab.dto.response.UserProfileResponse;
+import com.swipelab.users.dto.UpdateProfileRequest;
+import com.swipelab.users.dto.UserProfileResponse;
 import com.swipelab.exception.ResourceNotFoundException;
 import com.swipelab.gamification.infrastructure.GamificationRepository;
 import com.swipelab.users.domain.User;
@@ -212,3 +212,4 @@ class UserServiceTest {
         assertEquals("You cannot unban yourself.", exception.getMessage());
     }
 }
+

@@ -1,8 +1,8 @@
 package com.swipelab.recipients.application;
 
-import com.swipelab.dto.request.CreateRecipientGroupRequest;
-import com.swipelab.dto.request.UpdateRecipientGroupRequest;
-import com.swipelab.dto.response.RecipientGroupResponse;
+import com.swipelab.recipients.dto.CreateRecipientGroupRequest;
+import com.swipelab.recipients.dto.UpdateRecipientGroupRequest;
+import com.swipelab.recipients.dto.RecipientGroupResponse;
 import com.swipelab.exception.ResourceNotFoundException;
 import com.swipelab.recipients.domain.RecipientGroup;
 import com.swipelab.recipients.domain.RecipientUser;
@@ -107,3 +107,12 @@ public class RecipientGroupService {
                 .build();
     }
 }
+
+
+
+
+
+
+
+
+

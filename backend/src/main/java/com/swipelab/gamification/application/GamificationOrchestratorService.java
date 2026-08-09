@@ -2,8 +2,8 @@ package com.swipelab.gamification.application;
 
 import com.swipelab.classification.domain.core.Classification.UserResponse;
 import com.swipelab.classification.events.ClassificationSubmittedEvent;
-import com.swipelab.gamification.challenge.ChallengeEngine;
-import com.swipelab.gamification.challenge.MetricType;
+import com.swipelab.gamification.application.challenge.ChallengeEngine;
+import com.swipelab.gamification.domain.challenge.MetricType;
 import com.swipelab.gamification.domain.BadgeService;
 import com.swipelab.gamification.domain.Gamification;
 import com.swipelab.gamification.domain.PointsService;
@@ -93,4 +93,5 @@ public class GamificationOrchestratorService {
         log.info("User {} yes_tag_count={} rank={}", username, newCount, newTier.name());
     }
 }
+
 

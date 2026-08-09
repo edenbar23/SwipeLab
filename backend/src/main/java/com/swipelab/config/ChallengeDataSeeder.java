@@ -1,12 +1,12 @@
 package com.swipelab.config;
 
-import com.swipelab.gamification.badge.BadgeDefinition;
-import com.swipelab.gamification.badge.BadgeDefinitionRepository;
-import com.swipelab.gamification.challenge.AggregationType;
-import com.swipelab.gamification.challenge.ChallengeDefinition;
-import com.swipelab.gamification.challenge.ChallengeDefinitionRepository;
-import com.swipelab.gamification.challenge.MetricType;
-import com.swipelab.gamification.challenge.TimeWindowType;
+import com.swipelab.gamification.domain.badge.BadgeDefinition;
+import com.swipelab.gamification.infrastructure.badge.BadgeDefinitionRepository;
+import com.swipelab.gamification.domain.challenge.AggregationType;
+import com.swipelab.gamification.domain.challenge.ChallengeDefinition;
+import com.swipelab.gamification.infrastructure.challenge.ChallengeDefinitionRepository;
+import com.swipelab.gamification.domain.challenge.MetricType;
+import com.swipelab.gamification.domain.challenge.TimeWindowType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -170,3 +170,4 @@ public class ChallengeDataSeeder implements CommandLineRunner {
         }
     }
 }
+

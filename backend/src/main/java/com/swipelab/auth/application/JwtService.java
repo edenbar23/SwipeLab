@@ -1,7 +1,7 @@
 package com.swipelab.auth.application;
 
 import com.swipelab.auth.infrastructure.JwtConfig;
-import com.swipelab.dto.response.AuthResponse;
+import com.swipelab.auth.dto.AuthResponse;
 import com.swipelab.exception.UnauthorizedException;
 import com.swipelab.users.domain.User;
 import com.swipelab.users.infrastructure.UserRepository;
@@ -126,3 +126,6 @@ public class JwtService {
         return tokenProvider.extractUsername(refreshToken);
     }
 }
+
+
+

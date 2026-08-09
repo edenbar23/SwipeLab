@@ -1,8 +1,8 @@
 package com.swipelab.auth.application;
 
-import com.swipelab.dto.request.RegisterRequest;
-import com.swipelab.dto.request.ResetPasswordRequest;
-import com.swipelab.dto.response.AuthResponse;
+import com.swipelab.auth.dto.RegisterRequest;
+import com.swipelab.auth.dto.ResetPasswordRequest;
+import com.swipelab.auth.dto.AuthResponse;
 import com.swipelab.exception.EmailVerificationException;
 import com.swipelab.exception.PasswordResetException;
 import com.swipelab.users.domain.User;
@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.swipelab.dto.request.LoginRequest;
+import com.swipelab.auth.dto.LoginRequest;
 import com.swipelab.exception.UnauthorizedException;
 
 import java.time.LocalDateTime;
@@ -293,7 +293,7 @@ public class AuthenticationService {
      * generates an invitation token and sends an email.
      */
     @Transactional
-    public void inviteAdmin(com.swipelab.dto.request.InviteAdminRequest request) {
+    public void inviteAdmin(com.swipelab.auth.dto.InviteAdminRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("User already exists with this email");
         }
@@ -317,3 +317,16 @@ public class AuthenticationService {
     }
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+

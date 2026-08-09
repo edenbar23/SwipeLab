@@ -1,6 +1,6 @@
 package com.swipelab.users.api;
 
-import com.swipelab.dto.response.AdminNotificationResponse;
+import com.swipelab.users.dto.AdminNotificationResponse;
 import com.swipelab.exception.ResourceNotFoundException;
 import com.swipelab.users.application.AdminNotificationService;
 import com.swipelab.users.domain.NotificationSeverity;
@@ -144,3 +144,4 @@ class AdminNotificationControllerTest {
                 .andExpect(jsonPath("$.updated").value(5));
     }
 }
+

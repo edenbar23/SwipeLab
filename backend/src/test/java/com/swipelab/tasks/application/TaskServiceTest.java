@@ -1,10 +1,10 @@
 package com.swipelab.tasks.application;
 
-import com.swipelab.dto.request.CreateTaskRequest;
-import com.swipelab.dto.request.UpdateTaskRequest;
-import com.swipelab.dto.response.TaskPageResponse;
-import com.swipelab.dto.response.TaskProgressResponse;
-import com.swipelab.dto.response.TaskResponse;
+import com.swipelab.tasks.dto.CreateTaskRequest;
+import com.swipelab.tasks.dto.UpdateTaskRequest;
+import com.swipelab.tasks.dto.TaskPageResponse;
+import com.swipelab.tasks.dto.TaskProgressResponse;
+import com.swipelab.tasks.dto.TaskResponse;
 import com.swipelab.exception.DuplicateResourceException;
 import com.swipelab.exception.ResourceNotFoundException;
 import com.swipelab.recipients.domain.RecipientGroup;
@@ -356,3 +356,4 @@ class TaskServiceTest {
         assertEquals(0, captured[0].getImagesClassified(), "imagesClassified should be 0 for empty task");
     }
 }
+

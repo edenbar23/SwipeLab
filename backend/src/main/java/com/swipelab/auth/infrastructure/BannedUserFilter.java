@@ -30,7 +30,7 @@ import java.util.Map;
  *
  * <p>Skips: unauthenticated requests, public auth paths, and OPTIONS preflight.
  *
- * <p>The JSON body mirrors {@link com.swipelab.dto.response.ErrorResponse} so
+ * <p>The JSON body mirrors {@link com.swipelab.common.dto.response.ErrorResponse} so
  * the frontend's global {@code apiFetch} interceptor can detect
  * {@code errorCode == "ACCOUNT_BANNED"} uniformly for all endpoints.
  */
@@ -115,3 +115,4 @@ public class BannedUserFilter extends OncePerRequestFilter {
                 || path.startsWith("/swagger-ui");
     }
 }
+

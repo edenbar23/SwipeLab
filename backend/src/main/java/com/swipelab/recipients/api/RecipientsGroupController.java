@@ -8,9 +8,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import com.swipelab.dto.request.CreateRecipientGroupRequest;
-import com.swipelab.dto.request.UpdateRecipientGroupRequest;
-import com.swipelab.dto.response.RecipientGroupResponse;
+import com.swipelab.recipients.dto.CreateRecipientGroupRequest;
+import com.swipelab.recipients.dto.UpdateRecipientGroupRequest;
+import com.swipelab.recipients.dto.RecipientGroupResponse;
 import com.swipelab.recipients.application.RecipientGroupService;
 
 @RestController
@@ -45,3 +45,12 @@ public class RecipientsGroupController {
         return ResponseEntity.noContent().build();
     }
 }
+
+
+
+
+
+
+
+
+

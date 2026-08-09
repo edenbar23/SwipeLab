@@ -23,7 +23,7 @@ import com.swipelab.classification.domain.distribution.TaskDistributionService;
 
 import com.swipelab.classification.application.SuspiciousActivityService;
 import com.swipelab.classification.domain.fraud.WarningLevel;
-import com.swipelab.dto.response.SuspiciousActivityResponse;
+import com.swipelab.auth.dto.SuspiciousActivityResponse;
 import com.swipelab.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -136,3 +136,4 @@ class SuspiciousActivityControllerTest {
                 .andExpect(status().is4xxClientError());
     }
 }
+

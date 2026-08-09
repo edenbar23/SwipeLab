@@ -5,13 +5,13 @@ import com.swipelab.auth.application.AuthenticationService;
 import com.swipelab.auth.application.JwtService;
 import com.swipelab.auth.application.OAuth2Service;
 import com.swipelab.auth.domain.AuthMapper;
-import com.swipelab.dto.request.EmailVerificationRequest;
-import com.swipelab.dto.request.ForgotPasswordRequest;
-import com.swipelab.dto.request.LoginRequest;
-import com.swipelab.dto.request.RegisterRequest;
-import com.swipelab.dto.request.ResetPasswordRequest;
-import com.swipelab.dto.response.AuthResponse;
-import com.swipelab.dto.response.UserProfileResponse;
+import com.swipelab.auth.dto.EmailVerificationRequest;
+import com.swipelab.auth.dto.ForgotPasswordRequest;
+import com.swipelab.auth.dto.LoginRequest;
+import com.swipelab.auth.dto.RegisterRequest;
+import com.swipelab.auth.dto.ResetPasswordRequest;
+import com.swipelab.auth.dto.AuthResponse;
+import com.swipelab.users.dto.UserProfileResponse;
 import com.swipelab.users.application.UserService;
 import com.swipelab.users.domain.User;
 import org.junit.jupiter.api.BeforeEach;
@@ -353,3 +353,4 @@ class AuthControllerTest {
         verify(templateEngine, times(1)).process(eq("auth/email-verify-failure"), any(IContext.class));
     }
 }
+

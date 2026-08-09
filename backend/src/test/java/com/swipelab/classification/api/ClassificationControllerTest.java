@@ -6,7 +6,7 @@ import com.swipelab.classification.domain.image.ImageService;
 import com.swipelab.classification.dto.UserClassification;
 import com.swipelab.classification.dto.api.NextBatchResponse;
 import com.swipelab.classification.dto.api.SubmitClassificationRequest;
-import com.swipelab.dto.request.ClassificationRequest;
+import com.swipelab.classification.dto.ClassificationRequest;
 import com.swipelab.users.application.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -116,3 +116,4 @@ class ClassificationControllerTest {
         verify(classificationService, times(1)).submitBatchResponses(eq("testuser"), eq("USER"), eq(1L), anyList());
     }
 }
+

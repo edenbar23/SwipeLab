@@ -11,12 +11,12 @@ import com.swipelab.classification.infrastructure.LabelRepository;
 import com.swipelab.classification.infrastructure.ClassificationRepository;
 import com.swipelab.classification.infrastructure.GoldImageRepository;
 import com.swipelab.classification.infrastructure.CredibilityRepository;
-import com.swipelab.gamification.badge.BadgeAward;
-import com.swipelab.gamification.badge.BadgeAwardRepository;
-import com.swipelab.gamification.badge.BadgeDefinition;
-import com.swipelab.gamification.badge.BadgeDefinitionRepository;
-import com.swipelab.gamification.challenge.ChallengeDefinition;
-import com.swipelab.gamification.challenge.ChallengeDefinitionRepository;
+import com.swipelab.gamification.domain.badge.BadgeAward;
+import com.swipelab.gamification.infrastructure.badge.BadgeAwardRepository;
+import com.swipelab.gamification.domain.badge.BadgeDefinition;
+import com.swipelab.gamification.infrastructure.badge.BadgeDefinitionRepository;
+import com.swipelab.gamification.domain.challenge.ChallengeDefinition;
+import com.swipelab.gamification.infrastructure.challenge.ChallengeDefinitionRepository;
 import com.swipelab.gamification.domain.Gamification;
 import com.swipelab.gamification.infrastructure.GamificationRepository;
 import com.swipelab.model.enums.UserRole;
@@ -524,3 +524,4 @@ public class E2eDataSeeder implements CommandLineRunner {
         }
     }
 }
+

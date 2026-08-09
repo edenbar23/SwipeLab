@@ -1,6 +1,6 @@
 package com.swipelab.exception;
 
-import com.swipelab.dto.response.ErrorResponse;
+import com.swipelab.common.dto.response.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -168,3 +168,4 @@ public class GlobalExceptionHandler {
                 return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 }
+
