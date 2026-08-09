@@ -11,7 +11,7 @@ export function useSessionHeartbeat() {
   const checkTokenAndRefresh = async () => {
     try {
       const state = useAuthStore.getState();
-      if (!state.token) {
+      if (!state.token || state.token === 'web-cookie-placeholder') {
         return;
       }
 
