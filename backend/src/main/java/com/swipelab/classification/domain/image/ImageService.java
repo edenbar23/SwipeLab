@@ -25,10 +25,7 @@ import java.util.List;
 import java.util.Optional;
 
 import java.util.stream.Collectors;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.MediaType;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpHeaders;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -88,7 +85,7 @@ public class ImageService {
 
 
         private BatchImageDto mapToBatchDto(Image image, TaskProvider.TaskInfo taskInfo, String species) {
-                String src = getProvidedImagePath(image.getSrcPath());
+                String src = getProvidedImagePath(image.getImageData());
                 String contentType = "image/jpeg";
 
                 // Build question from the explicitly selected species for this image
@@ -140,26 +137,6 @@ public class ImageService {
                         return path;
                 }
 
-                // Local file path — read from disk and return as base64
-                try {
-                        java.io.File file;
-                        if (path.startsWith("/uploads/")) {
-                                String filename = java.nio.file.Paths.get(path).getFileName().toString();
-                                file = java.nio.file.Paths.get("uploads").toAbsolutePath().normalize().resolve(filename).toFile();
-                        } else {
-                                file = new java.io.File(path);
-                        }
-                        
-                        if (file.exists() && file.isFile()) {
-                                byte[] bytes = java.nio.file.Files.readAllBytes(file.toPath());
-                                return java.util.Base64.getEncoder().encodeToString(bytes);
-                        }
-                } catch (Exception e) {
-                        // log and fall through to fallback
-                        org.slf4j.LoggerFactory.getLogger(ImageService.class)
-                                .warn("Could not read image from path: {}", path, e);
-                }
-
                 // Already a data URI — return as-is
                 if (path.startsWith("data:image")) {
                         return path;
@@ -190,7 +167,7 @@ public class ImageService {
 
         private String getFallbackImage() {
                 // 1x1 white JPEG
-                return "/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=";
+                return "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=";
         }
 
         @Transactional
@@ -198,7 +175,7 @@ public class ImageService {
                 TaskProvider.TaskInfo taskInfo = taskProvider.getTaskInfo(request.getTaskId());
 
                 Image image = Image.builder()
-                                .srcPath(request.getImageUrl())
+                                .imageData(request.getImageUrl())
                                 .caption(request.getCaption())
                                 .taskId(taskInfo.id())
                                 .priority(request.getPriority())
@@ -264,7 +241,7 @@ public class ImageService {
                 boolean isGold = goldImageRepository.existsByImageId(image.getId());
                 // Route through getProvidedImagePath so base64 srcPaths get the correct
                 // data:image/...;base64, prefix before being sent to the frontend.
-                String imageUrl = getProvidedImagePath(image.getSrcPath());
+                String imageUrl = getProvidedImagePath(image.getImageData());
                 return ImageResponse.builder()
                                 .id(image.getId())
                                 .imageUrl(imageUrl)
@@ -274,41 +251,5 @@ public class ImageService {
                                 .priority(image.getPriority())
                                 .isGoldStandard(isGold)
                                 .build();
-        }
-
-        public ResponseEntity<byte[]> getImageContent(Long id) {
-                Image image = imageRepository.findById(id)
-                                .orElseThrow(() -> new ResourceNotFoundException("Image not found: " + id));
-                String path = image.getSrcPath();
-                if (path == null) {
-                        return ResponseEntity.notFound().build();
-                }
-
-                if (path.startsWith("http") || path.startsWith("data:image") || path.startsWith("/9j") || path.startsWith("iVBOR")) {
-                        // Not a local file, we can't easily serve it as a raw byte array endpoint
-                        // Frontend should use the original URL/base64 directly
-                        return ResponseEntity.status(HttpStatus.SEE_OTHER).header(HttpHeaders.LOCATION, path).build();
-                }
-
-                try {
-                        java.io.File file;
-                        if (path.startsWith("/uploads/")) {
-                                String filename = java.nio.file.Paths.get(path).getFileName().toString();
-                                file = java.nio.file.Paths.get("uploads").toAbsolutePath().normalize().resolve(filename).toFile();
-                        } else {
-                                file = new java.io.File(path);
-                        }
-                        
-                        if (file.exists() && file.isFile()) {
-                                byte[] bytes = java.nio.file.Files.readAllBytes(file.toPath());
-                                return ResponseEntity.ok()
-                                                .contentType(MediaType.IMAGE_JPEG)
-                                                .body(bytes);
-                        }
-                } catch (Exception e) {
-                        org.slf4j.LoggerFactory.getLogger(ImageService.class)
-                                        .warn("Could not read image from path: {}", path, e);
-                }
-                return ResponseEntity.notFound().build();
         }
 }

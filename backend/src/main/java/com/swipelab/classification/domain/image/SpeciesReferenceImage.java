@@ -26,6 +26,10 @@ public class SpeciesReferenceImage {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "is_deleted", nullable = false)
+    @Builder.Default
+    private boolean isDeleted = false;
+
     /** FK to labels.id – the species this image belongs to. */
     @Column(name = "label_id", nullable = false)
     private Long labelId;

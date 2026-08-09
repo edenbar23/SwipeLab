@@ -54,7 +54,7 @@ class ExportServiceTest {
         task1 = Task.builder().id(1L).name("Bird Survey").createdBy("researcher1").build();
         task2 = Task.builder().id(2L).name("Fish Study").createdBy("researcher1").build();
 
-        image1 = Image.builder().id(10L).parentImageId(999L).externalBoxId(1234L).srcPath("/images/bird1.jpg").taskId(1L).build();
+        image1 = Image.builder().id(10L).parentImageId(999L).externalBoxId(1234L).imageData("/images/bird1.jpg").taskId(1L).build();
 
         classification1 = Classification.builder()
                 .id(100L)

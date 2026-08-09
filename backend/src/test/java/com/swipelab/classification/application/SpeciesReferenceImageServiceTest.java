@@ -70,7 +70,7 @@ class SpeciesReferenceImageServiceTest {
 
         Label label = Label.builder().id(42L).name("speciesA").build();
         when(labelRepository.findByName("speciesA")).thenReturn(Optional.of(label));
-        when(repository.countByLabelId(42L)).thenReturn(0L);
+        when(repository.countByLabelIdAndIsDeletedFalse(42L)).thenReturn(0L);
         when(imageProcessingService.processAndStore(file)).thenReturn(processed);
         when(repository.save(any())).thenReturn(sampleEntity);
 
@@ -88,7 +88,7 @@ class SpeciesReferenceImageServiceTest {
     void getImagesForSpecies_returnsAllPoolImages() {
         Label label = Label.builder().id(42L).name("speciesA").build();
         when(labelRepository.findByName("speciesA")).thenReturn(Optional.of(label));
-        when(repository.findByLabelId(42L)).thenReturn(List.of(sampleEntity));
+        when(repository.findByLabelIdAndIsDeletedFalse(42L)).thenReturn(List.of(sampleEntity));
 
         List<SpeciesReferenceImageDto> result = service.getImagesForSpecies("speciesA");
 
@@ -108,7 +108,7 @@ class SpeciesReferenceImageServiceTest {
 
         when(labelRepository.findByNameIn(List.of("speciesA", "speciesB")))
                 .thenReturn(List.of(labelA, labelB));
-        when(repository.findByLabelIdIn(List.of(42L, 99L)))
+        when(repository.findByLabelIdInAndIsDeletedFalse(List.of(42L, 99L)))
                 .thenReturn(List.of(sampleEntity, second));
 
         Map<String, List<SpeciesReferenceImageDto>> result =
@@ -125,7 +125,8 @@ class SpeciesReferenceImageServiceTest {
 
         service.deleteImage(1L, "researcher1", false);
 
-        verify(repository, times(1)).delete(sampleEntity);
+        verify(repository, times(1)).save(sampleEntity);
+        assertThat(sampleEntity.isDeleted()).isTrue();
     }
 
     @Test
@@ -134,7 +135,8 @@ class SpeciesReferenceImageServiceTest {
 
         service.deleteImage(1L, "admin", true);
 
-        verify(repository, times(1)).delete(sampleEntity);
+        verify(repository, times(1)).save(sampleEntity);
+        assertThat(sampleEntity.isDeleted()).isTrue();
     }
 
     // ── Edge / failure cases ───────────────────────────────────────────────────
@@ -162,7 +164,7 @@ class SpeciesReferenceImageServiceTest {
         var file = new MockMultipartFile("f", "a.jpg", "image/jpeg", new byte[1]);
         Label label = Label.builder().id(42L).name("speciesA").build();
         when(labelRepository.findByName("speciesA")).thenReturn(Optional.of(label));
-        when(repository.countByLabelId(42L)).thenReturn(10L); // already at max
+        when(repository.countByLabelIdAndIsDeletedFalse(42L)).thenReturn(10L); // already at max
 
         assertThatThrownBy(() -> service.uploadImages("speciesA", List.of(file), "researcher1", null))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -176,7 +178,7 @@ class SpeciesReferenceImageServiceTest {
         assertThatThrownBy(() -> service.deleteImage(1L, "other_user", false))
                 .isInstanceOf(AccessDeniedException.class);
 
-        verify(repository, never()).delete(any());
+        verify(repository, never()).save(any());
     }
 
     @Test

@@ -87,19 +87,19 @@ class StardbiSyncServiceTest {
         // Task should now be ACTIVE
         assertEquals(TaskStatus.ACTIVE, task.getStatus());
 
-        // Verify the image was saved with base64 srcPath (not a file path)
+        // Verify the image was saved with base64 imageData (not a file path)
         ArgumentCaptor<Image> imageCaptor = ArgumentCaptor.forClass(Image.class);
         verify(imageRepository, times(1)).save(imageCaptor.capture());
 
         Image savedImage = imageCaptor.getValue();
-        assertNotNull(savedImage.getSrcPath(), "srcPath must not be null");
+        assertNotNull(savedImage.getImageData(), "imageData must not be null");
         // Verify it is NOT a file-system path (must not contain '/app/' or look like an absolute path)
-        assertFalse(savedImage.getSrcPath().contains("/app/"),
-                "srcPath must be base64, not a /app/... file path");
-        assertFalse(savedImage.getSrcPath().contains("storage"),
-                "srcPath must be base64 data, not a storage directory path");
-        assertDoesNotThrow(() -> Base64.getDecoder().decode(savedImage.getSrcPath()),
-                "srcPath must be valid base64");
+        assertFalse(savedImage.getImageData().contains("/app/"),
+                "imageData must be base64, not a /app/... file path");
+        assertFalse(savedImage.getImageData().contains("storage"),
+                "imageData must be base64 data, not a storage directory path");
+        assertDoesNotThrow(() -> Base64.getDecoder().decode(savedImage.getImageData()),
+                "imageData must be valid base64");
         assertEquals(10L, savedImage.getTaskId());
         assertEquals(102L, savedImage.getExternalBoxId());
     }

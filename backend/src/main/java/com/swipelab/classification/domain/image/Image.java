@@ -22,9 +22,9 @@ public class Image {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Use src_path mapped as TEXT to store full Base64 strings safely.
-    @Column(name = "src_path", nullable = false, columnDefinition = "TEXT")
-    private String srcPath;
+    // Use image_data mapped as TEXT to store full Base64 strings safely.
+    @Column(name = "image_data", nullable = false, columnDefinition = "TEXT")
+    private String imageData;
 
     @Column(name = "thumbnail_url")
     private String thumbnailUrl;

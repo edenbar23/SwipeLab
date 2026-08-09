@@ -11,13 +11,13 @@ import java.util.List;
 @Repository
 public interface SpeciesReferenceImageRepository extends JpaRepository<SpeciesReferenceImage, Long> {
 
-    List<SpeciesReferenceImage> findByLabelId(Long labelId);
+    List<SpeciesReferenceImage> findByLabelIdAndIsDeletedFalse(Long labelId);
 
     /** Batch-load images for multiple species IDs at once (used in task creation). */
-    @Query("SELECT s FROM SpeciesReferenceImage s WHERE s.labelId IN :labelIds ORDER BY s.createdAt ASC")
-    List<SpeciesReferenceImage> findByLabelIdIn(@Param("labelIds") List<Long> labelIds);
+    @Query("SELECT s FROM SpeciesReferenceImage s WHERE s.labelId IN :labelIds AND s.isDeleted = false ORDER BY s.createdAt ASC")
+    List<SpeciesReferenceImage> findByLabelIdInAndIsDeletedFalse(@Param("labelIds") List<Long> labelIds);
 
-    long countByLabelId(Long labelId);
+    long countByLabelIdAndIsDeletedFalse(Long labelId);
 
     /** Returns IDs of the pool images selected for a given task. */
     @Query(value = """

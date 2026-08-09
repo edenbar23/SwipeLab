@@ -43,7 +43,7 @@ public class ExportService {
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
     // Legacy header kept for backward-compatible single-task endpoints
-    private static final String LEGACY_CSV_HEADER = "parent_image_id,crop_id,src_path,username,user_response,classified_at,is_gold_standard";
+    private static final String LEGACY_CSV_HEADER = "parent_image_id,crop_id,image_data,username,user_response,classified_at,is_gold_standard";
 
     private static final String MULTI_EXPORT_CSV_HEADER =
             "classification_id,task_id,task_name,parent_image_id,crop_id,image_src_path,username,user_role,query_species,user_response,credibility_score,is_gold_standard,classified_at";
@@ -107,7 +107,7 @@ public class ExportService {
                         escapeCsv(taskNameMap.getOrDefault(c.getTaskId(), "")),
                         image.getParentImageId() != null ? image.getParentImageId().toString() : "",
                         image.getExternalBoxId() != null ? image.getExternalBoxId().toString() : "",
-                        escapeCsv(image.getSrcPath()),
+                        escapeCsv(image.getImageData()),
                         escapeCsv(c.getUsername()),
                         escapeCsv(c.getUserRole() != null ? c.getUserRole() : ""),
                         escapeCsv(c.getQuerySpecies() != null ? c.getQuerySpecies() : ""),
@@ -200,7 +200,7 @@ public class ExportService {
         return String.format("%s,%s,\"%s\",\"%s\",\"%s\",\"%s\",%b",
                 image.getParentImageId() != null ? image.getParentImageId().toString() : "",
                 image.getExternalBoxId() != null ? image.getExternalBoxId().toString() : "",
-                escapeCsv(image.getSrcPath()),
+                escapeCsv(image.getImageData()),
                 escapeCsv(classification.getUsername()),
                 escapeCsv(classification.getUserResponse().name()),
                 classification.getCreatedAt() != null ? classification.getCreatedAt().format(DATE_FORMATTER) : "",
@@ -212,7 +212,7 @@ public class ExportService {
         Map<String, Object> obj = new HashMap<>();
         obj.put("imageId", image.getParentImageId());
         obj.put("cropId", image.getExternalBoxId());
-        obj.put("srcPath", image.getSrcPath());
+        obj.put("imageData", image.getImageData());
         obj.put("username", classification.getUsername());
         obj.put("userResponse", classification.getUserResponse().name());
         obj.put("classifiedAt",

@@ -4,6 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import { CollectionItem, SwipeDirection } from '../../types';
 import { useThemeStore } from '../../stores/themeStore';
 import { Colors } from '../../../constants/theme';
+import { parseImageUrl } from '../../utils/imageUtils';
 
 interface CollectionCardProps {
     item: CollectionItem;
@@ -47,7 +48,7 @@ export default function CollectionCard({ item }: CollectionCardProps) {
             testID={`collection-item-${item.id}`} // Helpful for testing too
         >
             <Image
-                source={{ uri: item.imageUrl }}
+                source={{ uri: parseImageUrl(item.imageUrl) }}
                 style={styles.image}
                 resizeMode="cover"
             />

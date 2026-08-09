@@ -13,7 +13,6 @@ import com.swipelab.dto.request.GoldImageRequest;
 import com.swipelab.dto.response.GoldImageResponse;
 import com.swipelab.exception.ResourceNotFoundException;
 import com.swipelab.classification.application.port.out.TaskProvider;
-import com.swipelab.infrastructure.FileStorageService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -65,7 +64,7 @@ class GoldImageServiceTest {
         image = new Image();
         image.setId(1L);
         image.setTaskId(1L);
-        image.setSrcPath("/uploads/test-uuid.jpg");
+        image.setImageData("data:image/jpeg;base64,mockbase64");
 
         goldImage = new GoldImage();
         goldImage.setId(1L);

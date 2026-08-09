@@ -83,7 +83,7 @@ public class StardbiSyncService {
                                     .taskId(task.getId())
                                     .externalBoxId(crop.getBoxId())
                                     .parentImageId(crop.getImageId())
-                                    .srcPath(base64Image)
+                                    .imageData(base64Image)
                                     .experimentId(exp.getId())
                                     .build();
                             
@@ -172,7 +172,7 @@ public class StardbiSyncService {
                                         .taskId(task.getId())
                                         .externalBoxId(boxId)
                                         .parentImageId(extractImageIdFromFileName(fileName))
-                                        .srcPath(base64)
+                                        .imageData(base64)
                                         .experimentId(expId)
                                         .build();
 

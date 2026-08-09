@@ -30,9 +30,9 @@ public class CollectionEventListener {
             return; // only YES swipes go into the collection
         }
 
-        // Resolve imageUrl from the image record (srcPath holds the URL or base64).
+        // Resolve imageUrl from the image record (imageData holds the URL or base64).
         String imageUrl = imageRepository.findById(event.getImageId())
-                .map(img -> img.getSrcPath())
+                .map(img -> img.getImageData())
                 .orElse(null);
 
         collectionService.recordYesTag(

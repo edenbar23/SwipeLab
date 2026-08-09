@@ -47,7 +47,7 @@ export default function TaxonomyScreen() {
     const filteredSpecies = useMemo(() => {
         if (!searchQuery.trim()) return [];
         const queryTerms = searchQuery.toLowerCase().split(/\s+/).filter(Boolean);
-        return availableSpecies.filter(s => {
+        return availableSpecies.filter((s: { label: string, searchTerms: string }) => {
             const lowerLabel = s.label.toLowerCase();
             const lowerTerms = s.searchTerms.toLowerCase();
             return queryTerms.every(term => lowerLabel.includes(term) || lowerTerms.includes(term));
@@ -84,7 +84,7 @@ export default function TaxonomyScreen() {
                         size={24} 
                         color={isSelected ? "#10B981" : themeColors.textSecondary} 
                     />
-                    <Text style={[styles.speciesName, { color: themeColors.text }]} numberOfLines={1}>
+                    <Text style={[styles.speciesName, { color: themeColors.text }]} numberOfLines={2}>
                         {item.label}
                     </Text>
                 </TouchableOpacity>
@@ -149,6 +149,7 @@ export default function TaxonomyScreen() {
                     </View>
                 ) : (
                     <FlatList
+                        style={{ width: '100%', flex: 1 }}
                         data={filteredSpecies}
                         keyExtractor={item => item.id}
                         renderItem={renderItem}
@@ -188,14 +189,13 @@ export default function TaxonomyScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        width: '100%',
-        alignItems: 'center',
     },
     searchContainer: {
         flexDirection: 'row',
         alignItems: 'center',
         width: '100%',
         maxWidth: 800,
+        alignSelf: 'center',
         marginVertical: 16,
         paddingHorizontal: 16,
         paddingVertical: 12,
@@ -223,10 +223,10 @@ const styles = StyleSheet.create({
     },
     listContainer: {
         width: '100%',
+        maxWidth: 800,
+        alignSelf: 'center',
         paddingHorizontal: 16,
         paddingBottom: 100, // accommodate bottom button
-        maxWidth: 800,
-        marginHorizontal: 'auto',
     },
     card: {
         flexDirection: 'row',
@@ -258,14 +258,14 @@ const styles = StyleSheet.create({
     createBtn: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingVertical: 8,
-        paddingHorizontal: 14,
+        paddingVertical: 6,
+        paddingHorizontal: 10,
         borderRadius: 20,
     },
     createBtnText: {
         color: '#fff',
         fontWeight: '600',
-        fontSize: 14,
+        fontSize: 13,
         marginLeft: 4,
     },
     emptyContainer: {
