@@ -332,6 +332,24 @@ public class AuthController {
     }
 
     /**
+     * Change password for the currently authenticated user
+     *
+     * Endpoint: POST /api/v1/auth/password/change
+     */
+    @PostMapping("/password/change")
+    public ResponseEntity<Map<String, String>> changePassword(
+            @Valid @RequestBody ChangePasswordRequest request) {
+        
+        authenticationService.changePassword(request);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Password changed successfully.");
+        response.put("status", "success");
+
+        return ResponseEntity.ok(response);
+    }
+
+    /**
      * Send an invitation email to a new admin or researcher.
      * Restricted to the Super Admin — uses the same SpEL bean check
      * as all other privileged endpoints in this application.

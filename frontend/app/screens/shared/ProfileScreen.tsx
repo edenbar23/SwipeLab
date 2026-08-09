@@ -11,6 +11,7 @@ interface UserProfile {
     rank: string;
     score: number;
     badges: string[];
+    provider?: string;
 }
 
 import { Colors } from '../../../constants/theme';
@@ -172,11 +173,13 @@ export default function ProfileScreen() {
                 <View style={[styles.divider, { backgroundColor: themeColors.border }]} />
 
                 {/* Actions Section */}
-                <View style={styles.section}>
-                    <TouchableOpacity style={styles.button} onPress={handleStartChangePassword}>
-                        <Text style={styles.buttonText}>Change Password</Text>
-                    </TouchableOpacity>
-                </View>
+                {user.provider === 'LOCAL' && (
+                    <View style={styles.section}>
+                        <TouchableOpacity style={styles.button} onPress={handleStartChangePassword}>
+                            <Text style={styles.buttonText}>Change Password</Text>
+                        </TouchableOpacity>
+                    </View>
+                )}
 
                 {/* Change Password Modal */}
                 <Modal

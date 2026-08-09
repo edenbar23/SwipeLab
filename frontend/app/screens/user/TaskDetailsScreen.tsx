@@ -158,11 +158,6 @@ export default function TaskDetailsScreen() {
                                                                 uri={imageUri}
                                                                 style={[styles.image, { borderColor: borderCol }]}
                                                             />
-                                                            {!!img.caption && (
-                                                                <Text style={[styles.imageCaption, { color: themeColors.textSecondary }]} numberOfLines={1}>
-                                                                    {img.caption}
-                                                                </Text>
-                                                            )}
                                                         </View>
                                                     );
                                                 })}
@@ -178,10 +173,20 @@ export default function TaskDetailsScreen() {
 
             {/* ── Footer CTA ───────────────────────────────────────────────────── */}
             <View style={[styles.footer, { backgroundColor: themeColors.card, borderTopColor: borderCol }]}>
-                <TouchableOpacity style={styles.playButton} onPress={handlePlay} activeOpacity={0.85}>
-                    <Ionicons name="play-circle-outline" size={22} color="#fff" style={{ marginRight: 8 }} />
-                    <Text style={styles.playButtonText}>Start Classifying</Text>
-                    <Ionicons name="arrow-forward" size={18} color="#fff" style={{ marginLeft: 6 }} />
+                <TouchableOpacity
+                    style={[
+                        styles.playButton,
+                        pending === 0 && { backgroundColor: '#9CA3AF', shadowOpacity: 0, elevation: 0 }
+                    ]}
+                    onPress={pending > 0 ? handlePlay : undefined}
+                    activeOpacity={pending > 0 ? 0.85 : 1}
+                    disabled={pending === 0}
+                >
+                    {pending > 0 && <Ionicons name="play-circle-outline" size={22} color="#fff" style={{ marginRight: 8 }} />}
+                    <Text style={styles.playButtonText}>
+                        {pending === 0 ? 'Completed' : (imagesClassified > 0 ? 'Continue Classifying' : 'Start Classifying')}
+                    </Text>
+                    {pending > 0 && <Ionicons name="arrow-forward" size={18} color="#fff" style={{ marginLeft: 6 }} />}
                 </TouchableOpacity>
             </View>
         </View>

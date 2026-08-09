@@ -133,6 +133,10 @@ export default function SwipeScreen() {
           queryClient.invalidateQueries({ queryKey: QUERY_KEYS.challenges });
           queryClient.invalidateQueries({ queryKey: QUERY_KEYS.myBadges });
           queryClient.invalidateQueries({ queryKey: QUERY_KEYS.userProfile });
+          // Ensure task progress and global stats update in the background
+          queryClient.invalidateQueries({ queryKey: QUERY_KEYS.myTasks });
+          queryClient.invalidateQueries({ queryKey: QUERY_KEYS.taskDetails(currentImage.taskId) });
+          queryClient.invalidateQueries({ queryKey: QUERY_KEYS.statistics });
         }
       })
       .catch((e) => {
