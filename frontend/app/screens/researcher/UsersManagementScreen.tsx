@@ -12,14 +12,14 @@ import {
     View,
     Alert,
 } from 'react-native';
-import useResponsive from '../../hooks/useResponsive';
+import useResponsive from '@/hooks/useResponsive';
 import { Colors } from '../../../constants/theme';
-import { API_ENDPOINTS } from '../../api/apiEndpoints';
-import { apiFetch } from '../../api/apiFetch';
-import { QUERY_KEYS, useAdminUsers, useProfile } from "../../api/queries";
-import ScreenHeaderLayout from "../../components/layout/ScreenHeaderLayout/ScreenHeaderLayout";
-import { researcherStackParamList } from "../../navigation/researcherStack.types";
-import { useThemeStore } from '../../stores/themeStore';
+import { API_ENDPOINTS } from '@/api/apiEndpoints';
+import { apiFetch } from '@/api/apiFetch';
+import { QUERY_KEYS, useAdminUsers, useProfile } from "@/api/queries";
+import ScreenHeaderLayout from "@/components/layout/ScreenHeaderLayout/ScreenHeaderLayout";
+import { researcherStackParamList } from "@/navigation/researcherStack.types";
+import { useThemeStore } from '@/stores/themeStore';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 // Images

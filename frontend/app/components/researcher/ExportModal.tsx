@@ -14,10 +14,10 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../../constants/theme';
-import { useThemeStore } from '../../stores/themeStore';
-import MultiSelect, { MultiSelectOption } from '../ui/MultiSelect';
-import { useAdminTasks, useExportClassificationsCsv } from '../../api/queries';
-import { downloadCsvBlob } from '../../services/csvDownload';
+import { useThemeStore } from '@/stores/themeStore';
+import MultiSelect, { MultiSelectOption } from '@/components/ui/MultiSelect';
+import { useAdminTasks, useExportClassificationsCsv } from '@/api/queries';
+import { downloadCsvBlob } from '@/services/csvDownload';
 
 interface ExportModalProps {
   visible: boolean;

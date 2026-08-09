@@ -7,17 +7,17 @@ import { ActivityIndicator, View, Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 // stores
-import { useAuthStore } from "../stores/authStore";
-import { useModeStore } from "../stores/modeStore";
+import { useAuthStore } from "@/stores/authStore";
+import { useModeStore } from "@/stores/modeStore";
 
 // navigators
-import ResearcherNavigator from "./ResearcherNavigator";
-import UserNavigator from "./UserNavigator";
-import { useProfile } from "../api/queries";
+import ResearcherNavigator from "@/navigation/ResearcherNavigator";
+import UserNavigator from "@/navigation/UserNavigator";
+import { useProfile } from "@/api/queries";
 
 // screens
-import LoginScreen from "../screens/shared/LoginScreen";
-import BannedScreen from "../screens/shared/BannedScreen";
+import LoginScreen from "@/screens/shared/LoginScreen";
+import BannedScreen from "@/screens/shared/BannedScreen";
 
 export default function RootNavigator() {
   const { token, role, isLoading, sessionExpiredMessage, isSuperAdmin, isBanned: storeIsBanned } = useAuthStore();

@@ -7,14 +7,14 @@ import {
     Text,
     View,
 } from 'react-native';
-import ScreenHeaderLayout from '../../components/layout/ScreenHeaderLayout/ScreenHeaderLayout';
-import { useCollectionStore, CollectionEntry } from '../../stores/collectionStore';
+import ScreenHeaderLayout from '@/components/layout/ScreenHeaderLayout/ScreenHeaderLayout';
+import { useCollectionStore, CollectionEntry } from '@/stores/collectionStore';
 import { useNavigation } from '@react-navigation/native';
-import { useThemeStore } from '../../stores/themeStore';
+import { useThemeStore } from '@/stores/themeStore';
 import { Colors } from '../../../constants/theme';
-import AuthenticatedImage from '../../components/ui/AuthenticatedImage';
+import AuthenticatedImage from '@/components/ui/AuthenticatedImage';
 
-import { parseImageUrl } from '../../utils/imageUtils';
+import { parseImageUrl } from '@/utils/imageUtils';
 
 function formatDate(iso: string): string {
     const d = new Date(iso);

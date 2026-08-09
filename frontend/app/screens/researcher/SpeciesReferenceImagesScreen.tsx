@@ -15,19 +15,19 @@ import { useRoute, useNavigation, RouteProp } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from "@expo/vector-icons";
-import ScreenHeaderLayout from "../../components/layout/ScreenHeaderLayout/ScreenHeaderLayout";
-import { useThemeStore } from "../../stores/themeStore";
+import ScreenHeaderLayout from "@/components/layout/ScreenHeaderLayout/ScreenHeaderLayout";
+import { useThemeStore } from "@/stores/themeStore";
 import { Colors } from "../../../constants/theme";
-import AuthenticatedImage from "../../components/ui/AuthenticatedImage";
-import { useSpeciesPoolImages, useDeleteSpeciesRefImage, useProfile } from "../../api/queries";
-import { useAuthStore } from "../../stores/authStore";
-import { apiFetch } from "../../api/apiFetch";
-import { API_ENDPOINTS } from "../../api/apiEndpoints";
-import { researcherStackParamList } from "../../navigation/researcherStack.types";
+import AuthenticatedImage from "@/components/ui/AuthenticatedImage";
+import { useSpeciesPoolImages, useDeleteSpeciesRefImage, useProfile } from "@/api/queries";
+import { useAuthStore } from "@/stores/authStore";
+import { apiFetch } from "@/api/apiFetch";
+import { API_ENDPOINTS } from "@/api/apiEndpoints";
+import { researcherStackParamList } from "@/navigation/researcherStack.types";
 
 
 import taxonomyImg from "../../../assets/images/taxonomy.png";
-import { queryClient } from "../../queryClient";
+import { queryClient } from "@/queryClient";
 
 type SpeciesRefImagesRouteProp = RouteProp<researcherStackParamList, 'SpeciesReferenceImages'>;
 type NavigationProp = NativeStackNavigationProp<researcherStackParamList, 'SpeciesReferenceImages'>;

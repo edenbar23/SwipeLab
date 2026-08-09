@@ -1,8 +1,8 @@
 import React from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View, Platform } from 'react-native';
 import { Colors } from '../../../../constants/theme';
-import { useThemeStore } from '../../../stores/themeStore';
-import { StepConfirmProps } from './addTaskTypes';
+import { useThemeStore } from '@/stores/themeStore';
+import { StepConfirmProps } from '@/components/researcher/addTask/addTaskTypes';
 
 export default function StepConfirm({ formData, onBack, onSubmit, loading, availableOptions }: StepConfirmProps) {
   const { theme } = useThemeStore();

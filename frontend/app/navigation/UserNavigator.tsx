@@ -2,19 +2,19 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import React from "react";
 import { StyleSheet, View } from "react-native";
 
-import SettingsScreen from "../screens/shared/SettingsScreen";
-import LeaderboardScreen from "../screens/user/LeaderboardScreen";
-import UserMyTasksScreen from "../screens/user/UserMyTasksScreen";
-import SwipeScreen from "../screens/user/SwipeScreen";
-import ChallengesScreen from "../screens/user/ChallengesScreen";
-import StatsScreen from "../screens/user/StatsScreen";
-import MyCollectionScreen from "../screens/user/MyCollectionScreen";
-import ProfileScreen from "../screens/shared/ProfileScreen";
-import BottomBar from "./components/BottomBar";
-import TaskDetailsScreen from "../screens/user/TaskDetailsScreen";
-import TopBar from "./components/TopBar";
+import SettingsScreen from "@/screens/shared/SettingsScreen";
+import LeaderboardScreen from "@/screens/user/LeaderboardScreen";
+import UserMyTasksScreen from "@/screens/user/UserMyTasksScreen";
+import SwipeScreen from "@/screens/user/SwipeScreen";
+import ChallengesScreen from "@/screens/user/ChallengesScreen";
+import StatsScreen from "@/screens/user/StatsScreen";
+import MyCollectionScreen from "@/screens/user/MyCollectionScreen";
+import ProfileScreen from "@/screens/shared/ProfileScreen";
+import BottomBar from "@/navigation/components/BottomBar";
+import TaskDetailsScreen from "@/screens/user/TaskDetailsScreen";
+import TopBar from "@/navigation/components/TopBar";
 
-import CollectionDetailsScreen from "../screens/user/CollectionDetailsScreen";
+import CollectionDetailsScreen from "@/screens/user/CollectionDetailsScreen";
 
 const Stack = createNativeStackNavigator();
 

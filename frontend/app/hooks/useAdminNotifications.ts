@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiFetch } from '../api/apiFetch';
-import { API_ENDPOINTS } from '../api/apiEndpoints';
-import { AdminNotification, AdminNotificationPage } from '../types/fraudTypes';
+import { apiFetch } from '@/api/apiFetch';
+import { API_ENDPOINTS } from '@/api/apiEndpoints';
+import { AdminNotification, AdminNotificationPage } from '@/types/fraudTypes';
 
 const ADMIN_NOTIF_KEYS = {
   all: ['admin', 'notifications'] as const,

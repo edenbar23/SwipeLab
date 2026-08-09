@@ -1,5 +1,5 @@
-import { apiFetch } from '../apiFetch';
-import { useAuthStore } from '../../stores/authStore';
+import { apiFetch } from '@/api/apiFetch';
+import { useAuthStore } from '@/stores/authStore';
 
 // Mock dependencies
 jest.mock('../../stores/authStore', () => ({

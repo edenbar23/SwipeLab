@@ -13,14 +13,14 @@ import {
     View,
     Platform
 } from 'react-native';
-import useResponsive from '../../hooks/useResponsive';
+import useResponsive from '@/hooks/useResponsive';
 import { Colors } from '../../../constants/theme';
-import { apiFetch } from '../../api/apiFetch';
-import { RecipientGroup } from '../../mocks/data/recipients.mock';
-import { User } from '../../mocks/data/users.mock';
-import { useThemeStore } from '../../stores/themeStore';
-import { API_ENDPOINTS } from '../../api/apiEndpoints';
-import { useAdminUsers, useRecipients } from '../../api/queries';
+import { apiFetch } from '@/api/apiFetch';
+import { RecipientGroup } from '@/mocks/data/recipients.mock';
+import { User } from '@/mocks/data/users.mock';
+import { useThemeStore } from '@/stores/themeStore';
+import { API_ENDPOINTS } from '@/api/apiEndpoints';
+import { useAdminUsers, useRecipients } from '@/api/queries';
 import { useQueryClient } from '@tanstack/react-query';
 
 

@@ -12,16 +12,16 @@ import {
 } from "react-native";
 
 import { Colors } from '../../../constants/theme';
-import { API_ENDPOINTS } from '../../api/apiEndpoints';
-import { apiFetch } from "../../api/apiFetch";
-import ScreenHeaderLayout from "../../components/layout/ScreenHeaderLayout";
+import { API_ENDPOINTS } from '@/api/apiEndpoints';
+import { apiFetch } from "@/api/apiFetch";
+import ScreenHeaderLayout from "@/components/layout/ScreenHeaderLayout";
 import { useQueryClient } from "@tanstack/react-query";
-import MultiSelect from "../../components/ui/MultiSelect";
-import SpeciesImagePicker from "../../components/researcher/addTask/SpeciesImagePicker";
-import { SpeciesRefImage } from "../../components/researcher/addTask/addTaskTypes";
-import { useSpeciesPoolImages, QUERY_KEYS } from "../../api/queries";
-import { researcherStackParamList } from "../../navigation/researcherStack.types";
-import { useThemeStore } from '../../stores/themeStore';
+import MultiSelect from "@/components/ui/MultiSelect";
+import SpeciesImagePicker from "@/components/researcher/addTask/SpeciesImagePicker";
+import { SpeciesRefImage } from "@/components/researcher/addTask/addTaskTypes";
+import { useSpeciesPoolImages, QUERY_KEYS } from "@/api/queries";
+import { researcherStackParamList } from "@/navigation/researcherStack.types";
+import { useThemeStore } from '@/stores/themeStore';
 
 
 type Props = NativeStackScreenProps<

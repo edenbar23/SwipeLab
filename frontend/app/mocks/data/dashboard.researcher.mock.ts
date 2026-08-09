@@ -1,4 +1,4 @@
-import { taxonomyMock } from './taxonomy.mock'
+import { taxonomyMock } from '@/mocks/data/taxonomy.mock'
 
 export const dashboardAdminMock = {
   tasks: {

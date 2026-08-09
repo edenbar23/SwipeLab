@@ -9,14 +9,14 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import { useThemeStore } from '../../stores/themeStore';
+import { useThemeStore } from '@/stores/themeStore';
 import { Colors } from '../../../constants/theme';
-import ScreenHeaderLayout from '../../components/layout/ScreenHeaderLayout/ScreenHeaderLayout';
+import ScreenHeaderLayout from '@/components/layout/ScreenHeaderLayout/ScreenHeaderLayout';
 import { useNavigation } from '@react-navigation/native';
-import { apiFetch } from '../../api/apiFetch';
-import { researcherStackParamList } from '../../navigation/researcherStack.types';
+import { apiFetch } from '@/api/apiFetch';
+import { researcherStackParamList } from '@/navigation/researcherStack.types';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { API_ENDPOINTS } from '../../api/apiEndpoints';
+import { API_ENDPOINTS } from '@/api/apiEndpoints';
 
 
 type NavigationProp = NativeStackNavigationProp<researcherStackParamList, 'AddUser'>;

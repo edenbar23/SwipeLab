@@ -11,12 +11,12 @@ import {
 } from "react-native";
 import { useQueryClient } from '@tanstack/react-query';
 import { Colors } from '../../../constants/theme';
-import { apiFetch } from "../../api/apiFetch";
-import GoldImageCard from "../../components/researcher/GoldImageCard";
-import ScreenHeaderLayout from "../../components/layout/ScreenHeaderLayout";
-import { useThemeStore } from '../../stores/themeStore';
-import { API_ENDPOINTS } from '../../api/apiEndpoints';
-import { useGoldImages } from '../../api/queries';
+import { apiFetch } from "@/api/apiFetch";
+import GoldImageCard from "@/components/researcher/GoldImageCard";
+import ScreenHeaderLayout from "@/components/layout/ScreenHeaderLayout";
+import { useThemeStore } from '@/stores/themeStore';
+import { API_ENDPOINTS } from '@/api/apiEndpoints';
+import { useGoldImages } from '@/api/queries';
 
 
 type GoldImageResponse = {

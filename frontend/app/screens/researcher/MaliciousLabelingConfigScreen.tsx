@@ -11,13 +11,13 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import ScreenHeaderLayout from '../../components/layout/ScreenHeaderLayout/ScreenHeaderLayout';
-import { useThemeStore } from '../../stores/themeStore';
+import ScreenHeaderLayout from '@/components/layout/ScreenHeaderLayout/ScreenHeaderLayout';
+import { useThemeStore } from '@/stores/themeStore';
 import {
   useMaliciousLabelingConfig,
   useMaliciousLabelingAuditLog,
   useUpdateMaliciousLabelingConfig,
-} from '../../api/queries';
+} from '@/api/queries';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 

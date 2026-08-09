@@ -1,6 +1,6 @@
 import { create } from 'zustand';
-import { apiFetch } from '../api/apiFetch';
-import { API_ENDPOINTS } from '../api/apiEndpoints';
+import { apiFetch } from '@/api/apiFetch';
+import { API_ENDPOINTS } from '@/api/apiEndpoints';
 
 export interface CollectionEntry {
     id: number;

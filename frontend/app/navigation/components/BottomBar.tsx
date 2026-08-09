@@ -1,8 +1,8 @@
 import { useNavigation } from "@react-navigation/native";
 import React from "react";
 import { Image, ImageSourcePropType, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { useThemeStore } from "../../stores/themeStore";
-import useResponsive from "../../hooks/useResponsive";
+import { useThemeStore } from "@/stores/themeStore";
+import useResponsive from "@/hooks/useResponsive";
 import { Colors } from "../../../constants/theme";
 
 interface NavItem {

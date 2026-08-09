@@ -9,10 +9,10 @@ import {
   View,
 } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
-import { apiFetch } from "../api/apiFetch";
-import { useAuthStore } from "../stores/authStore";
-import { useModeStore } from "../stores/modeStore";
-import { API_ENDPOINTS } from '../api/apiEndpoints';
+import { apiFetch } from "@/api/apiFetch";
+import { useAuthStore } from "@/stores/authStore";
+import { useModeStore } from "@/stores/modeStore";
+import { API_ENDPOINTS } from '@/api/apiEndpoints';
 
 
 interface Props {

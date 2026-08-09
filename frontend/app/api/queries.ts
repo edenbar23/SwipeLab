@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiFetch } from './apiFetch';
-import { API_ENDPOINTS } from './apiEndpoints';
+import { apiFetch } from '@/api/apiFetch';
+import { API_ENDPOINTS } from '@/api/apiEndpoints';
 
 export const QUERY_KEYS = {
   // Tasks
@@ -390,7 +390,7 @@ export const useDeleteSpeciesRefImage = () => {
   });
 };
 
-import { queryClient } from '../queryClient';
+import { queryClient } from '@/queryClient';
 
 
 export const preloadAfterLogin = async (role: string) => {

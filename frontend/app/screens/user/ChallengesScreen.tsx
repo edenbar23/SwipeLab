@@ -9,13 +9,13 @@ import {
     View,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { apiFetch } from '../../api/apiFetch';
-import ScreenHeaderLayout from '../../components/layout/ScreenHeaderLayout/ScreenHeaderLayout';
-import { useThemeStore } from '../../stores/themeStore';
+import { apiFetch } from '@/api/apiFetch';
+import ScreenHeaderLayout from '@/components/layout/ScreenHeaderLayout/ScreenHeaderLayout';
+import { useThemeStore } from '@/stores/themeStore';
 import { Colors } from '../../../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
-import { API_ENDPOINTS } from '../../api/apiEndpoints';
-import { useChallenges } from '../../api/queries';
+import { API_ENDPOINTS } from '@/api/apiEndpoints';
+import { useChallenges } from '@/api/queries';
 
 
 interface ChallengeDto {

@@ -1,4 +1,4 @@
-import { User, usersMock } from './users.mock';
+import { User, usersMock } from '@/mocks/data/users.mock';
 
 export interface RecipientGroup {
     id: number;

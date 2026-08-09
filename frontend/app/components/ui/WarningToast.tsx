@@ -7,7 +7,7 @@ import {
   View,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { ClassificationWarning } from '../../types/fraudTypes';
+import { ClassificationWarning } from '@/types/fraudTypes';
 
 interface WarningToastProps {
   warning: ClassificationWarning;

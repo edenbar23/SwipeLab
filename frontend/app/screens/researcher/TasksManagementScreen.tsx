@@ -4,10 +4,10 @@ import React, { useState, useCallback } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { ActivityIndicator, FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Colors } from '../../../constants/theme';
-import { useAdminTasks, useUpdateTaskStatus } from '../../api/queries';
-import TaskCard from '../../components/researcher/TaskCard';
-import ScreenHeaderLayout from '../../components/layout/ScreenHeaderLayout';
-import { useThemeStore } from '../../stores/themeStore';
+import { useAdminTasks, useUpdateTaskStatus } from '@/api/queries';
+import TaskCard from '@/components/researcher/TaskCard';
+import ScreenHeaderLayout from '@/components/layout/ScreenHeaderLayout';
+import { useThemeStore } from '@/stores/themeStore';
 
 type StatusFilter = 'ALL' | 'ACTIVE' | 'PAUSED' | 'ARCHIVED' | 'PROCESSING';
 

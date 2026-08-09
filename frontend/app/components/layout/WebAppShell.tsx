@@ -12,7 +12,7 @@
 
 import React from 'react';
 import { Platform, StyleSheet, View, ViewStyle } from 'react-native';
-import { useThemeStore } from '../../stores/themeStore';
+import { useThemeStore } from '@/stores/themeStore';
 import { Colors } from '../../../constants/theme';
 
 interface Props {

@@ -1,15 +1,15 @@
 import { useNavigation } from '@react-navigation/native';
 import React, { useCallback, useState } from 'react';
-import { useMyTasks, useAvailableTasks, useStatistics, useAssignTask } from "../../api/queries";
+import { useMyTasks, useAvailableTasks, useStatistics, useAssignTask } from "@/api/queries";
 import { RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../../constants/theme';
 
-import ScreenHeaderLayout from '../../components/layout/ScreenHeaderLayout/ScreenHeaderLayout';
-import TaskCard from '../../components/user/TaskCard';
-import ErrorToast from '../../components/ui/ErrorToast';
-import { useThemeStore } from '../../stores/themeStore';
-import { useSwipeStore } from '../../stores/swipeStore';
+import ScreenHeaderLayout from '@/components/layout/ScreenHeaderLayout/ScreenHeaderLayout';
+import TaskCard from '@/components/user/TaskCard';
+import ErrorToast from '@/components/ui/ErrorToast';
+import { useThemeStore } from '@/stores/themeStore';
+import { useSwipeStore } from '@/stores/swipeStore';
 
 
 export default function UserMyTasksScreen() {

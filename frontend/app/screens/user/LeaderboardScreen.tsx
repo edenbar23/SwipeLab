@@ -2,11 +2,11 @@ import { useNavigation } from '@react-navigation/native';
 import React, { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Colors } from '../../../constants/theme';
-import { apiFetch } from '../../api/apiFetch';
-import ScreenHeaderLayout from '../../components/layout/ScreenHeaderLayout/ScreenHeaderLayout';
-import { useThemeStore } from '../../stores/themeStore';
-import { API_ENDPOINTS } from '../../api/apiEndpoints';
-import { useLeaderboard, useRank, useProfile } from '../../api/queries';
+import { apiFetch } from '@/api/apiFetch';
+import ScreenHeaderLayout from '@/components/layout/ScreenHeaderLayout/ScreenHeaderLayout';
+import { useThemeStore } from '@/stores/themeStore';
+import { API_ENDPOINTS } from '@/api/apiEndpoints';
+import { useLeaderboard, useRank, useProfile } from '@/api/queries';
 
 
 interface LeaderboardEntry {

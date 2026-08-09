@@ -4,8 +4,8 @@ import React from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { Colors } from '../../../constants/theme';
-import { useThemeStore } from '../../stores/themeStore';
-import { useSwipeStore } from '../../stores/swipeStore';
+import { useThemeStore } from '@/stores/themeStore';
+import { useSwipeStore } from '@/stores/swipeStore';
 
 export default function TaskDetailsScreen() {
     const navigation = useNavigation<any>();

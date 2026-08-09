@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Image, ImageProps, Platform, StyleSheet, View, ActivityIndicator } from 'react-native';
-import { useAuthStore } from '../../stores/authStore';
-import { backendUrl } from '../../api/apiFetch';
+import { useAuthStore } from '@/stores/authStore';
+import { backendUrl } from '@/api/apiFetch';
 
 interface AuthenticatedImageProps extends Omit<ImageProps, 'source'> {
   uri: string | null | undefined;

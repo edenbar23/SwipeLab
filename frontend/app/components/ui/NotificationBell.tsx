@@ -15,8 +15,8 @@ import {
   useMarkAllNotificationsRead,
   useMarkNotificationRead,
   useNotificationUnreadCount,
-} from '../../hooks/useAdminNotifications';
-import { AdminNotification } from '../../types/fraudTypes';
+} from '@/hooks/useAdminNotifications';
+import { AdminNotification } from '@/types/fraudTypes';
 
 const SEVERITY_COLORS: Record<string, string> = {
   INFO: '#3b82f6',

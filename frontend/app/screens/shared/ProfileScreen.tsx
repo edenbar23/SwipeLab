@@ -1,9 +1,9 @@
 import { useNavigation } from "@react-navigation/native";
 import React, { useState } from "react";
 import { ActivityIndicator, Alert, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
-import { apiFetch } from "../../api/apiFetch";
-import ScreenHeaderLayout from "../../components/layout/ScreenHeaderLayout/ScreenHeaderLayout";
-import useResponsive from "../../hooks/useResponsive";
+import { apiFetch } from "@/api/apiFetch";
+import ScreenHeaderLayout from "@/components/layout/ScreenHeaderLayout/ScreenHeaderLayout";
+import useResponsive from "@/hooks/useResponsive";
 
 interface UserProfile {
     username: string;
@@ -14,10 +14,10 @@ interface UserProfile {
 }
 
 import { Colors } from '../../../constants/theme';
-import { useThemeStore } from '../../stores/themeStore';
-import { API_ENDPOINTS } from '../../api/apiEndpoints';
-import { useProfile, useMyBadges } from "../../api/queries";
-import { getBadgeIcon } from "../../constants/badgeIcons";
+import { useThemeStore } from '@/stores/themeStore';
+import { API_ENDPOINTS } from '@/api/apiEndpoints';
+import { useProfile, useMyBadges } from "@/api/queries";
+import { getBadgeIcon } from "@/constants/badgeIcons";
 
 export default function ProfileScreen() {
     const navigation = useNavigation<any>();

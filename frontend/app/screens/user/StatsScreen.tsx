@@ -2,11 +2,11 @@ import { useNavigation } from '@react-navigation/native';
 import React, { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Colors } from '../../../constants/theme';
-import { API_ENDPOINTS } from '../../api/apiEndpoints';
-import { apiFetch } from '../../api/apiFetch';
-import ScreenHeaderLayout from '../../components/layout/ScreenHeaderLayout/ScreenHeaderLayout';
-import { useThemeStore } from '../../stores/themeStore';
-import { useAllStatistics } from '../../api/queries';
+import { API_ENDPOINTS } from '@/api/apiEndpoints';
+import { apiFetch } from '@/api/apiFetch';
+import ScreenHeaderLayout from '@/components/layout/ScreenHeaderLayout/ScreenHeaderLayout';
+import { useThemeStore } from '@/stores/themeStore';
+import { useAllStatistics } from '@/api/queries';
 
 
 const DEBUG_MODE = false; // Set to true for testing controls

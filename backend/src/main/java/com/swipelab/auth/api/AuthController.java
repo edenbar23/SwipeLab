@@ -22,6 +22,9 @@ import org.thymeleaf.spring6.SpringTemplateEngine;
 import java.security.Principal;
 import java.util.HashMap;
 import java.util.Map;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Cookie;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -34,6 +37,36 @@ public class AuthController {
     private final com.swipelab.auth.domain.AuthMapper authMapper;
     private final com.swipelab.auth.application.JwtService jwtService;
     private final SpringTemplateEngine templateEngine;
+
+    private void setAuthCookies(HttpServletResponse response, String accessToken, String refreshToken) {
+        Cookie accessCookie = new Cookie("accessToken", accessToken);
+        accessCookie.setHttpOnly(true);
+        accessCookie.setPath("/");
+        accessCookie.setMaxAge(3600); // 1 hour
+
+        Cookie refreshCookie = new Cookie("refreshToken", refreshToken);
+        refreshCookie.setHttpOnly(true);
+        refreshCookie.setPath("/");
+        refreshCookie.setMaxAge(604800); // 7 days
+
+        response.addCookie(accessCookie);
+        response.addCookie(refreshCookie);
+    }
+
+    private void clearAuthCookies(HttpServletResponse response) {
+        Cookie accessCookie = new Cookie("accessToken", "");
+        accessCookie.setHttpOnly(true);
+        accessCookie.setPath("/");
+        accessCookie.setMaxAge(0);
+
+        Cookie refreshCookie = new Cookie("refreshToken", "");
+        refreshCookie.setHttpOnly(true);
+        refreshCookie.setPath("/");
+        refreshCookie.setMaxAge(0);
+
+        response.addCookie(accessCookie);
+        response.addCookie(refreshCookie);
+    }
 
     /**
      * Register a new user
@@ -135,33 +168,58 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(
-            @Valid @RequestBody LoginRequest request) {
-        return ResponseEntity.ok(authenticationService.login(request));
+            @Valid @RequestBody LoginRequest request, HttpServletResponse response) {
+        AuthResponse authResponse = authenticationService.login(request);
+        setAuthCookies(response, authResponse.getAccessToken(), authResponse.getRefreshToken());
+        return ResponseEntity.ok(authResponse);
     }
 
     @PostMapping("/refresh")
     public ResponseEntity<AuthResponse> refreshToken(
-            @RequestHeader("Authorization") String authorizationHeader) {
+            @RequestHeader(value = "Authorization", required = false) String authorizationHeader,
+            HttpServletRequest request, HttpServletResponse response) {
 
-        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+        String refreshToken = null;
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            refreshToken = authorizationHeader.substring(7);
+        } else if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if ("refreshToken".equals(cookie.getName())) {
+                    refreshToken = cookie.getValue();
+                }
+            }
+        }
+
+        if (refreshToken == null) {
             throw new UnauthorizedException("Missing refresh token");
         }
 
-        String refreshToken = authorizationHeader.substring(7);
-        return ResponseEntity.ok(authenticationService.refresh(refreshToken));
+        AuthResponse authResponse = authenticationService.refresh(refreshToken);
+        setAuthCookies(response, authResponse.getAccessToken(), authResponse.getRefreshToken());
+        return ResponseEntity.ok(authResponse);
     }
 
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(
-            @RequestHeader("Authorization") String authorizationHeader) {
+            @RequestHeader(value = "Authorization", required = false) String authorizationHeader,
+            HttpServletRequest request, HttpServletResponse response) {
 
-        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-            throw new UnauthorizedException("Missing refresh token");
+        String refreshToken = null;
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            refreshToken = authorizationHeader.substring(7);
+        } else if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if ("refreshToken".equals(cookie.getName())) {
+                    refreshToken = cookie.getValue();
+                }
+            }
         }
 
-        String refreshToken = authorizationHeader.substring(7);
-        authenticationService.logout(refreshToken);
+        if (refreshToken != null) {
+            authenticationService.logout(refreshToken);
+        }
 
+        clearAuthCookies(response);
         return ResponseEntity.noContent().build();
     }
 
@@ -177,7 +235,7 @@ public class AuthController {
     }
 
     @PostMapping("/login/google")
-    public ResponseEntity<AuthResponse> loginGoogle(@RequestBody Map<String, String> payload) {
+    public ResponseEntity<AuthResponse> loginGoogle(@RequestBody Map<String, String> payload, HttpServletResponse response) {
         String credential = payload.get("credential");
         if (credential == null) {
             credential = payload.get("idToken");
@@ -222,6 +280,7 @@ public class AuthController {
         String accessToken  = jwtService.generateAccessToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
 
+        setAuthCookies(response, accessToken, refreshToken);
         return ResponseEntity.ok(authMapper.toAuthResponse(accessToken, refreshToken, user));
     }
 
