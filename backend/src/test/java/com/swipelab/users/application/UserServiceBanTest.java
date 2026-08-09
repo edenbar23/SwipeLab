@@ -2,7 +2,7 @@ package com.swipelab.users.application;
 
 import com.swipelab.auth.application.SecurityAuthorizationService;
 import com.swipelab.auth.domain.AuthMapper;
-import com.swipelab.dto.response.UserProfileResponse;
+import com.swipelab.users.dto.UserProfileResponse;
 import com.swipelab.exception.ResourceNotFoundException;
 import com.swipelab.model.enums.UserRole;
 import com.swipelab.model.enums.UserStatus;
@@ -142,3 +142,4 @@ class UserServiceBanTest {
                 .isInstanceOf(ResourceNotFoundException.class);
     }
 }
+

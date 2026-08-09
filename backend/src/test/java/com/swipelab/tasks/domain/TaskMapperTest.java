@@ -1,11 +1,11 @@
 package com.swipelab.tasks.domain;
 
 import com.swipelab.tasks.application.port.out.TargetSpeciesProvider;
-import com.swipelab.dto.request.CreateTaskRequest;
-import com.swipelab.dto.request.UpdateTaskRequest;
-import com.swipelab.dto.response.TaskResponse;
-import com.swipelab.dto.response.TaskProgressResponse;
-import com.swipelab.dto.response.TargetSpeciesResponse;
+import com.swipelab.tasks.dto.CreateTaskRequest;
+import com.swipelab.tasks.dto.UpdateTaskRequest;
+import com.swipelab.tasks.dto.TaskResponse;
+import com.swipelab.tasks.dto.TaskProgressResponse;
+import com.swipelab.tasks.dto.TargetSpeciesResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -137,3 +137,4 @@ class TaskMapperTest {
         assertEquals(2, responses.size());
     }
 }
+

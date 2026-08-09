@@ -1,9 +1,9 @@
 package com.swipelab.recipients.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.swipelab.dto.request.CreateRecipientGroupRequest;
-import com.swipelab.dto.request.UpdateRecipientGroupRequest;
-import com.swipelab.dto.response.RecipientGroupResponse;
+import com.swipelab.recipients.dto.CreateRecipientGroupRequest;
+import com.swipelab.recipients.dto.UpdateRecipientGroupRequest;
+import com.swipelab.recipients.dto.RecipientGroupResponse;
 import com.swipelab.recipients.application.RecipientGroupService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -103,3 +103,4 @@ class RecipientsGroupControllerTest {
                 .andExpect(status().isNoContent());
     }
 }
+

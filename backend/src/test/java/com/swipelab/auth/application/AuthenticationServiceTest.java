@@ -1,10 +1,10 @@
 package com.swipelab.auth.application;
 
 import com.swipelab.auth.domain.AuthMapper;
-import com.swipelab.dto.request.LoginRequest;
-import com.swipelab.dto.request.RegisterRequest;
-import com.swipelab.dto.request.ResetPasswordRequest;
-import com.swipelab.dto.response.AuthResponse;
+import com.swipelab.auth.dto.LoginRequest;
+import com.swipelab.auth.dto.RegisterRequest;
+import com.swipelab.auth.dto.ResetPasswordRequest;
+import com.swipelab.auth.dto.AuthResponse;
 import org.springframework.context.ApplicationEventPublisher;
 import com.swipelab.exception.EmailVerificationException;
 import com.swipelab.exception.PasswordResetException;
@@ -283,3 +283,4 @@ class AuthenticationServiceTest {
         verify(userRepository, times(1)).save(user);
     }
 }
+

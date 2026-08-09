@@ -1,7 +1,7 @@
 package com.swipelab.auth.external;
 
 import com.swipelab.auth.infrastructure.AuthProvider;
-import com.swipelab.dto.request.ExternalLoginRequest;
+import com.swipelab.auth.dto.ExternalLoginRequest;
 import com.swipelab.integration.stardbi.StardbiClientPort;
 import com.swipelab.model.enums.UserRole;
 import com.swipelab.model.enums.UserStatus;
@@ -137,3 +137,6 @@ public class StardbiAuthService {
         }
     }
 }
+
+
+

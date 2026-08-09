@@ -1,7 +1,7 @@
 package com.swipelab.classification.api;
 
 import com.swipelab.classification.application.SuspiciousActivityService;
-import com.swipelab.dto.response.SuspiciousActivityResponse;
+import com.swipelab.auth.dto.SuspiciousActivityResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -52,3 +52,6 @@ public class SuspiciousActivityController {
                 "message", "Strikes and warnings cleared. User status restored to ACTIVE."));
     }
 }
+
+
+

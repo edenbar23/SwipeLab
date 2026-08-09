@@ -141,7 +141,7 @@ public class AdminNotificationService {
     // ── Query methods (used by AdminNotificationController) ───────────────────
 
     @org.springframework.transaction.annotation.Transactional(readOnly = true)
-    public org.springframework.data.domain.Page<com.swipelab.dto.response.AdminNotificationResponse> getNotifications(
+    public org.springframework.data.domain.Page<com.swipelab.users.dto.AdminNotificationResponse> getNotifications(
             Boolean isRead,
             com.swipelab.users.domain.NotificationType type,
             com.swipelab.users.domain.NotificationSeverity severity,
@@ -181,8 +181,8 @@ public class AdminNotificationService {
         return adminNotificationRepository.markAllAsRead();
     }
 
-    private com.swipelab.dto.response.AdminNotificationResponse toResponse(AdminNotification n) {
-        return com.swipelab.dto.response.AdminNotificationResponse.builder()
+    private com.swipelab.users.dto.AdminNotificationResponse toResponse(AdminNotification n) {
+        return com.swipelab.users.dto.AdminNotificationResponse.builder()
                 .id(n.getId())
                 .type(n.getType())
                 .severity(n.getSeverity())
@@ -208,3 +208,5 @@ public class AdminNotificationService {
                 .build());
     }
 }
+
+

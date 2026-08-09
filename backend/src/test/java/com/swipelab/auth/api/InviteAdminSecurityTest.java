@@ -12,7 +12,7 @@ import com.swipelab.auth.infrastructure.JwtAuthenticationFilter;
 import com.swipelab.auth.infrastructure.OAuth2AuthenticationFailureHandler;
 import com.swipelab.auth.infrastructure.OAuth2AuthenticationSuccessHandler;
 import com.swipelab.auth.infrastructure.RateLimitingFilter;
-import com.swipelab.dto.request.InviteAdminRequest;
+import com.swipelab.auth.dto.InviteAdminRequest;
 import com.swipelab.users.application.UserService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -172,3 +172,4 @@ class InviteAdminSecurityTest {
         verify(authenticationService, times(1)).inviteAdmin(any(InviteAdminRequest.class));
     }
 }
+

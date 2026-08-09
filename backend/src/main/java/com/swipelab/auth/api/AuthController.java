@@ -1,8 +1,13 @@
 package com.swipelab.auth.api;
 
-import com.swipelab.dto.request.*;
-import com.swipelab.dto.response.AuthResponse;
-import com.swipelab.dto.response.UserProfileResponse;
+
+import com.swipelab.auth.dto.*;
+import com.swipelab.classification.dto.*;
+import com.swipelab.tasks.dto.*;
+import com.swipelab.users.dto.*;
+import com.swipelab.recipients.dto.*;
+import com.swipelab.auth.dto.AuthResponse;
+import com.swipelab.users.dto.UserProfileResponse;
 
 import com.swipelab.exception.UnauthorizedException;
 import com.swipelab.auth.application.AuthenticationService;
@@ -289,3 +294,8 @@ public class AuthController {
     }
 
 }
+
+
+
+
+

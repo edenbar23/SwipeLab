@@ -5,7 +5,7 @@ import com.swipelab.exception.ResourceNotFoundException;
 import com.swipelab.tasks.domain.Task;
 import com.swipelab.tasks.infrastructure.TaskRepository;
 import com.swipelab.tasks.application.port.out.TargetSpeciesProvider;
-import com.swipelab.dto.response.TargetSpeciesResponse;
+import com.swipelab.tasks.dto.TargetSpeciesResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,3 +33,4 @@ public class TaskProviderImpl implements TaskProvider {
         return new TaskInfo(task.getId(), task.getQuestion(), task.getQuerySpecies(), speciesNames, species, task.getConsensusThreshold());
     }
 }
+

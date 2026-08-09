@@ -3,7 +3,7 @@ package com.swipelab.classification.application;
 import com.swipelab.classification.domain.fraud.SuspiciousActivityRecord;
 import com.swipelab.classification.domain.fraud.WarningLevel;
 import com.swipelab.classification.infrastructure.SuspiciousActivityRepository;
-import com.swipelab.dto.response.SuspiciousActivityResponse;
+import com.swipelab.auth.dto.SuspiciousActivityResponse;
 import com.swipelab.users.domain.User;
 import com.swipelab.users.infrastructure.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -74,3 +74,6 @@ public class SuspiciousActivityService {
                 .build();
     }
 }
+
+
+

@@ -14,9 +14,9 @@ import com.swipelab.classification.infrastructure.ClassificationRepository;
 import com.swipelab.classification.infrastructure.GoldImageRepository;
 import com.swipelab.classification.infrastructure.ImageRepository;
 import com.swipelab.classification.infrastructure.LabelRepository;
-import com.swipelab.dto.request.ImageUploadRequest;
-import com.swipelab.dto.response.ImageBatchResponse;
-import com.swipelab.dto.response.ImageResponse;
+import com.swipelab.classification.dto.ImageUploadRequest;
+import com.swipelab.classification.dto.ImageBatchResponse;
+import com.swipelab.classification.dto.ImageResponse;
 import com.swipelab.exception.ResourceNotFoundException;
 import com.swipelab.classification.application.port.out.TaskProvider;
 import org.junit.jupiter.api.BeforeEach;
@@ -179,3 +179,4 @@ class ImageServiceTest {
         assertThrows(ResourceNotFoundException.class, () -> imageService.getImageById(1L));
     }
 }
+

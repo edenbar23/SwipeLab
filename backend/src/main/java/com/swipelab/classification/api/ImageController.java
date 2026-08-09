@@ -1,8 +1,8 @@
 package com.swipelab.classification.api;
 
-import com.swipelab.dto.request.ImageUploadRequest;
-import com.swipelab.dto.response.ImageBatchResponse;
-import com.swipelab.dto.response.ImageResponse;
+import com.swipelab.classification.dto.ImageUploadRequest;
+import com.swipelab.classification.dto.ImageBatchResponse;
+import com.swipelab.classification.dto.ImageResponse;
 import com.swipelab.classification.domain.image.ImageService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -38,3 +38,12 @@ public class ImageController {
         return ResponseEntity.ok(imageService.getImageById(id));
     }
 }
+
+
+
+
+
+
+
+
+

@@ -2,8 +2,8 @@ package com.swipelab.classification.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.swipelab.classification.domain.goldimage.GoldImageService;
-import com.swipelab.dto.request.GoldImageRequest;
-import com.swipelab.dto.response.GoldImageResponse;
+import com.swipelab.classification.dto.GoldImageRequest;
+import com.swipelab.classification.dto.GoldImageResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -114,5 +114,6 @@ class GoldImageControllerTest {
     }
 
 }
+
 
 

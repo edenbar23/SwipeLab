@@ -1,7 +1,7 @@
 package com.swipelab.classification.api;
 
-import com.swipelab.dto.request.GoldImageRequest;
-import com.swipelab.dto.response.GoldImageResponse;
+import com.swipelab.classification.dto.GoldImageRequest;
+import com.swipelab.classification.dto.GoldImageResponse;
 import com.swipelab.classification.domain.goldimage.GoldImageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
@@ -72,3 +72,9 @@ public class GoldImageController {
     }
 
 }
+
+
+
+
+
+

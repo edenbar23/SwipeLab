@@ -1,6 +1,6 @@
 package com.swipelab.analytics.application;
 
-import com.swipelab.dto.response.DashboardStatsResponse;
+import com.swipelab.analytics.dto.DashboardStatsResponse;
 import com.swipelab.classification.infrastructure.ClassificationRepository;
 import com.swipelab.classification.infrastructure.ImageRepository;
 import com.swipelab.tasks.infrastructure.TaskRepository;
@@ -27,3 +27,6 @@ public class StatisticsService {
                 .build();
     }
 }
+
+
+

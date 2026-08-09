@@ -1,12 +1,20 @@
 package com.swipelab.auth.external;
 
+import com.swipelab.auth.dto.AuthResponse;
 import com.swipelab.auth.domain.AuthMapper;
-import com.swipelab.dto.request.ExternalLoginRequest;
-import com.swipelab.dto.response.UserProfileResponse;
+import com.swipelab.auth.dto.AuthResponse;
+import com.swipelab.auth.dto.ExternalLoginRequest;
+import com.swipelab.auth.dto.AuthResponse;
+import com.swipelab.users.dto.UserProfileResponse;
+import com.swipelab.auth.dto.AuthResponse;
 import com.swipelab.users.domain.User;
+import com.swipelab.auth.dto.AuthResponse;
 import jakarta.validation.Valid;
+import com.swipelab.auth.dto.AuthResponse;
 import lombok.RequiredArgsConstructor;
+import com.swipelab.auth.dto.AuthResponse;
 import org.springframework.http.ResponseEntity;
+import com.swipelab.auth.dto.AuthResponse;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -27,7 +35,7 @@ public class ExternalAuthController {
      * Expected request body: the full Stardbi login response object.
      */
     @PostMapping("/stardbi/loginExternal")
-    public ResponseEntity<com.swipelab.dto.response.AuthResponse> loginExternal(
+    public ResponseEntity<com.swipelab.auth.dto.AuthResponse> loginExternal(
             @Valid @RequestBody ExternalLoginRequest request) {
 
         User user = stardbiAuthService.loginExternal(request);
@@ -37,7 +45,7 @@ public class ExternalAuthController {
 
             UserProfileResponse profile = authMapper.toUserProfileResponse(user);
             
-            com.swipelab.dto.response.AuthResponse response = com.swipelab.dto.response.AuthResponse.builder()
+            com.swipelab.auth.dto.AuthResponse response = com.swipelab.auth.dto.AuthResponse.builder()
                     .accessToken(accessToken)
                     .refreshToken(refreshToken)
                     .expiresIn(jwtService.getAccessTokenExpirySeconds())
@@ -50,3 +58,10 @@ public class ExternalAuthController {
         return ResponseEntity.status(401).build();
     }
 }
+
+
+
+
+
+
+

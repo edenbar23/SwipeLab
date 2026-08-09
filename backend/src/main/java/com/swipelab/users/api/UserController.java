@@ -1,7 +1,7 @@
 package com.swipelab.users.api;
 
-import com.swipelab.dto.request.UpdateProfileRequest;
-import com.swipelab.dto.response.UserProfileResponse;
+import com.swipelab.users.dto.UpdateProfileRequest;
+import com.swipelab.users.dto.UserProfileResponse;
 import com.swipelab.users.application.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -64,3 +64,7 @@ public class UserController {
         return ResponseEntity.ok(userService.unbanUser(username));
     }
 }
+
+
+
+

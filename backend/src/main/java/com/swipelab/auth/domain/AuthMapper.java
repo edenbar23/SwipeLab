@@ -1,9 +1,9 @@
 package com.swipelab.auth.domain;
 
 import com.swipelab.auth.infrastructure.AuthProvider;
-import com.swipelab.dto.request.RegisterRequest;
-import com.swipelab.dto.response.AuthResponse;
-import com.swipelab.dto.response.UserProfileResponse;
+import com.swipelab.auth.dto.RegisterRequest;
+import com.swipelab.auth.dto.AuthResponse;
+import com.swipelab.users.dto.UserProfileResponse;
 import com.swipelab.users.domain.User;
 import com.swipelab.model.enums.UserRole;
 import com.swipelab.auth.application.SecurityAuthorizationService;
@@ -76,3 +76,10 @@ public class AuthMapper {
                 .build();
     }
 }
+
+
+
+
+
+
+

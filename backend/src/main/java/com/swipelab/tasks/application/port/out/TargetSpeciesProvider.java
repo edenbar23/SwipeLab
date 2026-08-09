@@ -1,6 +1,6 @@
 package com.swipelab.tasks.application.port.out;
 
-import com.swipelab.dto.response.TargetSpeciesResponse;
+import com.swipelab.tasks.dto.TargetSpeciesResponse;
 import java.util.List;
 
 public interface TargetSpeciesProvider {
@@ -8,3 +8,4 @@ public interface TargetSpeciesProvider {
     List<TargetSpeciesResponse> getSpeciesByIdsAndRefImages(List<Long> speciesIds, List<Long> refImageIds);
     List<Long> getOrCreateSpeciesIds(List<String> speciesNames);
 }
+

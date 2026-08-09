@@ -9,8 +9,8 @@ import com.swipelab.classification.domain.core.LabelService;
 
 import com.swipelab.classification.infrastructure.GoldImageRepository;
 import com.swipelab.classification.infrastructure.ImageRepository;
-import com.swipelab.dto.request.GoldImageRequest;
-import com.swipelab.dto.response.GoldImageResponse;
+import com.swipelab.classification.dto.GoldImageRequest;
+import com.swipelab.classification.dto.GoldImageResponse;
 import com.swipelab.exception.ResourceNotFoundException;
 import com.swipelab.classification.application.port.out.TaskProvider;
 import org.junit.jupiter.api.BeforeEach;
@@ -190,3 +190,4 @@ class GoldImageServiceTest {
         verify(goldImageRepository, times(1)).findAllByActiveTrue();
     }
 }
+

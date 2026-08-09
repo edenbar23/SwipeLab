@@ -1,8 +1,8 @@
 package com.swipelab.users.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.swipelab.dto.request.UpdateProfileRequest;
-import com.swipelab.dto.response.UserProfileResponse;
+import com.swipelab.users.dto.UpdateProfileRequest;
+import com.swipelab.users.dto.UserProfileResponse;
 import com.swipelab.users.application.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -106,3 +106,4 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.username").value("testuser"));
     }
 }
+
