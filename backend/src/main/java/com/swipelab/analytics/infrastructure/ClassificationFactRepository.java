@@ -76,6 +76,7 @@ public interface ClassificationFactRepository extends JpaRepository<Classificati
      */
     @Query("SELECT c.userId, COUNT(c), " +
             "SUM(CASE WHEN c.isCorrect = true THEN 1 ELSE 0 END), " +
+            "SUM(CASE WHEN c.isCorrect IS NOT NULL THEN 1 ELSE 0 END), " +
             "AVG(c.credibilityAtTime) " +
             "FROM ClassificationFact c " +
             "WHERE (:taskId IS NULL OR c.taskId = :taskId) " +
@@ -87,6 +88,7 @@ public interface ClassificationFactRepository extends JpaRepository<Classificati
      */
     @Query("SELECT c.userId, COUNT(c) as total, " +
             "SUM(CASE WHEN c.isCorrect = true THEN 1 ELSE 0 END), " +
+            "SUM(CASE WHEN c.isCorrect IS NOT NULL THEN 1 ELSE 0 END), " +
             "AVG(c.credibilityAtTime) " +
             "FROM ClassificationFact c " +
             "GROUP BY c.userId ORDER BY total DESC")

@@ -233,7 +233,7 @@ export default function AnalyticsScreen({ navigation }: any) {
                 </Text>
                 <Text style={[styles.userStats, { color: themeColors.textSecondary }]}>
                   {user.totalClassifications} classifications •{' '}
-                  {(user.goldAccuracy ?? 0).toFixed(1)}% accuracy
+                  {((user.goldAccuracy ?? 0) * 100).toFixed(1)}% accuracy
                 </Text>
               </View>
               <View style={styles.credBox}>

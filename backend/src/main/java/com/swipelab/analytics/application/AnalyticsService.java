@@ -355,14 +355,15 @@ public class AnalyticsService {
         String username = (String) row[0];
         int total = row[1] != null ? ((Number) row[1]).intValue() : 0;
         int correct = row[2] != null ? ((Number) row[2]).intValue() : 0;
-        double avgCredibility = row[3] != null ? ((Number) row[3]).doubleValue() : 0.0;
-        double accuracy = total > 0 ? (double) correct / total : 0.0;
+        int goldTotal = row[3] != null ? ((Number) row[3]).intValue() : 0;
+        double avgCredibility = row[4] != null ? ((Number) row[4]).doubleValue() : 0.0;
+        double accuracy = goldTotal > 0 ? (double) correct / goldTotal : 0.0;
 
         return UserPerformanceResponse.builder()
                 .username(username)
                 .displayName(username)
                 .totalClassifications(total)
-                .goldImageClassifications(0)
+                .goldImageClassifications(goldTotal)
                 .correctGoldClassifications(correct)
                 .goldAccuracy(accuracy)
                 .credibilityScore(avgCredibility)

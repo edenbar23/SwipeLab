@@ -160,8 +160,8 @@ class AnalyticsServiceTest {
 
     @Test
     void getUserPerformanceMetrics_happyFlow_mapsAggregationCorrectly() {
-        // (userId, total, correct, avgCredibility)
-        Object[] row = {"alice", 50L, 40L, 0.85};
+        // (userId, total, correct, goldTotal, avgCredibility)
+        Object[] row = {"alice", 100L, 40L, 50L, 0.85};
         List<Object[]> perfRows = new java.util.ArrayList<>();
         perfRows.add(row);
         when(classificationFactRepository.getUserPerformanceAggregation(eq(1L)))
@@ -172,7 +172,8 @@ class AnalyticsServiceTest {
         assertEquals(1, result.size());
         UserPerformanceResponse resp = result.get(0);
         assertEquals("alice", resp.getUsername());
-        assertEquals(50, resp.getTotalClassifications());
+        assertEquals(100, resp.getTotalClassifications());
+        assertEquals(50, resp.getGoldImageClassifications());
         assertEquals(0.85, resp.getCredibilityScore(), 0.001);
         assertEquals(0.8, resp.getGoldAccuracy(), 0.001); // 40/50
     }
@@ -192,7 +193,7 @@ class AnalyticsServiceTest {
 
     @Test
     void getTopPerformers_happyFlow_returnsLimitedList() {
-        Object[] row = {"bob", 100L, 90L, 0.92};
+        Object[] row = {"bob", 200L, 90L, 100L, 0.92};
         List<Object[]> topRows = new java.util.ArrayList<>();
         topRows.add(row);
         when(classificationFactRepository.getTopPerformersAggregation(any(Pageable.class)))
