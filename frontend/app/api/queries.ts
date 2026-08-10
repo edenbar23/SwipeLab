@@ -7,7 +7,7 @@ export const QUERY_KEYS = {
   myTasks: ['tasks', 'my'],
   availableTasks: ['tasks', 'available'],
   dashboardTasks: ['tasks', 'dashboard'],
-  taskDetails: (id: string | number) => ['tasks', id],
+  taskDetails: (id: string | number) => ['tasks', Number(id)],
   experiments: ['tasks', 'experiments'],
   
   // User Profile
@@ -314,7 +314,7 @@ export const useUpdateTaskStatus = () => {
       queryClient.setQueryData(QUERY_KEYS.dashboardTasks, (oldData: any) => {
         if (!Array.isArray(oldData)) return oldData;
         return oldData.map((task: any) =>
-          task.taskId === taskId ? updatedTask : task
+          task.taskId === Number(taskId) ? updatedTask : task
         );
       });
     },
