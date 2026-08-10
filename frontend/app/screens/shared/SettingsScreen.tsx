@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, Alert, Linking } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import ScreenHeaderLayout from '@/components/layout/ScreenHeaderLayout/ScreenHeaderLayout';
@@ -7,8 +7,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { useThemeStore } from '@/stores/themeStore';
 
 export default function SettingsScreen() {
-  const { logout } = useAuthStore();
-  const isSuperAdmin = useAuthStore((state) => state.isSuperAdmin);
+  const { logout, isSuperAdmin, role } = useAuthStore();
   const { theme, toggleTheme } = useThemeStore();
   const [notifications, setNotifications] = useState(true);
   const navigation = useNavigation<any>();
@@ -37,6 +36,18 @@ export default function SettingsScreen() {
     versionText: {
       color: isDarkMode ? '#6b7280' : '#999',
     },
+  };
+
+  const handleHelpCenter = () => {
+    const isResearchMode = role === 'RESEARCHER' || isSuperAdmin;
+    const url = isResearchMode 
+        ? 'https://swipelab-project.netlify.app/researcher-manual' 
+        : 'https://swipelab-project.netlify.app/user-manual';
+    Linking.openURL(url).catch((err) => console.error("Couldn't load page", err));
+  };
+
+  const handleAbout = () => {
+    Alert.alert('About SwipeLab', 'SwipeLab v1.0.0-alpha\n\nA platform for crowdsourced biological classifications.\nDeveloped for research purposes.');
   };
 
   return (
@@ -120,7 +131,7 @@ export default function SettingsScreen() {
           <View style={styles.section}>
             <Text style={[styles.sectionTitle, dynamicStyles.sectionTitle]}>Support</Text>
 
-            <TouchableOpacity style={[styles.settingRow, dynamicStyles.settingRow]}>
+            <TouchableOpacity style={[styles.settingRow, dynamicStyles.settingRow]} onPress={handleHelpCenter}>
               <View style={styles.settingLeft}>
                 <Ionicons name="help-circle-outline" size={24} color={dynamicStyles.iconColor} />
                 <Text style={[styles.settingLabel, dynamicStyles.settingLabel]}>Help Center</Text>
@@ -128,7 +139,7 @@ export default function SettingsScreen() {
               <Ionicons name="open-outline" size={20} color={dynamicStyles.chevronColor} />
             </TouchableOpacity>
 
-            <TouchableOpacity style={[styles.settingRow, dynamicStyles.settingRow]}>
+            <TouchableOpacity style={[styles.settingRow, dynamicStyles.settingRow]} onPress={handleAbout}>
               <View style={styles.settingLeft}>
                 <Ionicons name="information-circle-outline" size={24} color={dynamicStyles.iconColor} />
                 <Text style={[styles.settingLabel, dynamicStyles.settingLabel]}>About</Text>

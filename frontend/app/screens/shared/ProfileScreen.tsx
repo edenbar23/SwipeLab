@@ -157,16 +157,22 @@ export default function ProfileScreen() {
                 <View style={styles.section}>
                     <Text style={[styles.sectionTitle, { color: themeColors.text }]}>Badges</Text>
                     <View style={styles.badgesContainer}>
-                        {myBadges?.map((badge: any, index: number) => (
-                            <View key={index} style={[styles.badge, { backgroundColor: themeColors.background, borderColor: themeColors.border, alignItems: 'center' }]}>
-                                {badge.iconUrl && typeof badge.iconUrl === 'string' && badge.iconUrl.startsWith('http') ? (
-                                    <Image source={{ uri: badge.iconUrl }} style={styles.badgeImage} />
-                                ) : (
-                                    <Image source={getBadgeIcon(badge.title)} style={styles.badgeImage} />
-                                )}
-                                <Text style={[styles.badgeText, { fontSize: 14, color: themeColors.text, textAlign: 'center' }]}>{badge.title}</Text>
-                            </View>
-                        ))}
+                        {myBadges && myBadges.length > 0 ? (
+                            myBadges.map((badge: any, index: number) => (
+                                <View key={index} style={[styles.badge, { backgroundColor: themeColors.background, borderColor: themeColors.border, alignItems: 'center' }]}>
+                                    {badge.iconUrl && typeof badge.iconUrl === 'string' && badge.iconUrl.startsWith('http') ? (
+                                        <Image source={{ uri: badge.iconUrl }} style={styles.badgeImage} />
+                                    ) : (
+                                        <Image source={getBadgeIcon(badge.title)} style={styles.badgeImage} />
+                                    )}
+                                    <Text style={[styles.badgeText, { fontSize: 14, color: themeColors.text, textAlign: 'center' }]}>{badge.title}</Text>
+                                </View>
+                            ))
+                        ) : (
+                            <Text style={{ color: themeColors.textSecondary, fontStyle: 'italic', marginTop: 8 }}>
+                                No badges earned yet. Keep classifying!
+                            </Text>
+                        )}
                     </View>
                 </View>
 
