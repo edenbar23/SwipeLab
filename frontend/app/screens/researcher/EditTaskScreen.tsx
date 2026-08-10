@@ -93,7 +93,12 @@ export default function EditTaskScreen({ route, navigation }: Props) {
         }
         if (researchersRes.ok) {
           const researchers = await researchersRes.json();
-          setAvailableResearchers(researchers.map((r: any) => ({ id: r.username, label: r.displayName || r.username })));
+          const currentUser = queryClient.getQueryData<any>(QUERY_KEYS.userProfile);
+          setAvailableResearchers(
+            researchers
+              .filter((r: any) => !currentUser || r.username !== currentUser.username)
+              .map((r: any) => ({ id: r.username, label: r.displayName || r.username }))
+          );
         }
         setAvailableOptions(loaded);
       } catch (error) {
