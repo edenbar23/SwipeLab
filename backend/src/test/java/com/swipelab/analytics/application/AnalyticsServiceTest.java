@@ -54,6 +54,7 @@ class AnalyticsServiceTest {
         Object[] row = {10L, 8L};
         when(userDailyStatsRepository.getProgressSince(eq("alice"), any(LocalDate.class)))
                 .thenReturn(row);
+        when(classificationFactRepository.getUserAccuracy("alice")).thenReturn(0.8);
 
         UserProgressResponse result = analyticsService.getUserProgress("alice");
 
@@ -66,6 +67,7 @@ class AnalyticsServiceTest {
         // Repository returns null result when the user has no data
         when(userDailyStatsRepository.getProgressSince(eq("ghost"), any(LocalDate.class)))
                 .thenReturn(null);
+        when(classificationFactRepository.getUserAccuracy("ghost")).thenReturn(null);
 
         UserProgressResponse result = analyticsService.getUserProgress("ghost");
 

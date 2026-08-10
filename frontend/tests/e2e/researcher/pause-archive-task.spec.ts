@@ -15,7 +15,7 @@ const ARCHIVE_TASK = 'E2E Archive Target';
 async function loginAsResearcher(page: Page): Promise<void> {
     await test.step('Login as researcher', async () => {
         await page.goto(BASE_URL);
-        await page.waitForLoadState('networkidle');
+        await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(1500);
 
         await expect(page.locator('text=Welcome to SwipeLab')).toBeVisible({ timeout: 15000 });
@@ -94,6 +94,10 @@ test.describe('[E2E] R8 Pause / Archive Task', () => {
         await test.step('Archive paused task', async () => {
             // Click the Archive button
             await expect(page.getByText('Archive', { exact: true }).last()).toBeVisible();
+            await page.getByText('Archive', { exact: true }).last().click();
+            
+            // Confirm the archive action in the modal
+            await expect(page.getByText('Are you sure you want to archive', { exact: false }).last()).toBeVisible();
             await page.getByText('Archive', { exact: true }).last().click();
         });
 
