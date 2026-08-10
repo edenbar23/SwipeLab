@@ -24,7 +24,7 @@ public interface ClassificationFactRepository extends JpaRepository<Classificati
     Double getGlobalAverageAccuracy();
 
     @Query("SELECT COUNT(DISTINCT c.imageId) FROM ClassificationFact c WHERE c.taskId = :taskId")
-    Long countCompletedImages(@Param("taskId") Long taskId);
+    Long countDistinctImagesByTaskId(@Param("taskId") Long taskId);
 
     @Query("SELECT c.species, COUNT(c), AVG(CASE WHEN c.isCorrect = true THEN 1.0 ELSE 0.0 END) " +
             "FROM ClassificationFact c WHERE c.userId = :userId AND c.isCorrect IS NOT NULL GROUP BY c.species")

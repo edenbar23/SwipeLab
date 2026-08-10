@@ -5,6 +5,7 @@ import com.swipelab.analytics.dto.*;
 import com.swipelab.analytics.infrastructure.*;
 import com.swipelab.classification.domain.core.Classification.UserResponse;
 import com.swipelab.classification.infrastructure.ClassificationRepository;
+import com.swipelab.classification.infrastructure.ConsensusResultRepository;
 import com.swipelab.classification.infrastructure.ImageRepository;
 import com.swipelab.config.CacheConfig;
 import com.swipelab.analytics.dto.DashboardStatsResponse;
@@ -43,6 +44,7 @@ public class AnalyticsService {
     private final UserRepository userRepository;
     private final TaskRepository taskRepository;
     private final ImageRepository imageRepository;
+    private final ConsensusResultRepository consensusResultRepository;
 
     // ─── User-scoped endpoints ────────────────────────────────────────────────
 
@@ -197,7 +199,8 @@ public class AnalyticsService {
 
     @Transactional(readOnly = true)
     public TaskAnalyticsResponse getTaskAnalytics(Long taskId) {
-        Long completedImages = classificationFactRepository.countCompletedImages(taskId);
+        Long imagesClassified = classificationFactRepository.countDistinctImagesByTaskId(taskId);
+        Long completedImages = consensusResultRepository.countCompletedImagesByTaskId(taskId);
         List<ClassificationFact> facts = classificationFactRepository.findByTaskId(taskId);
         int totalClassifications = facts.size();
 
@@ -207,7 +210,7 @@ public class AnalyticsService {
                 : 0.0;
 
         TaskAnalyticsResponse.Progress progress = TaskAnalyticsResponse.Progress.builder()
-                .imagesClassified(completedImages.intValue())
+                .imagesClassified(imagesClassified.intValue())
                 .totalImages(totalImages)
                 .completedImages(completedImages.intValue())
                 .percentComplete(percentComplete)
