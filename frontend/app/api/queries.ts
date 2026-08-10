@@ -92,7 +92,7 @@ export const useAllStatistics = () => {
             fetchJson(API_ENDPOINTS.STATISTICS.VS_EXPERTS),
             fetchJson(API_ENDPOINTS.STATISTICS.VS_USERS),
             fetchJson(API_ENDPOINTS.STATISTICS.BREAKDOWN),
-            fetchJson(API_ENDPOINTS.GAMIFICATION.USER_INFO).catch(() => ({ score: 0, badge: null, currentStreak: 0 })),
+            fetchJson(API_ENDPOINTS.GAMIFICATION.USER_INFO).catch(() => ({ score: 0, badge: null, currentStreak: 0, longestStreak: 0 })),
         ]);
         return { summary, vsExperts, vsUsers, breakdown, userInfo };
     },
