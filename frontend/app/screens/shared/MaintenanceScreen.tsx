@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity, Linking, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity, Linking, SafeAreaView, Platform } from 'react-native';
 import { Image } from 'expo-image';
 import { theme } from '@/theme/theme';
 import Animated, { FadeIn, FadeInDown, SlideInDown } from 'react-native-reanimated';
@@ -47,17 +47,17 @@ export function MaintenanceScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
-        <Animated.View entering={FadeInDown.duration(800).delay(100)}>
+        <Animated.View entering={FadeInDown.duration(800).delay(100)} pointerEvents="none">
           <Image 
-            source={require('../../../assets/images/swipelab.gif')} 
+            source={Platform.OS === 'web' ? { uri: '/swipelab.gif' } : require('../../../assets/images/swipelab.gif')} 
             style={styles.logo} 
             contentFit="contain"
           />
         </Animated.View>
 
-        <Animated.View entering={FadeInDown.duration(800).delay(200)}>
+        <Animated.View entering={FadeInDown.duration(800).delay(200)} pointerEvents="none">
           <Image 
-            source={require('../../../assets/images/maintenance.gif')} 
+            source={Platform.OS === 'web' ? { uri: '/maintenance.gif' } : require('../../../assets/images/maintenance.gif')} 
             style={styles.mainImage} 
             contentFit="contain"
           />
