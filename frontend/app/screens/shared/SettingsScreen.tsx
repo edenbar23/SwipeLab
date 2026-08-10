@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, Alert, Linking } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, Modal, Linking, Platform } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import ScreenHeaderLayout from '@/components/layout/ScreenHeaderLayout/ScreenHeaderLayout';
@@ -10,6 +10,7 @@ export default function SettingsScreen() {
   const { logout, isSuperAdmin, role } = useAuthStore();
   const { theme, toggleTheme } = useThemeStore();
   const [notifications, setNotifications] = useState(true);
+  const [isAboutVisible, setIsAboutVisible] = useState(false);
   const navigation = useNavigation<any>();
 
   const isDarkMode = theme === 'dark';
@@ -47,7 +48,7 @@ export default function SettingsScreen() {
   };
 
   const handleAbout = () => {
-    Alert.alert('About SwipeLab', 'SwipeLab v1.0.0-alpha\n\nA platform for crowdsourced biological classifications.\nDeveloped for research purposes.');
+    setIsAboutVisible(true);
   };
 
   return (
@@ -157,6 +158,32 @@ export default function SettingsScreen() {
           <Text style={[styles.versionText, dynamicStyles.versionText]}>SwipeLab v1.0.0-alpha</Text>
         </ScrollView>
       </View>
+
+      {/* Custom About Modal */}
+      <Modal
+        visible={isAboutVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setIsAboutVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: isDarkMode ? '#2d2d44' : '#fff' }]}>
+            <Text style={[styles.modalTitle, { color: isDarkMode ? '#fff' : '#333' }]}>About SwipeLab</Text>
+            <Text style={[styles.modalText, { color: isDarkMode ? '#d1d5db' : '#666' }]}>
+              SwipeLab v1.0.0-alpha{'\n\n'}
+              A platform for crowdsourced biological classifications.{'\n'}
+              Developed for research purposes.
+            </Text>
+            
+            <TouchableOpacity 
+              style={styles.closeButton} 
+              onPress={() => setIsAboutVisible(false)}
+            >
+              <Text style={styles.closeButtonText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </ScreenHeaderLayout >
   );
 }
@@ -229,5 +256,49 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 24,
     fontSize: 12,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalContent: {
+    width: '100%',
+    maxWidth: 350,
+    borderRadius: 16,
+    padding: 24,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  modalText: {
+    fontSize: 15,
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: 24,
+  },
+  closeButton: {
+    backgroundColor: '#007AFF',
+    paddingVertical: 10,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    width: '100%',
+    alignItems: 'center',
+  },
+  closeButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
