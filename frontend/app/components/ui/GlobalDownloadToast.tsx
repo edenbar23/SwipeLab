@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Animated, StyleSheet, Text, ActivityIndicator, Platform } from 'react-native';
 import { useDownloadStore } from '@/stores/downloadStore';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors } from '@/constants/theme';
+import { Colors } from '../../../constants/theme';
 import { useThemeStore } from '@/stores/themeStore';
 
 export default function GlobalDownloadToast() {
