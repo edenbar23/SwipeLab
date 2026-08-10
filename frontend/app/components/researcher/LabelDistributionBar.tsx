@@ -11,8 +11,8 @@ type Props = {
 const LABEL_CONFIG: Record<string, { color: string; emoji: string }> = {
   YES:       { color: '#10B981', emoji: '✅' },
   NO:        { color: '#EF4444', emoji: '❌' },
-  DONT_KNOW: { color: '#9CA3AF', emoji: '❓' },
-  TRASH:     { color: '#F59E0B', emoji: '🗑️' },
+  DONT_KNOW: { color: '#F59E0B', emoji: '❓' },
+  TRASH:     { color: '#9CA3AF', emoji: '🗑️' },
 };
 
 export default function LabelDistributionBar({ data }: Props) {
