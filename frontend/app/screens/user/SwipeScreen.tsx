@@ -33,9 +33,10 @@ const ACCENT = '#4B7BE5';
 export default function SwipeScreen() {
   const navigation = useNavigation<any>();
   const [showReference, setShowReference] = useState(false);
-  const { dataBatch, currentIndex, activeTaskId, setActiveTaskId, setBatch, nextCard, clearBatch } =
+  const { dataBatch, currentIndex, activeTaskId, setActiveTaskId, setBatch, appendBatch, nextCard, clearBatch } =
     useSwipeStore();
   const [loading, setLoading] = useState(false);
+  const [isFetchingNextBatch, setIsFetchingNextBatch] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeWarning, setActiveWarning] = useState<ClassificationWarning | null>(null);
 
@@ -96,8 +97,37 @@ export default function SwipeScreen() {
     }
   };
 
+  const fetchNextBatchInBackground = async () => {
+    setIsFetchingNextBatch(true);
+    try {
+      const res = await apiFetch(
+        API_ENDPOINTS.CLASSIFICATIONS.NEXT_BATCH(activeTaskId as string | number, 5),
+        { method: 'GET' }
+      );
+      if (res.ok) {
+        const json = await res.json();
+        const newImages = json.images || [];
+        if (newImages.length > 0) {
+          appendBatch(newImages);
+          queryClient.setQueryData(QUERY_KEYS.swipeBatch(activeTaskId as string | number), (old: any) => {
+             return { images: [...(old?.images || []), ...newImages] };
+          });
+        }
+      }
+    } catch (e: any) {
+      console.error('Background batch fetch failed', e);
+    } finally {
+      setIsFetchingNextBatch(false);
+    }
+  };
+
   const handleSwipe = (direction: SwipeDirection) => {
     const currentImage = dataBatch[currentIndex];
+
+    const cardsLeft = dataBatch.length - (currentIndex + 1);
+    if (cardsLeft <= 3 && !loading && !isFetchingNextBatch) {
+      fetchNextBatchInBackground();
+    }
 
     // Immediately advance UI to the next card
     if (currentIndex + 1 < dataBatch.length) {

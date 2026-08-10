@@ -36,6 +36,7 @@ public class GamificationController {
                 .score(gamification.getScore())
                 .badge(gamification.getBadge())
                 .currentStreak(gamification.getCurrentStreak())
+                .longestStreak(gamification.getLongestStreak())
                 .build());
     }
 

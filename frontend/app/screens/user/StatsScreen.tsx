@@ -158,7 +158,7 @@ export default function StatsScreen() {
                     <Text style={[styles.sectionTitle, { color: themeColors.text }]}>🔥 Streak</Text>
                     <View style={[styles.streakContainer, { backgroundColor: themeColors.card }]}>
                         <Text style={[styles.streakText, { color: themeColors.text }]}>Current: <Text style={styles.streakBold}>{data.userInfo?.currentStreak ?? 0} days</Text></Text>
-                        <Text style={[styles.streakText, { color: themeColors.text }]}>Longest: <Text style={styles.streakBold}>{data.summary?.summary?.longestStreak ?? 0} days</Text></Text>
+                        <Text style={[styles.streakText, { color: themeColors.text }]}>Longest: <Text style={styles.streakBold}>{data.userInfo?.longestStreak ?? 0} days</Text></Text>
                     </View>
                 </View>
 

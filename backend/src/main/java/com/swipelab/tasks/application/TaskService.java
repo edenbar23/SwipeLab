@@ -72,7 +72,7 @@ public class TaskService {
                 pageable);
 
         List<TaskResponse> taskResponses = taskPage.getContent().stream()
-                .map(task -> taskMapper.toResponse(task, true)) // assignedToUser = true
+                .map(task -> taskMapper.toResponse(task, true, buildProgress(task.getId()))) // assignedToUser = true
                 .collect(Collectors.toList());
 
         return TaskPageResponse.builder()
@@ -119,7 +119,7 @@ public class TaskService {
             throw new ResourceNotFoundException("Task not found or access denied");
         }
 
-        return taskMapper.toResponse(task, true);
+        return taskMapper.toResponse(task, true, buildProgress(task.getId()));
     }
 
     @Transactional(readOnly = true)
@@ -140,7 +140,7 @@ public class TaskService {
                 pageable);
 
         List<TaskResponse> taskResponses = taskPage.getContent().stream()
-                .map(task -> taskMapper.toResponse(task, false))
+                .map(task -> taskMapper.toResponse(task, false, buildProgress(task.getId())))
                 .collect(Collectors.toList());
 
         return TaskPageResponse.builder()
@@ -170,7 +170,7 @@ public class TaskService {
         }
 
         task.getAssignedUsernames().add(username);
-        return taskMapper.toResponse(task, true);
+        return taskMapper.toResponse(task, true, buildProgress(task.getId()));
     }
 
     // =========================

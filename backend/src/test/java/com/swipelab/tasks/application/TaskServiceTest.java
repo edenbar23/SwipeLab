@@ -102,7 +102,7 @@ class TaskServiceTest {
         Page<Task> taskPage = new PageImpl<>(Collections.singletonList(task), pageable, 1);
         
         when(taskRepository.findAccessibleTasksForUser(eq(TaskStatus.ACTIVE), eq("testuser"), anySet(), eq(pageable))).thenReturn(taskPage);
-        when(taskMapper.toResponse(any(Task.class), eq(true))).thenReturn(taskResponse);
+        when(taskMapper.toResponse(any(Task.class), eq(true), any(TaskProgressResponse.class))).thenReturn(taskResponse);
 
         TaskPageResponse response = taskService.getTasksForUser("testuser", pageable);
 
@@ -130,7 +130,7 @@ class TaskServiceTest {
     void getTaskForUser_ShouldReturnTask_WhenActiveAndAssigned() {
         when(taskRepository.findById(1L)).thenReturn(Optional.of(task));
         when(recipientGroupRepository.findByUsers_Username("testuser")).thenReturn(Collections.singletonList(group));
-        when(taskMapper.toResponse(task, true)).thenReturn(taskResponse);
+        when(taskMapper.toResponse(eq(task), eq(true), any(TaskProgressResponse.class))).thenReturn(taskResponse);
 
         TaskResponse response = taskService.getTaskForUser(1L, "testuser");
 
@@ -300,7 +300,7 @@ class TaskServiceTest {
         task.setAssignedUsernames(new ArrayList<>());
         when(taskRepository.findById(1L)).thenReturn(Optional.of(task));
         when(taskRepository.existsByIdAndUsernameInAssignedUsers(1L, "testuser")).thenReturn(false);
-        when(taskMapper.toResponse(task, true)).thenReturn(taskResponse);
+        when(taskMapper.toResponse(eq(task), eq(true), any(TaskProgressResponse.class))).thenReturn(taskResponse);
 
         TaskResponse response = taskService.assignTaskToUser(1L, "testuser");
 
