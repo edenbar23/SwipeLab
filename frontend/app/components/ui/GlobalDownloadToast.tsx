@@ -14,11 +14,10 @@ export default function GlobalDownloadToast() {
   const [visible, setVisible] = useState(false);
   const [completed, setCompleted] = useState(false);
   const opacity = useRef(new Animated.Value(0)).current;
-  const translateY = useRef(new Animated.Value(20)).current;
 
   // Keep track of previous length to detect completion
   const prevLengthRef = useRef(activeExports.length);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     const currentLength = activeExports.length;
@@ -28,35 +27,22 @@ export default function GlobalDownloadToast() {
       setVisible(true);
       setCompleted(false);
       
-      Animated.parallel([
-        Animated.timing(opacity, {
-          toValue: 1,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-        Animated.spring(translateY, {
-          toValue: 0,
-          useNativeDriver: true,
-        })
-      ]).start();
+      Animated.timing(opacity, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
     } else if (currentLength === 0 && prevLengthRef.current > 0) {
       // Just finished
       setCompleted(true);
       
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
       timeoutRef.current = setTimeout(() => {
-        Animated.parallel([
-          Animated.timing(opacity, {
-            toValue: 0,
-            duration: 300,
-            useNativeDriver: true,
-          }),
-          Animated.timing(translateY, {
-            toValue: 20,
-            duration: 300,
-            useNativeDriver: true,
-          })
-        ]).start(() => {
+        Animated.timing(opacity, {
+          toValue: 0,
+          duration: 300,
+          useNativeDriver: true,
+        }).start(() => {
           setVisible(false);
           setCompleted(false);
         });
@@ -64,7 +50,7 @@ export default function GlobalDownloadToast() {
     }
     
     prevLengthRef.current = currentLength;
-  }, [activeExports.length, opacity, translateY]);
+  }, [activeExports.length, opacity]);
 
   if (!visible) return null;
 
@@ -88,7 +74,6 @@ export default function GlobalDownloadToast() {
         styles.container,
         {
           opacity,
-          transform: [{ translateY }],
           backgroundColor: isDark ? themeColors.card : '#FFFFFF',
           borderColor: isDark ? themeColors.border : '#E5E7EB',
           ...Platform.select({
