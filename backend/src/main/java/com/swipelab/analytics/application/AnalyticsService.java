@@ -62,7 +62,8 @@ public class AnalyticsService {
             }
         }
 
-        double accuracy = total > 0 ? (double) correct / total : 0.0;
+        Double calculatedAccuracy = classificationFactRepository.getUserAccuracy(userId);
+        double accuracy = calculatedAccuracy != null ? calculatedAccuracy : 0.0;
 
         return UserProgressResponse.builder()
                 .completed((int) total)
@@ -83,7 +84,9 @@ public class AnalyticsService {
                 correct = row[1] != null ? ((Number) row[1]).longValue() : 0;
             }
         }
-        double accuracy = total > 0 ? (double) correct / total : 0.0;
+        
+        Double calculatedAccuracy = classificationFactRepository.getUserAccuracy(userId);
+        double accuracy = calculatedAccuracy != null ? calculatedAccuracy : 0.0;
 
         UserRanking ranking = userRankingRepository.findByUserIdAndPeriod(userId, "ALL_TIME")
                 .orElse(UserRanking.builder().rank(0).percentile(0).build());
