@@ -1,9 +1,9 @@
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View, ScrollView, Platform } from 'react-native';
 import { Colors } from '../../../../constants/theme';
-import { useThemeStore } from '../../../stores/themeStore';
-import MultiSelect from '../../ui/MultiSelect';
-import { StepExperimentsProps } from './addTaskTypes';
+import { useThemeStore } from '@/stores/themeStore';
+import MultiSelect from '@/components/ui/MultiSelect';
+import { StepExperimentsProps } from '@/components/researcher/addTask/addTaskTypes';
 
 export default function StepExperiments({
   formData,

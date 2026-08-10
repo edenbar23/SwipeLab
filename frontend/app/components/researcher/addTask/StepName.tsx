@@ -1,8 +1,8 @@
 import React from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View, Platform, ScrollView } from 'react-native';
 import { Colors } from '../../../../constants/theme';
-import { useThemeStore } from '../../../stores/themeStore';
-import { StepProps } from './addTaskTypes';
+import { useThemeStore } from '@/stores/themeStore';
+import { StepProps } from '@/components/researcher/addTask/addTaskTypes';
 
 export default function StepName({ formData, onUpdate, onNext }: StepProps) {
   const { theme } = useThemeStore();

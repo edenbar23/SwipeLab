@@ -4,17 +4,28 @@ import React from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { Colors } from '../../../constants/theme';
-import { useThemeStore } from '../../stores/themeStore';
-import { useSwipeStore } from '../../stores/swipeStore';
+import { useThemeStore } from '@/stores/themeStore';
+import { useSwipeStore } from '@/stores/swipeStore';
+import { useMyTasks, useAvailableTasks } from '@/api/queries';
+import AuthenticatedImage from '@/components/ui/AuthenticatedImage';
 
 export default function TaskDetailsScreen() {
     const navigation = useNavigation<any>();
     const route = useRoute<any>();
-    const { task } = route.params;
+    const { task: initialTask } = route.params;
     const { theme } = useThemeStore();
     const themeColors = Colors[theme as keyof typeof Colors];
     const isDark = theme === 'dark';
     const { setActiveTaskId } = useSwipeStore();
+
+    // Fetch live data so progress updates after classification
+    const { data: myTasks } = useMyTasks();
+    const { data: availableTasks } = useAvailableTasks();
+    
+    const taskId = initialTask.id ?? initialTask.taskId;
+    const task = myTasks?.find((t: any) => (t.id ?? t.taskId) === taskId) 
+              || availableTasks?.find((t: any) => (t.id ?? t.taskId) === taskId) 
+              || initialTask;
 
     const totalImages      = task.progress?.totalImages    ?? task.totalImages    ?? 0;
     const imagesClassified = task.progress?.imagesClassified ?? task.imagesClassified ?? 0;
@@ -122,20 +133,46 @@ export default function TaskDetailsScreen() {
                                             index === (task.targetSpecies || []).length - 1 && { borderBottomWidth: 0 },
                                         ]}
                                     >
-                                        <View style={[styles.speciesIconWrap, { backgroundColor: isDark ? '#1e3a5f' : '#DBEAFE' }]}>
-                                            <Ionicons name="leaf" size={16} color="#3B82F6" />
-                                        </View>
-                                        <View style={{ flex: 1 }}>
-                                            <Text style={[styles.speciesName, { color: themeColors.text }]}>
-                                                {commonName || name}
-                                            </Text>
-                                            {commonName && name && commonName !== name && (
-                                                <Text style={[styles.speciesSci, { color: themeColors.textSecondary }]}>
-                                                    {name}
+                                        <View style={styles.speciesRowHeader}>
+                                            <View style={[styles.speciesIconWrap, { backgroundColor: isDark ? '#1e3a5f' : '#DBEAFE' }]}>
+                                                <Ionicons name="leaf" size={16} color="#3B82F6" />
+                                            </View>
+                                            <View style={{ flex: 1 }}>
+                                                <Text style={[styles.speciesName, { color: themeColors.text }]}>
+                                                    {commonName || name}
                                                 </Text>
-                                            )}
+                                                {commonName && name && commonName !== name && (
+                                                    <Text style={[styles.speciesSci, { color: themeColors.textSecondary }]}>
+                                                        {name}
+                                                    </Text>
+                                                )}
+                                            </View>
                                         </View>
-                                        <Ionicons name="chevron-forward" size={14} color={borderCol} />
+                                        {(s.referenceImages || []).length > 0 && (
+                                            <ScrollView
+                                                horizontal
+                                                showsHorizontalScrollIndicator={false}
+                                                style={{ marginTop: 12, paddingLeft: 46 }}
+                                                contentContainerStyle={{ gap: 10 }}
+                                            >
+                                                {s.referenceImages.map((img: any, idx: number) => {
+                                                    let imageUri = '';
+                                                    if (img.imageUrl) {
+                                                      imageUri = img.imageUrl;
+                                                    } else if (img.data) {
+                                                      imageUri = `data:${img.contentType || 'image/jpeg'};base64,${img.data}`;
+                                                    }
+                                                    return (
+                                                        <View key={idx} style={styles.imageCard}>
+                                                            <AuthenticatedImage
+                                                                uri={imageUri}
+                                                                style={[styles.image, { borderColor: borderCol }]}
+                                                            />
+                                                        </View>
+                                                    );
+                                                })}
+                                            </ScrollView>
+                                        )}
                                     </View>
                                 );
                             })}
@@ -146,10 +183,20 @@ export default function TaskDetailsScreen() {
 
             {/* ── Footer CTA ───────────────────────────────────────────────────── */}
             <View style={[styles.footer, { backgroundColor: themeColors.card, borderTopColor: borderCol }]}>
-                <TouchableOpacity style={styles.playButton} onPress={handlePlay} activeOpacity={0.85}>
-                    <Ionicons name="play-circle-outline" size={22} color="#fff" style={{ marginRight: 8 }} />
-                    <Text style={styles.playButtonText}>Start Classifying</Text>
-                    <Ionicons name="arrow-forward" size={18} color="#fff" style={{ marginLeft: 6 }} />
+                <TouchableOpacity
+                    style={[
+                        styles.playButton,
+                        pending === 0 && { backgroundColor: '#9CA3AF', shadowOpacity: 0, elevation: 0 }
+                    ]}
+                    onPress={pending > 0 ? handlePlay : undefined}
+                    activeOpacity={pending > 0 ? 0.85 : 1}
+                    disabled={pending === 0}
+                >
+                    {pending > 0 && <Ionicons name="play-circle-outline" size={22} color="#fff" style={{ marginRight: 8 }} />}
+                    <Text style={styles.playButtonText}>
+                        {pending === 0 ? 'Completed' : (imagesClassified > 0 ? 'Continue Classifying' : 'Start Classifying')}
+                    </Text>
+                    {pending > 0 && <Ionicons name="arrow-forward" size={18} color="#fff" style={{ marginLeft: 6 }} />}
                 </TouchableOpacity>
             </View>
         </View>
@@ -345,11 +392,15 @@ const styles = StyleSheet.create({
         elevation: 2,
     },
     speciesRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
+        flexDirection: 'column',
+        alignItems: 'stretch',
         paddingVertical: 12,
         paddingHorizontal: 14,
         borderBottomWidth: 1,
+    },
+    speciesRowHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
         gap: 12,
     },
     speciesIconWrap: {
@@ -367,6 +418,23 @@ const styles = StyleSheet.create({
         fontSize: 12,
         fontStyle: 'italic',
         marginTop: 1,
+    },
+    imageCard: {
+        alignItems: 'center',
+        width: 100,
+    },
+    image: {
+        width: 100,
+        height: 100,
+        borderRadius: 10,
+        backgroundColor: '#DBEAFE',
+        borderWidth: 1,
+    },
+    imageCaption: {
+        fontSize: 11,
+        marginTop: 5,
+        textAlign: 'center',
+        maxWidth: 100,
     },
 
     // Footer

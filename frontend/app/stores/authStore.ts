@@ -2,10 +2,10 @@
 import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 import { create } from "zustand";
-import { apiFetch } from "../api/apiFetch";
-import { useModeStore } from "./modeStore";
-import { API_ENDPOINTS } from '../api/apiEndpoints';
 import { jwtDecode } from "jwt-decode";
+import { setTokens, clearTokens, setItem, getItem, removeItem } from "@/utils/tokenUtils";
+import { API_ENDPOINTS } from '@/api/apiEndpoints';
+import { useModeStore } from "@/stores/modeStore";
 
 
 type Role = "USER" | "RESEARCHER" | null;
@@ -49,21 +49,13 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   setAuth: async (token, role, refreshToken) => {
     set({ token, role, authProvider: "LOCAL" });
-    if (Platform.OS === 'web') {
-      localStorage.setItem("token", token);
-      localStorage.setItem("authProvider", "LOCAL");
-      if (role) localStorage.setItem("role", role);
-      if (refreshToken) localStorage.setItem("refreshToken", refreshToken);
-    } else {
-      await SecureStore.setItemAsync("token", token);
-      await SecureStore.setItemAsync("authProvider", "LOCAL");
-      if (role) await SecureStore.setItemAsync("role", role);
-      if (refreshToken) await SecureStore.setItemAsync("refreshToken", refreshToken);
-    }
+    await setTokens(token, refreshToken);
+    await setItem("authProvider", "LOCAL");
+    if (role) await setItem("role", role);
 
     // Automatically set researcher mode if role is RESEARCHER
     if (role === "RESEARCHER") {
-      useModeStore.getState().setMode("researcher"); // keeping mode string same for now if modeStore uses researcher, but we'll update modeStore next
+      useModeStore.getState().setMode("researcher");
     } else {
       useModeStore.getState().setMode("USER");
     }
@@ -71,31 +63,16 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   setExternalAuth: async (token, refreshToken, username) => {
     set({ token, role: "RESEARCHER", authProvider: "STARDBI" });
-    if (Platform.OS === 'web') {
-      localStorage.setItem("token", token);
-      localStorage.setItem("role", "RESEARCHER");
-      localStorage.setItem("authProvider", "STARDBI");
-      localStorage.setItem("refreshToken", refreshToken);
-      localStorage.setItem("username", username);
-    } else {
-      await SecureStore.setItemAsync("token", token);
-      await SecureStore.setItemAsync("role", "RESEARCHER");
-      await SecureStore.setItemAsync("authProvider", "STARDBI");
-      await SecureStore.setItemAsync("refreshToken", refreshToken);
-      await SecureStore.setItemAsync("username", username);
-    }
+    await setTokens(token, refreshToken);
+    await setItem("role", "RESEARCHER");
+    await setItem("authProvider", "STARDBI");
+    await setItem("username", username);
     useModeStore.getState().setMode("researcher");
   },
 
   updateTokens: async (token, refreshToken) => {
     set({ token });
-    if (Platform.OS === 'web') {
-      localStorage.setItem("token", token);
-      localStorage.setItem("refreshToken", refreshToken);
-    } else {
-      await SecureStore.setItemAsync("token", token);
-      await SecureStore.setItemAsync("refreshToken", refreshToken);
-    }
+    await setTokens(token, refreshToken);
   },
 
   logout: async () => {
@@ -106,98 +83,68 @@ export const useAuthStore = create<AuthState>((set) => ({
       return;
     }
 
-    // 1. Get the refresh token before clearing storage
-    let refreshToken = null;
-    if (Platform.OS === 'web') {
-      refreshToken = localStorage.getItem("refreshToken");
-    } else {
-      refreshToken = await SecureStore.getItemAsync("refreshToken");
-    }
+    const { getRefreshToken } = require("@/utils/tokenUtils");
+    const refreshToken = await getRefreshToken();
 
-    // 2. Clear frontend state immediately to prevent re-entry
+    // 1. Clear frontend state immediately to prevent re-entry
     set({ token: null, role: null, authProvider: null, isSuperAdmin: false, isBanned: false });
-    if (Platform.OS === 'web') {
-      localStorage.removeItem("token");
-      localStorage.removeItem("role");
-      localStorage.removeItem("refreshToken");
-      localStorage.removeItem("authProvider");
-      localStorage.removeItem("isSuperAdmin");
-    } else {
-      await SecureStore.deleteItemAsync("token");
-      await SecureStore.deleteItemAsync("role");
-      await SecureStore.deleteItemAsync("refreshToken");
-      await SecureStore.deleteItemAsync("authProvider");
-      await SecureStore.deleteItemAsync("isSuperAdmin");
-    }
+    await clearTokens();
+    await removeItem("role");
+    await removeItem("authProvider");
+    await removeItem("isSuperAdmin");
+    await removeItem("username");
 
-    // 3. Call the backend to invalidate the refresh token (fire-and-forget)
-    if (refreshToken) {
-      const { backendUrl } = require("../api/apiFetch");
-
-      fetch(backendUrl + API_ENDPOINTS.AUTH.LOGOUT, {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${refreshToken}`
-        }
-      })
-      .then(res => {
-        if (res.status === 401) {
-          console.warn("[logout] Server returned 401 on logout, but local cleanup is already complete.");
-        }
-      })
-      .catch(e => console.error("Logout request failed", e));
-    }
+    // 2. Call the backend to invalidate the refresh token / clear cookies (fire-and-forget)
+    const { backendUrl } = require("@/api/apiFetch");
+    fetch(backendUrl + API_ENDPOINTS.AUTH.LOGOUT, {
+      method: "POST",
+      credentials: "include", // Essential for web HttpOnly cookies
+      headers: {
+        ...(refreshToken && Platform.OS !== "web" ? { Authorization: `Bearer ${refreshToken}` } : {})
+      }
+    }).catch(e => console.error("Logout request failed", e));
 
     // 4. Clear mode and query cache
     useModeStore.getState().resetMode?.();
-    const { queryClient } = require("../queryClient");
+    const { queryClient } = require("@/queryClient");
     queryClient.clear();
   },
 
   initialize: async () => {
     try {
-      let token, role, authProvider, isSuperAdmin = false;
-      if (Platform.OS === 'web') {
-        token = localStorage.getItem("token");
-        role = localStorage.getItem("role") as Role;
-        authProvider = localStorage.getItem("authProvider") as "LOCAL" | "STARDBI" | null;
-        isSuperAdmin = localStorage.getItem("isSuperAdmin") === "true";
-      } else {
-        token = await SecureStore.getItemAsync("token");
-        role = (await SecureStore.getItemAsync("role")) as Role;
-        authProvider = (await SecureStore.getItemAsync("authProvider")) as "LOCAL" | "STARDBI" | null;
-        isSuperAdmin = (await SecureStore.getItemAsync("isSuperAdmin")) === "true";
-      }
+      const isAuthFlag = await getItem("isAuthenticated");
+      const localToken = await getItem("token"); // Only present on mobile
+      
+      const role = (await getItem("role")) as Role;
+      const authProvider = (await getItem("authProvider")) as "LOCAL" | "STARDBI" | null;
+      const isSuperAdmin = (await getItem("isSuperAdmin")) === "true";
 
-      if (token) {
+      const token = Platform.OS === "web" ? "web-cookie-placeholder" : localToken;
+      const isAuthenticated = Platform.OS === "web" ? isAuthFlag === "true" : !!token;
+
+      if (isAuthenticated) {
         let isExpired = false;
-        try {
-          const decoded = jwtDecode<{ exp?: number }>(token);
-          if (decoded.exp && Date.now() >= decoded.exp * 1000) {
+        
+        if (Platform.OS !== "web" && token) {
+          try {
+            const decoded = jwtDecode<{ exp?: number }>(token);
+            if (decoded.exp && Date.now() >= decoded.exp * 1000) {
+              isExpired = true;
+            }
+          } catch (e) {
+            console.error("Invalid token on boot:", e);
             isExpired = true;
           }
-        } catch (e) {
-          console.error("Invalid token on boot:", e);
-          isExpired = true;
         }
 
         if (isExpired) {
           console.log("[authStore] Token expired on boot. Clearing state.");
           set({ sessionExpiredMessage: true });
           setTimeout(async () => {
-            if (Platform.OS === 'web') {
-              localStorage.removeItem("token");
-              localStorage.removeItem("role");
-              localStorage.removeItem("refreshToken");
-              localStorage.removeItem("authProvider");
-              localStorage.removeItem("isSuperAdmin");
-            } else {
-              await SecureStore.deleteItemAsync("token");
-              await SecureStore.deleteItemAsync("role");
-              await SecureStore.deleteItemAsync("refreshToken");
-              await SecureStore.deleteItemAsync("authProvider");
-              await SecureStore.deleteItemAsync("isSuperAdmin");
-            }
+            await clearTokens();
+            await removeItem("role");
+            await removeItem("authProvider");
+            await removeItem("isSuperAdmin");
             set({ token: null, role: null, authProvider: null, isSuperAdmin: false, isBanned: false, sessionExpiredMessage: false });
           }, 2000);
         } else {

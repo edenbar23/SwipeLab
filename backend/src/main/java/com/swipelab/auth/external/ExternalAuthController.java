@@ -2,20 +2,16 @@ package com.swipelab.auth.external;
 
 import com.swipelab.auth.dto.AuthResponse;
 import com.swipelab.auth.domain.AuthMapper;
-import com.swipelab.auth.dto.AuthResponse;
 import com.swipelab.auth.dto.ExternalLoginRequest;
-import com.swipelab.auth.dto.AuthResponse;
 import com.swipelab.users.dto.UserProfileResponse;
-import com.swipelab.auth.dto.AuthResponse;
 import com.swipelab.users.domain.User;
-import com.swipelab.auth.dto.AuthResponse;
 import jakarta.validation.Valid;
-import com.swipelab.auth.dto.AuthResponse;
 import lombok.RequiredArgsConstructor;
-import com.swipelab.auth.dto.AuthResponse;
 import org.springframework.http.ResponseEntity;
-import com.swipelab.auth.dto.AuthResponse;
 import org.springframework.web.bind.annotation.*;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.Cookie;
 
 @RestController
 @RequestMapping("/api/v1/auth/external")
@@ -25,6 +21,21 @@ public class ExternalAuthController {
     private final StardbiAuthService stardbiAuthService;
     private final AuthMapper authMapper;
     private final com.swipelab.auth.application.JwtService jwtService;
+
+    private void setAuthCookies(HttpServletResponse response, String accessToken, String refreshToken) {
+        Cookie accessCookie = new Cookie("accessToken", accessToken);
+        accessCookie.setHttpOnly(true);
+        accessCookie.setPath("/");
+        accessCookie.setMaxAge(3600); // 1 hour
+
+        Cookie refreshCookie = new Cookie("refreshToken", refreshToken);
+        refreshCookie.setHttpOnly(true);
+        refreshCookie.setPath("/");
+        refreshCookie.setMaxAge(604800); // 7 days
+
+        response.addCookie(accessCookie);
+        response.addCookie(refreshCookie);
+    }
 
     /**
      * Called by the frontend immediately after a successful Stardbi login.
@@ -36,7 +47,7 @@ public class ExternalAuthController {
      */
     @PostMapping("/stardbi/loginExternal")
     public ResponseEntity<com.swipelab.auth.dto.AuthResponse> loginExternal(
-            @Valid @RequestBody ExternalLoginRequest request) {
+            @Valid @RequestBody ExternalLoginRequest request, HttpServletResponse httpResponse) {
 
         User user = stardbiAuthService.loginExternal(request);
         if (user != null) {
@@ -53,6 +64,7 @@ public class ExternalAuthController {
                     .user(profile)
                     .build();
                     
+            setAuthCookies(httpResponse, accessToken, refreshToken);
             return ResponseEntity.ok(response);
         }
         return ResponseEntity.status(401).build();

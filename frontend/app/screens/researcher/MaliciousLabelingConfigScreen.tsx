@@ -11,13 +11,13 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import ScreenHeaderLayout from '../../components/layout/ScreenHeaderLayout/ScreenHeaderLayout';
-import { useThemeStore } from '../../stores/themeStore';
+import ScreenHeaderLayout from '@/components/layout/ScreenHeaderLayout/ScreenHeaderLayout';
+import { useThemeStore } from '@/stores/themeStore';
 import {
   useMaliciousLabelingConfig,
   useMaliciousLabelingAuditLog,
   useUpdateMaliciousLabelingConfig,
-} from '../../api/queries';
+} from '@/api/queries';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -230,7 +230,7 @@ export default function MaliciousLabelingConfigScreen() {
 
   return (
     <ScreenHeaderLayout
-      leftIcon={require('../../../assets/images/settings.png')}
+      leftIcon={require('../../../assets/images/config.png')}
       leftTitle="Malicious Labeling Config"
       rightIcon={require('../../../assets/images/settings.png')}
       rightTitle="Settings"

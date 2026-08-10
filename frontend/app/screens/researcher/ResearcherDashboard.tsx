@@ -8,10 +8,10 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import useResponsive from "../../hooks/useResponsive";
-import { useThemeStore } from '../../stores/themeStore';
+import useResponsive from "@/hooks/useResponsive";
+import { useThemeStore } from '@/stores/themeStore';
 import { Colors } from '../../../constants/theme';
-import { useAuthStore } from "../../stores/authStore";
+import { useAuthStore } from "@/stores/authStore";
 
 // Images
 import addGoldImg from "../../../assets/images/add_gold_image.png";

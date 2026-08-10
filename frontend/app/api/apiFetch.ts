@@ -1,6 +1,7 @@
-import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
-import { API_ENDPOINTS } from './apiEndpoints';
+import { API_ENDPOINTS } from '@/api/apiEndpoints';
+import { getAccessToken, getRefreshToken, getItem } from '@/utils/tokenUtils';
+import Toast from 'react-native-toast-message';
 
 const USE_MOCKS = __DEV__
 
@@ -27,17 +28,10 @@ export async function forceTokenRefresh(): Promise<boolean> {
 
   isRefreshing = true;
 
-  let refreshToken;
-  let authProvider;
-  if (Platform.OS === 'web') {
-    refreshToken = localStorage.getItem("refreshToken");
-    authProvider = localStorage.getItem("authProvider");
-  } else {
-    refreshToken = await SecureStore.getItemAsync("refreshToken");
-    authProvider = await SecureStore.getItemAsync("authProvider");
-  }
+  let refreshToken = await getRefreshToken();
+  let authProvider = await getItem("authProvider");
 
-  if (!refreshToken) {
+  if (!refreshToken && Platform.OS !== 'web') {
     isRefreshing = false;
     onRefreshed(null);
     return false;
@@ -47,9 +41,8 @@ export async function forceTokenRefresh(): Promise<boolean> {
     // SwipeLab backend refresh (works for both local users and Stardbi researchers via BFF)
     const refreshResponse = await fetch(backendUrl + API_ENDPOINTS.AUTH.REFRESH, {
       method: "POST",
-      headers: {
-        "Authorization": `Bearer ${refreshToken}`,
-      },
+      credentials: "include", // Important for sending the refresh cookie on web
+      headers: refreshToken ? { "Authorization": `Bearer ${refreshToken}` } : {},
     });
 
     if (refreshResponse.ok) {
@@ -58,7 +51,7 @@ export async function forceTokenRefresh(): Promise<boolean> {
       const newRefresh = data.refreshToken || refreshToken;
 
       if (newAccess) {
-        const { useAuthStore } = require("../stores/authStore");
+        const { useAuthStore } = require("@/stores/authStore");
         await useAuthStore.getState().updateTokens(newAccess, newRefresh);
 
         isRefreshing = false;
@@ -91,19 +84,17 @@ export async function apiFetch(
   // }
 
 
-  // Get token from storage
-  let token;
-  if (Platform.OS === 'web') {
-    token = localStorage.getItem("token");
-  } else {
-    token = await SecureStore.getItemAsync("token");
-  }
+  // Get token from storage (null on web if cookies are used)
+  const token = await getAccessToken();
 
-  const fullUrl = backendUrl + input;
-  console.log("[apiFetch] Full exact URL being fetch'ed:", fullUrl);
+  const fullUrl = url.startsWith('http') ? url : backendUrl + url;
+  if (__DEV__) {
+    console.log("[apiFetch] Full exact URL being fetch'ed:", fullUrl);
+  }
 
   const response = await fetch(fullUrl, {
     ...init,
+    credentials: "include", // Required for HttpOnly cookies on web
     headers: {
       ...(init?.headers ?? {}),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -116,7 +107,7 @@ export async function apiFetch(
       const cloned = response.clone();
       const body = await cloned.json();
       if (body?.errorCode === 'STARDBI_SESSION_EXPIRED') {
-        const { useAuthStore } = require("../stores/authStore");
+        const { useAuthStore } = require("@/stores/authStore");
         useAuthStore.getState().setSessionExpiredMessage(true);
         setTimeout(() => {
           useAuthStore.getState().logout();
@@ -159,42 +150,24 @@ export async function apiFetch(
     const refreshSuccess = await forceTokenRefresh();
     
     if (refreshSuccess) {
-      let newToken;
-      if (Platform.OS === 'web') {
-        newToken = localStorage.getItem("token");
-      } else {
-        newToken = await SecureStore.getItemAsync("token");
-      }
+      const newToken = await getAccessToken();
       
-      if (newToken) {
-        return fetch(fullUrl, {
-          ...init,
-          headers: {
-            ...(init?.headers ?? {}),
-            Authorization: `Bearer ${newToken}`,
-          },
-        });
-      }
+      return fetch(fullUrl, {
+        ...init,
+        credentials: "include",
+        headers: {
+          ...(init?.headers ?? {}),
+          ...(newToken ? { Authorization: `Bearer ${newToken}` } : {}),
+        },
+      });
     }
 
     // If no refresh token or refresh failed, we must logout
-    const { useAuthStore } = require("../stores/authStore");
+    const { useAuthStore } = require("@/stores/authStore");
     
-    // Only show "Session Expired" if they actually had a refresh token
-    let hadRefreshToken = false;
-    if (Platform.OS === 'web') {
-      hadRefreshToken = !!localStorage.getItem("refreshToken");
-    } else {
-      hadRefreshToken = !!SecureStore.getItem("refreshToken"); // Sync read is ok here, or we can just rely on the fact that if they had a token, they are logged in. Wait, SecureStore.getItemAsync is async. Let's do it safely.
-    }
-    // Actually, forceTokenRefresh already knows if there's a refresh token, but it's encapsulated.
-    
-    if (Platform.OS === 'web') {
-      hadRefreshToken = !!localStorage.getItem("refreshToken");
-    } else {
-      // For mobile, we'll just check if they are currently marked as authenticated in the store
-      hadRefreshToken = useAuthStore.getState().isAuthenticated;
-    }
+    const isAuthenticatedFlag = await getItem("isAuthenticated");
+    const localToken = await getAccessToken();
+    const hadRefreshToken = Platform.OS === 'web' ? isAuthenticatedFlag === 'true' : !!localToken;
 
     if (hadRefreshToken) {
       useAuthStore.getState().setSessionExpiredMessage(true);
@@ -214,7 +187,7 @@ export async function apiFetch(
       const cloned = response.clone();
       const body = await cloned.json();
       if (body?.errorCode === 'ACCOUNT_BANNED') {
-        const { useAuthStore } = require("../stores/authStore");
+        const { useAuthStore } = require("@/stores/authStore");
         useAuthStore.getState().setIsBanned(true);
       }
     } catch {
@@ -222,5 +195,23 @@ export async function apiFetch(
     }
   }
 
+  // Handle generic errors (non-401, non-403) with a Toast
+  if (!response.ok && response.status !== 401 && response.status !== 403 && response.status !== 500) {
+    const urlString = input.toString();
+    if (!urlString.includes('/login') && !urlString.includes('/refresh')) {
+      Toast.show({
+        type: 'error',
+        text1: 'API Error',
+        text2: `Request failed with status ${response.status}`,
+      });
+    }
+  }
+
+  // 500 Maintenance Mode handling
+  if (response.status >= 500) {
+    const { useAppStateStore } = require('@/stores/appStateStore');
+    useAppStateStore.getState().setMaintenanceMode(true);
+  }
+  
   return response;
 }

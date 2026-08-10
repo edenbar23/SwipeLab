@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 import { AppState, Platform } from 'react-native';
-import { useAuthStore } from '../stores/authStore';
+import { useAuthStore } from '@/stores/authStore';
 import { jwtDecode } from 'jwt-decode';
-import { forceTokenRefresh } from '../api/apiFetch';
+import { forceTokenRefresh } from '@/api/apiFetch';
 
 const THRESHOLD_SECONDS = 180; // 3 minutes
 const INTERVAL_MS = 60 * 1000; // Check every minute
@@ -11,7 +11,7 @@ export function useSessionHeartbeat() {
   const checkTokenAndRefresh = async () => {
     try {
       const state = useAuthStore.getState();
-      if (!state.token) {
+      if (!state.token || state.token === 'web-cookie-placeholder') {
         return;
       }
 

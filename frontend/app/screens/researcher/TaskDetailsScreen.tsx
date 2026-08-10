@@ -12,10 +12,10 @@ import {
 } from "react-native";
 
 import { Colors } from '../../../constants/theme';
-import { researcherStackParamList } from "../../navigation/researcherStack.types";
-import { useThemeStore } from '../../stores/themeStore';
-import AuthenticatedImage from '../../components/ui/AuthenticatedImage';
-import { useTaskDetails, useExperiments, useUpdateTaskStatus } from "../../api/queries";
+import { researcherStackParamList } from "@/navigation/researcherStack.types";
+import { useThemeStore } from '@/stores/themeStore';
+import AuthenticatedImage from '@/components/ui/AuthenticatedImage';
+import { useTaskDetails, useExperiments, useUpdateTaskStatus } from "@/api/queries";
 
 type Props = NativeStackScreenProps<researcherStackParamList, "TaskDetails">;
 
@@ -149,7 +149,7 @@ export default function TaskDetailsScreen({ route, navigation }: Props) {
             <StatChip
               icon="checkmark-done-outline"
               label="Consensus"
-              value={`${task.consensusThreshold}%`}
+              value={String(task.consensusThreshold)}
               isDark={isDark}
               themeSecondary={themeColors.textSecondary}
             />

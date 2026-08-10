@@ -8,15 +8,17 @@ import {
     TextInput,
     TouchableOpacity,
     View,
+    Platform,
+    Keyboard,
 } from 'react-native';
-import { useThemeStore } from '../../stores/themeStore';
+import { useThemeStore } from '@/stores/themeStore';
 import { Colors } from '../../../constants/theme';
-import ScreenHeaderLayout from '../../components/layout/ScreenHeaderLayout/ScreenHeaderLayout';
+import ScreenHeaderLayout from '@/components/layout/ScreenHeaderLayout/ScreenHeaderLayout';
 import { useNavigation } from '@react-navigation/native';
-import { apiFetch } from '../../api/apiFetch';
-import { researcherStackParamList } from '../../navigation/researcherStack.types';
+import { apiFetch } from '@/api/apiFetch';
+import { researcherStackParamList } from '@/navigation/researcherStack.types';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { API_ENDPOINTS } from '../../api/apiEndpoints';
+import { API_ENDPOINTS } from '@/api/apiEndpoints';
 
 
 type NavigationProp = NativeStackNavigationProp<researcherStackParamList, 'AddUser'>;
@@ -32,6 +34,11 @@ export default function AddUserScreen() {
     const [loading, setLoading] = useState(false);
 
     const handleSubmit = async () => {
+        Keyboard.dismiss();
+        if (Platform.OS === 'web' && document.activeElement instanceof HTMLElement) {
+            document.activeElement.blur();
+        }
+
         if (!username.trim() || !email.trim()) {
             Alert.alert("Error", "Please fill in all fields");
             return;

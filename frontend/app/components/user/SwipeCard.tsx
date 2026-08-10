@@ -8,10 +8,10 @@ import {
   Text,
   View,
 } from 'react-native';
-import { SwipeDirection } from '../../types';
-import { useThemeStore } from '../../stores/themeStore';
+import { SwipeDirection } from '@/types';
+import { useThemeStore } from '@/stores/themeStore';
 import { Colors } from '../../../constants/theme';
-import AuthenticatedImage from '../ui/AuthenticatedImage';
+import AuthenticatedImage from '@/components/ui/AuthenticatedImage';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SWIPE_THRESHOLD = 120;

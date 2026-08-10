@@ -1,4 +1,4 @@
-import { useThemeStore } from '../stores/themeStore';
+import { useThemeStore } from '@/stores/themeStore';
 
 export function useColorScheme() {
   const { theme } = useThemeStore();

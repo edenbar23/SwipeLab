@@ -1,6 +1,6 @@
 import { useRef } from 'react';
 import { Animated, Dimensions, PanResponder } from 'react-native';
-import { SwipeDirection } from '../types';
+import { SwipeDirection } from '@/types';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SWIPE_THRESHOLD = 120;

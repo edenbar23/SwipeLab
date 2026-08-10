@@ -1,15 +1,15 @@
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { useAuthStore } from "../../stores/authStore";
-import { useModeStore } from "../../stores/modeStore";
-import { useThemeStore } from "../../stores/themeStore";
+import { useAuthStore } from "@/stores/authStore";
+import { useModeStore } from "@/stores/modeStore";
+import { useThemeStore } from "@/stores/themeStore";
 import { Ionicons as VectorIcons } from '@expo/vector-icons';
 
 // Cast to any to accept strict React 19 types
 const Ionicons = VectorIcons as any;
 import { useNavigation, CommonActions } from '@react-navigation/native';
-import useResponsive from "../../hooks/useResponsive";
-import NotificationBell from "../ui/NotificationBell";
+import useResponsive from "@/hooks/useResponsive";
+import NotificationBell from "@/components/ui/NotificationBell";
 
 export default function AdminTopBar() {
   const navigation = useNavigation<any>();

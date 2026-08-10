@@ -8,7 +8,7 @@ import {
     View
 } from "react-native";
 import { Colors } from '../../../constants/theme';
-import { useThemeStore } from '../../stores/themeStore';
+import { useThemeStore } from '@/stores/themeStore';
 
 type GoldImageData = {
     id: number;

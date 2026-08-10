@@ -2,7 +2,7 @@ import type {
   PlatformOverview,
   GlobalStats,
   UserPerformance,
-} from '../../types/analyticsTypes';
+} from '@/types/analyticsTypes';
 
 // ─── Platform Overview mock ───────────────────────────────────────────────────
 

@@ -14,15 +14,15 @@ import {
     View
 } from 'react-native';
 import { Colors } from '../../../constants/theme';
-import { API_ENDPOINTS } from '../../api/apiEndpoints';
-import { apiFetch } from '../../api/apiFetch';
-import ScreenHeaderLayout from '../../components/layout/ScreenHeaderLayout/ScreenHeaderLayout';
-import useResponsive from '../../hooks/useResponsive';
-import { RecipientGroup } from '../../mocks/data/recipients.mock';
-import { User } from '../../mocks/data/users.mock';
-import { researcherStackParamList } from '../../navigation/researcherStack.types';
-import { useThemeStore } from '../../stores/themeStore';
-import { useAdminUsers, useRecipients } from '../../api/queries';
+import { API_ENDPOINTS } from '@/api/apiEndpoints';
+import { apiFetch } from '@/api/apiFetch';
+import ScreenHeaderLayout from '@/components/layout/ScreenHeaderLayout/ScreenHeaderLayout';
+import useResponsive from '@/hooks/useResponsive';
+import { RecipientGroup } from '@/mocks/data/recipients.mock';
+import { User } from '@/mocks/data/users.mock';
+import { researcherStackParamList } from '@/navigation/researcherStack.types';
+import { useThemeStore } from '@/stores/themeStore';
+import { useAdminUsers, useRecipients } from '@/api/queries';
 
 
 type NavigationProp = NativeStackNavigationProp<researcherStackParamList, 'RecipientsList'>;

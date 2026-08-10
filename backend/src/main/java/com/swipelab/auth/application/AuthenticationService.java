@@ -230,8 +230,8 @@ public class AuthenticationService {
         // Look up user by email
         User user = userRepository.findByEmail(email).orElse(null);
 
-        // If user exists, generate token and send email
-        if (user != null) {
+        // If user exists and is a LOCAL user, generate token and send email
+        if (user != null && user.getProvider() == com.swipelab.auth.infrastructure.AuthProvider.LOCAL) {
             // Generate password reset token
             String resetToken = UUID.randomUUID().toString();
 
@@ -316,6 +316,32 @@ public class AuthenticationService {
         emailService.sendInvitationEmail(user.getEmail(), request.getRole().name(), invitationToken);
     }
 
+    /**
+     * Changes password for a currently authenticated local user.
+     */
+    @Transactional
+    public void changePassword(com.swipelab.auth.dto.ChangePasswordRequest request) {
+        org.springframework.security.core.Authentication authentication = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new UnauthorizedException("User not authenticated");
+        }
+
+        String username = authentication.getName();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UnauthorizedException("Authenticated user not found"));
+
+        if (user.getProvider() != com.swipelab.auth.infrastructure.AuthProvider.LOCAL) {
+            throw new IllegalArgumentException("External users cannot change their password");
+        }
+
+        String hashedPassword = passwordEncoder.encode(request.getNewPassword());
+        user.setPasswordHash(hashedPassword);
+
+        // Invalidate all refresh tokens for security
+        user.setRefreshTokenHash(null);
+
+        userRepository.save(user);
+    }
 }
 
 

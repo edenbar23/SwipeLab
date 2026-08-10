@@ -13,8 +13,8 @@ import {
 } from 'react-native';
 import { PinchGestureHandler } from 'react-native-gesture-handler';
 import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
-import { useAuthStore } from '../../stores/authStore';
-import AuthenticatedImage from '../ui/AuthenticatedImage';
+import { useAuthStore } from '@/stores/authStore';
+import AuthenticatedImage from '@/components/ui/AuthenticatedImage';
 
 const AnimatedAuthenticatedImage = Animated.createAnimatedComponent(AuthenticatedImage);
 

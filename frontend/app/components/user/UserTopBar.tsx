@@ -2,11 +2,11 @@ import { Ionicons as VectorIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { useProfile } from '../../api/queries';
-import { useAuthStore } from "../../stores/authStore";
-import { useModeStore } from "../../stores/modeStore";
-import { useThemeStore } from "../../stores/themeStore";
-import useResponsive from "../../hooks/useResponsive";
+import { useProfile } from '@/api/queries';
+import { useAuthStore } from "@/stores/authStore";
+import { useModeStore } from "@/stores/modeStore";
+import { useThemeStore } from "@/stores/themeStore";
+import useResponsive from "@/hooks/useResponsive";
 
 // Cast to any to accept strict React 19 types
 const Ionicons = VectorIcons as any;

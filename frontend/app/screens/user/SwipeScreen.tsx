@@ -13,18 +13,18 @@ import {
 } from 'react-native';
 
 import { Colors } from '../../../constants/theme';
-import { API_ENDPOINTS } from '../../api/apiEndpoints';
-import { apiFetch } from '../../api/apiFetch';
-import { QUERY_KEYS, useMyTasks, useSwipeBatch } from '../../api/queries';
-import ReferenceGallery from '../../components/user/ReferenceGallery';
-import SwipeButtons from '../../components/user/SwipeButtons';
-import SwipeCard, { SwipeCardHandle } from '../../components/user/SwipeCard';
-import WarningToast from '../../components/ui/WarningToast';
-import useResponsive from '../../hooks/useResponsive';
-import { useSwipeStore } from '../../stores/swipeStore';
-import { useThemeStore } from '../../stores/themeStore';
-import { SwipeDirection } from '../../types';
-import { ClassificationWarning } from '../../types/fraudTypes';
+import { API_ENDPOINTS } from '@/api/apiEndpoints';
+import { apiFetch } from '@/api/apiFetch';
+import { QUERY_KEYS, useMyTasks, useSwipeBatch } from '@/api/queries';
+import ReferenceGallery from '@/components/user/ReferenceGallery';
+import SwipeButtons from '@/components/user/SwipeButtons';
+import SwipeCard, { SwipeCardHandle } from '@/components/user/SwipeCard';
+import WarningToast from '@/components/ui/WarningToast';
+import useResponsive from '@/hooks/useResponsive';
+import { useSwipeStore } from '@/stores/swipeStore';
+import { useThemeStore } from '@/stores/themeStore';
+import { SwipeDirection } from '@/types';
+import { ClassificationWarning } from '@/types/fraudTypes';
 
 
 // ─── Accent used across Quick Start UI ──────────────────────────────────────
@@ -133,6 +133,10 @@ export default function SwipeScreen() {
           queryClient.invalidateQueries({ queryKey: QUERY_KEYS.challenges });
           queryClient.invalidateQueries({ queryKey: QUERY_KEYS.myBadges });
           queryClient.invalidateQueries({ queryKey: QUERY_KEYS.userProfile });
+          // Ensure task progress and global stats update in the background
+          queryClient.invalidateQueries({ queryKey: QUERY_KEYS.myTasks });
+          queryClient.invalidateQueries({ queryKey: QUERY_KEYS.taskDetails(currentImage.taskId) });
+          queryClient.invalidateQueries({ queryKey: QUERY_KEYS.statistics });
         }
       })
       .catch((e) => {

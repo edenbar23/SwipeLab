@@ -1,13 +1,14 @@
 import * as Google from "expo-auth-session/providers/google";
 import * as WebBrowser from "expo-web-browser";
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, Image, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View, ScrollView } from "react-native";
-import { API_ENDPOINTS } from '../../api/apiEndpoints';
-import { apiFetch, backendUrl } from "../../api/apiFetch";
-import { preloadAfterLogin } from "../../api/queries";
-import RegisterForm from "../../components/RegisterForm";
-import { useAuthStore } from "../../stores/authStore";
-import useResponsive from "../../hooks/useResponsive";
+import { ActivityIndicator, Image, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View, ScrollView, Keyboard } from "react-native";
+import { API_ENDPOINTS } from '@/api/apiEndpoints';
+import { apiFetch, backendUrl } from "@/api/apiFetch";
+import { preloadAfterLogin } from "@/api/queries";
+import RegisterForm from "@/components/RegisterForm";
+import { useAuthStore } from "@/stores/authStore";
+import useResponsive from "@/hooks/useResponsive";
+import { theme } from "@/theme/theme";
 
 
 
@@ -88,6 +89,10 @@ export default function LoginScreen() {
   }, [response]);
 
   const handleLogin = async () => {
+    Keyboard.dismiss();
+    if (Platform.OS === 'web' && document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
     setLoading(true);
     setError("");
 
@@ -131,6 +136,10 @@ export default function LoginScreen() {
   };
 
   const handleExternalLogin = async () => {
+    Keyboard.dismiss();
+    if (Platform.OS === 'web' && document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
     setLoading(true);
     setError("");
 
@@ -212,22 +221,25 @@ export default function LoginScreen() {
         <Text style={styles.title}>Welcome to SwipeLab</Text>
         <Text style={styles.subtitle}>Swipe • Label • Improve Research</Text>
 
-        <TextInput
-          placeholder="Enter your username"
-          value={username}
-          onChangeText={setUsername}
-          style={styles.input}
-          placeholderTextColor="#888"
-        />
-        <TextInput
-          placeholder="Enter your password"
-          value={password}
-          onChangeText={setPassword}
-          style={styles.input}
-          secureTextEntry
-          placeholderTextColor="#888"
-          onSubmitEditing={handleLogin}
-        />
+        {/* @ts-ignore RN Web form role */}
+        <View style={styles.formContainer} accessibilityRole="form">
+          <TextInput
+            placeholder="Enter your username"
+            value={username}
+            onChangeText={setUsername}
+            style={styles.input}
+            placeholderTextColor="#888"
+          />
+          <TextInput
+            placeholder="Enter your password"
+            value={password}
+            onChangeText={setPassword}
+            style={styles.input}
+            secureTextEntry
+            placeholderTextColor="#888"
+            onSubmitEditing={handleLogin}
+          />
+        </View>
         {error ? <Text style={styles.error}>{error}</Text> : null}
 
         <TouchableOpacity style={styles.loginButton} onPress={handleLogin} disabled={loading}>
@@ -260,20 +272,20 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  screenContainer: { flex: 1, backgroundColor: '#fff' },
+  screenContainer: { flex: 1, backgroundColor: theme.colors.background },
   scrollContent: { flexGrow: 1 },
   // Web: center the card vertically on the page
   webScreenContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: theme.colors.background,
     flexGrow: 1,
   },
   container: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#fff",
+    backgroundColor: theme.colors.background,
     paddingHorizontal: 20,
   },
   webCard: {
@@ -285,15 +297,16 @@ const styles = StyleSheet.create({
   },
   logo: { width: 140, height: 140, resizeMode: "contain", marginBottom: 30 },
   title: { fontSize: 28, fontWeight: "bold", marginBottom: 6 },
-  subtitle: { fontSize: 16, color: "#777", marginBottom: 20 },
-  input: { width: "85%", borderWidth: 1, borderColor: "#ccc", padding: 10, borderRadius: 8, color: "#000", marginBottom: 12, fontSize: 16 },
-  loginButton: { width: "85%", backgroundColor: "#4B7BE5", padding: 12, borderRadius: 8, alignItems: "center", marginBottom: 12 },
-  researcherButton: { backgroundColor: "#2E8B57" },
+  subtitle: { fontSize: 16, color: theme.colors.textSecondary, marginBottom: 20 },
+  formContainer: { width: "100%", alignItems: "center" },
+  input: { width: "85%", borderWidth: 1, borderColor: theme.colors.border, padding: 10, borderRadius: 8, color: theme.colors.text, marginBottom: 12, fontSize: 16 },
+  loginButton: { width: "85%", backgroundColor: theme.colors.primary, padding: 12, borderRadius: 8, alignItems: "center", marginBottom: 12 },
+  researcherButton: { backgroundColor: theme.colors.secondary },
   loginButtonText: { color: "#fff", fontSize: 16, fontWeight: "600" },
-  orText: { marginVertical: 10, fontSize: 14, color: "#555" },
-  googleButton: { width: "85%", backgroundColor: "white", padding: 12, flexDirection: "row", alignItems: "center", borderRadius: 8, borderWidth: 1, borderColor: "#ccc", justifyContent: "center" },
+  orText: { marginVertical: 10, fontSize: 14, color: theme.colors.textSecondary },
+  googleButton: { width: "85%", backgroundColor: theme.colors.background, padding: 12, flexDirection: "row", alignItems: "center", borderRadius: 8, borderWidth: 1, borderColor: theme.colors.border, justifyContent: "center" },
   googleIcon: { width: 22, height: 22, marginRight: 10 },
   googleText: { fontSize: 16, fontWeight: "600" },
-  error: { color: "red", marginBottom: 8 },
-  registerText: { color: "#4B7BE5", textAlign: "center", fontSize: 14 },
+  error: { color: theme.colors.error, marginBottom: 8 },
+  registerText: { color: theme.colors.primary, textAlign: "center", fontSize: 14 },
 });

@@ -1,24 +1,24 @@
 import React, { useEffect, useState } from "react";
-import { Alert, KeyboardAvoidingView, Platform, StyleSheet, View, Text, TouchableOpacity } from "react-native";
+import { Alert, KeyboardAvoidingView, Platform, StyleSheet, View, Text, TouchableOpacity, Keyboard } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../../constants/theme';
-import { API_ENDPOINTS } from "../../api/apiEndpoints";
-import { apiFetch } from "../../api/apiFetch";
-import ScreenHeaderLayout from "../../components/layout/ScreenHeaderLayout";
+import { API_ENDPOINTS } from "@/api/apiEndpoints";
+import { apiFetch } from "@/api/apiFetch";
+import ScreenHeaderLayout from "@/components/layout/ScreenHeaderLayout";
 import { useQueryClient } from "@tanstack/react-query";
-import StepIndicator from "../../components/ui/StepIndicator";
-import { useThemeStore } from '../../stores/themeStore';
-import useResponsive from '../../hooks/useResponsive';
+import StepIndicator from "@/components/ui/StepIndicator";
+import { useThemeStore } from '@/stores/themeStore';
+import useResponsive from '@/hooks/useResponsive';
 
-import { AddTaskFormData } from "../../components/researcher/addTask/addTaskTypes";
-import StepConfirm from "../../components/researcher/addTask/StepConfirm";
-import StepDescription from "../../components/researcher/addTask/StepDescription";
+import { AddTaskFormData } from "@/components/researcher/addTask/addTaskTypes";
+import StepConfirm from "@/components/researcher/addTask/StepConfirm";
+import StepDescription from "@/components/researcher/addTask/StepDescription";
 
-import StepName from "../../components/researcher/addTask/StepName";
-import StepRecipients from "../../components/researcher/addTask/StepRecipients";
-import StepSpecies from "../../components/researcher/addTask/StepSpecies";
-import StepExperiments from "../../components/researcher/addTask/StepExperiments";
-import { useSpeciesPoolImages } from "../../api/queries";
+import StepName from "@/components/researcher/addTask/StepName";
+import StepRecipients from "@/components/researcher/addTask/StepRecipients";
+import StepSpecies from "@/components/researcher/addTask/StepSpecies";
+import StepExperiments from "@/components/researcher/addTask/StepExperiments";
+import { useSpeciesPoolImages } from "@/api/queries";
 
 const STEPS = ["Name", "Description", "Experiments", "Species", "Recipients", "Confirm"];
 
@@ -116,6 +116,11 @@ export default function AddTaskScreen({ route, navigation }: any) {
   };
 
   const handleSubmit = async () => {
+    Keyboard.dismiss();
+    if (Platform.OS === 'web' && document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+
     if (!formData.name || !formData.description) {
       Alert.alert("Validation Error", "Task name and description are required");
       return;

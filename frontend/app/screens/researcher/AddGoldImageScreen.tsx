@@ -10,15 +10,16 @@ import {
     View,
     Image as RNImage,
     Platform,
+    Keyboard,
 } from "react-native";
 import * as ImagePicker from 'expo-image-picker';
-import { apiFetch } from "../../api/apiFetch";
-import ScreenHeaderLayout from "../../components/layout/ScreenHeaderLayout";
-import { useThemeStore } from '../../stores/themeStore';
+import { apiFetch } from "@/api/apiFetch";
+import ScreenHeaderLayout from "@/components/layout/ScreenHeaderLayout";
+import { useThemeStore } from '@/stores/themeStore';
 import { Colors } from '../../../constants/theme';
-import { API_ENDPOINTS } from '../../api/apiEndpoints';
+import { API_ENDPOINTS } from '@/api/apiEndpoints';
 import { useQueryClient } from '@tanstack/react-query';
-import MultiSelect from '../../components/ui/MultiSelect';
+import MultiSelect from '@/components/ui/MultiSelect';
 
 type UrlValidationState = 'idle' | 'checking' | 'valid' | 'invalid';
 
@@ -135,6 +136,12 @@ export default function AddGoldImageScreen({ navigation }: any) {
     };
 
     const handleSubmit = async () => {
+        Keyboard.dismiss();
+        if (Platform.OS === 'web' && document.activeElement instanceof HTMLElement) {
+            document.activeElement.blur();
+        }
+
+        if (loading) return;
         setStatusMessage(null);
 
         if (uploadType === "url" && !imageUrl) {

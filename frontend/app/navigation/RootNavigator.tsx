@@ -3,21 +3,21 @@
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import React from "react";
-import { ActivityIndicator, View, Text } from "react-native";
+import { ActivityIndicator, View, Text, Platform } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 // stores
-import { useAuthStore } from "../stores/authStore";
-import { useModeStore } from "../stores/modeStore";
+import { useAuthStore } from "@/stores/authStore";
+import { useModeStore } from "@/stores/modeStore";
 
 // navigators
-import ResearcherNavigator from "./ResearcherNavigator";
-import UserNavigator from "./UserNavigator";
-import { useProfile } from "../api/queries";
+import ResearcherNavigator from "@/navigation/ResearcherNavigator";
+import UserNavigator from "@/navigation/UserNavigator";
+import { useProfile } from "@/api/queries";
 
 // screens
-import LoginScreen from "../screens/shared/LoginScreen";
-import BannedScreen from "../screens/shared/BannedScreen";
+import LoginScreen from "@/screens/shared/LoginScreen";
+import BannedScreen from "@/screens/shared/BannedScreen";
 
 export default function RootNavigator() {
   const { token, role, isLoading, sessionExpiredMessage, isSuperAdmin, isBanned: storeIsBanned } = useAuthStore();
@@ -26,6 +26,15 @@ export default function RootNavigator() {
   
   const { data: profile } = useProfile({ enabled: !!token });
   const isBanned = storeIsBanned || profile?.status === 'BANNED';
+
+  // Fix for Web: Blur active element on navigation to prevent aria-hidden focus warnings
+  const handleStateChange = () => {
+    if (Platform.OS === 'web' && typeof document !== 'undefined') {
+      if (document.activeElement && document.activeElement instanceof HTMLElement) {
+        document.activeElement.blur();
+      }
+    }
+  };
 
   if (sessionExpiredMessage) {
     return (
@@ -48,7 +57,7 @@ export default function RootNavigator() {
 
   if (!token) {
     return (
-      <NavigationContainer>
+      <NavigationContainer onStateChange={handleStateChange}>
         <Stack.Navigator>
           <Stack.Screen
             name="Login"
@@ -69,7 +78,7 @@ export default function RootNavigator() {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <NavigationContainer key={mode}>
+      <NavigationContainer key={mode} onStateChange={handleStateChange}>
         {isAdmin ? mode === "researcher"
           ? <ResearcherNavigator />
           : <UserNavigator />

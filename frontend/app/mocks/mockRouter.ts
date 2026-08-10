@@ -1,23 +1,23 @@
-import { authMock } from './data/auth.mock'
-import { classificationMock } from './data/classification.mock'
-import { addToCollection, getCollection, getCollectionStats } from './data/collection.mock'
-import { dashboardAdminMock } from './data/dashboard.researcher.mock'
-import { dashboardUserMock } from './data/dashboard.user.mock'
+import { authMock } from '@/mocks/data/auth.mock'
+import { classificationMock } from '@/mocks/data/classification.mock'
+import { addToCollection, getCollection, getCollectionStats } from '@/mocks/data/collection.mock'
+import { dashboardAdminMock } from '@/mocks/data/dashboard.researcher.mock'
+import { dashboardUserMock } from '@/mocks/data/dashboard.user.mock'
 
-import { getTaskAnalytics, getUserPerformance, MOCK_PLATFORM_OVERVIEW, MOCK_GLOBAL_STATS } from './data/analytics.mock'
-import { refinedChallengesMock } from './data/challenges.mock'
-import { setUserAccuracy, statisticsMock } from './data/statistics.mock'
+import { getTaskAnalytics, getUserPerformance, MOCK_PLATFORM_OVERVIEW, MOCK_GLOBAL_STATS } from '@/mocks/data/analytics.mock'
+import { refinedChallengesMock } from '@/mocks/data/challenges.mock'
+import { setUserAccuracy, statisticsMock } from '@/mocks/data/statistics.mock'
 
-import { MOCK_GOLD_IMAGES } from './data/goldImages.mock'
-import { getLeaderboardData, setUserScore } from './data/leaderboard.mock'
+import { MOCK_GOLD_IMAGES } from '@/mocks/data/goldImages.mock'
+import { getLeaderboardData, setUserScore } from '@/mocks/data/leaderboard.mock'
 import {
   addRecipientGroup,
   addUserToGroup,
   getRecipientGroups,
   removeUserFromGroup
-} from './data/recipients.mock'
-import { usersMock } from './data/users.mock'
-import { API_ENDPOINTS } from '../api/apiEndpoints';
+} from '@/mocks/data/recipients.mock'
+import { usersMock } from '@/mocks/data/users.mock'
+import { API_ENDPOINTS } from '@/api/apiEndpoints';
 
 
 type Method = 'GET' | 'POST' | 'PUT' | 'DELETE'
@@ -396,18 +396,6 @@ export async function mockRouter(
 
   if (method === 'GET' && url.endsWith(API_ENDPOINTS.COLLECTION.STATS)) {
     return jsonResponse(getCollectionStats());
-  }
-
-  if (method === 'POST' && url.endsWith(API_ENDPOINTS.COLLECTION.ADD)) {
-    const { imageUrl, label, taskId, taskName, question } = body as {
-      imageUrl: string;
-      label: string;
-      taskId: number;
-      taskName: string;
-      question: string;
-    };
-    const newItem = addToCollection(imageUrl, label as any, taskId, taskName, question);
-    return jsonResponse(newItem, 201);
   }
 
   // ---------- GOLD IMAGES ----------

@@ -1,4 +1,4 @@
-import { MultiSelectOption } from '../../ui/MultiSelect';
+import { MultiSelectOption } from '@/components/ui/MultiSelect';
 
 /** One reference image entry — held in local state until task submit. */
 export interface SpeciesRefImage {

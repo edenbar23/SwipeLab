@@ -1,8 +1,8 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Colors } from '../../../constants/theme';
-import { useThemeStore } from '../../stores/themeStore';
-import type { LabelDistributionPoint } from '../../types/analyticsTypes';
+import { useThemeStore } from '@/stores/themeStore';
+import type { LabelDistributionPoint } from '@/types/analyticsTypes';
 
 type Props = {
   data: LabelDistributionPoint[];

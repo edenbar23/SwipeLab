@@ -109,10 +109,10 @@ async function expectStatus(page: Page, username: string, expected: 'Active' | '
 /** Reads `active` for `username` from /users/get-all using the session's stored token. */
 async function apiUserActive(page: Page, username: string): Promise<boolean | null> {
   return page.evaluate(async (username) => {
-    const token = window.localStorage.getItem('token');
-    if (!token) return null;
+    // The E2E tests run on the web where authentication uses HttpOnly cookies.
+    // The browser attaches these automatically when `credentials: 'include'` is set.
     const res = await fetch(`http://localhost:8080/api/v1/users/get-all?_=${Date.now()}`, {
-      headers: { Authorization: `Bearer ${token}` },
+      credentials: 'include',
       cache: 'no-store',
     });
     if (!res.ok) return null;

@@ -13,22 +13,22 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../../constants/theme';
-import { useThemeStore } from '../../stores/themeStore';
+import { useThemeStore } from '@/stores/themeStore';
 import { useQueryClient } from '@tanstack/react-query';
-import ScreenHeaderLayout from '../../components/layout/ScreenHeaderLayout';
-import MetricCard from '../../components/researcher/MetricCard';
-import TimeWindowCards from '../../components/researcher/TimeWindowCards';
-import ConfidenceTrendChart from '../../components/researcher/ConfidenceTrendChart';
-import LabelDistributionBar from '../../components/researcher/LabelDistributionBar';
+import ScreenHeaderLayout from '@/components/layout/ScreenHeaderLayout';
+import MetricCard from '@/components/researcher/MetricCard';
+import TimeWindowCards from '@/components/researcher/TimeWindowCards';
+import ConfidenceTrendChart from '@/components/researcher/ConfidenceTrendChart';
+import LabelDistributionBar from '@/components/researcher/LabelDistributionBar';
 import {
   useAnalyticsOverview,
   useAnalyticsTop,
   useAnalyticsTask,
   useAdminTasks,
   QUERY_KEYS,
-} from '../../api/queries';
-import type { UserPerformance, TaskAnalytics } from '../../types/analyticsTypes';
-import ExportModal from '../../components/researcher/ExportModal';
+} from '@/api/queries';
+import type { UserPerformance, TaskAnalytics } from '@/types/analyticsTypes';
+import ExportModal from '@/components/researcher/ExportModal';
 
 type Tab = 'overview' | 'tasks';
 

@@ -1,4 +1,4 @@
-import { CollectionItem, CollectionStats, SwipeDirection } from '../../types';
+import { CollectionItem, CollectionStats, SwipeDirection } from '@/types';
 
 // Sample images for collection mock
 const sampleImages = [

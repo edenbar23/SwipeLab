@@ -55,9 +55,9 @@ export async function assertOnUserHome(page: Page): Promise<void> {
   await expect(page.locator('text=Leaderboard').first()).toBeVisible({ timeout: 10000 });
 }
 
-/** Read the JWT the app stores in web localStorage after auth (authStore.setAuth). */
+/** Check if the app stored the auth session (on web, this is the isAuthenticated flag). */
 export async function getStoredToken(page: Page): Promise<string | null> {
-  return page.evaluate(() => window.localStorage.getItem('token'));
+  return page.evaluate(() => window.localStorage.getItem('isAuthenticated') || window.localStorage.getItem('token'));
 }
 
 /** Log in as the seeded regular user and wait for the home screen. */

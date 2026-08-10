@@ -27,7 +27,7 @@ public interface AdminNotificationRepository extends JpaRepository<AdminNotifica
     long countByIsRead(Boolean isRead);
 
     /** Mark all as read in a single UPDATE to avoid N+1 queries. */
-    @Modifying
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("UPDATE AdminNotification n SET n.isRead = true WHERE n.isRead = false")
     int markAllAsRead();
 }

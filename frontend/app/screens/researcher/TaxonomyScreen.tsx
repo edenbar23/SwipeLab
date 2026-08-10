@@ -11,12 +11,12 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { researcherStackParamList } from "../../navigation/researcherStack.types";
-import ScreenHeaderLayout from "../../components/layout/ScreenHeaderLayout/ScreenHeaderLayout";
-import { useThemeStore } from '../../stores/themeStore';
+import { researcherStackParamList } from "@/navigation/researcherStack.types";
+import ScreenHeaderLayout from "@/components/layout/ScreenHeaderLayout/ScreenHeaderLayout";
+import { useThemeStore } from '@/stores/themeStore';
 import { Colors } from '../../../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
-import { useSpeciesMetadata } from "../../api/queries";
+import { useSpeciesMetadata } from "@/api/queries";
 
 // Images
 import taxonomyImg from "../../../assets/images/taxonomy.png";

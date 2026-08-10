@@ -1,9 +1,9 @@
 import { useNavigation } from "@react-navigation/native";
 import React, { useState } from "react";
-import { ActivityIndicator, Alert, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
-import { apiFetch } from "../../api/apiFetch";
-import ScreenHeaderLayout from "../../components/layout/ScreenHeaderLayout/ScreenHeaderLayout";
-import useResponsive from "../../hooks/useResponsive";
+import { ActivityIndicator, Alert, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, Keyboard, Platform } from "react-native";
+import { apiFetch } from "@/api/apiFetch";
+import ScreenHeaderLayout from "@/components/layout/ScreenHeaderLayout/ScreenHeaderLayout";
+import useResponsive from "@/hooks/useResponsive";
 
 interface UserProfile {
     username: string;
@@ -11,13 +11,14 @@ interface UserProfile {
     rank: string;
     score: number;
     badges: string[];
+    provider?: string;
 }
 
 import { Colors } from '../../../constants/theme';
-import { useThemeStore } from '../../stores/themeStore';
-import { API_ENDPOINTS } from '../../api/apiEndpoints';
-import { useProfile, useMyBadges } from "../../api/queries";
-import { getBadgeIcon } from "../../constants/badgeIcons";
+import { useThemeStore } from '@/stores/themeStore';
+import { API_ENDPOINTS } from '@/api/apiEndpoints';
+import { useProfile, useMyBadges } from "@/api/queries";
+import { getBadgeIcon } from "@/constants/badgeIcons";
 
 export default function ProfileScreen() {
     const navigation = useNavigation<any>();
@@ -42,6 +43,10 @@ export default function ProfileScreen() {
     };
 
     const handleCancelChangePassword = () => {
+        Keyboard.dismiss();
+        if (Platform.OS === 'web' && document.activeElement instanceof HTMLElement) {
+            document.activeElement.blur();
+        }
         setIsChangingPassword(false);
         setNewPassword("");
         setConfirmPassword("");
@@ -49,6 +54,10 @@ export default function ProfileScreen() {
     };
 
     const handleSavePassword = async () => {
+        Keyboard.dismiss();
+        if (Platform.OS === 'web' && document.activeElement instanceof HTMLElement) {
+            document.activeElement.blur();
+        }
         setPasswordError("");
 
         if (!newPassword || !confirmPassword) {
@@ -164,11 +173,13 @@ export default function ProfileScreen() {
                 <View style={[styles.divider, { backgroundColor: themeColors.border }]} />
 
                 {/* Actions Section */}
-                <View style={styles.section}>
-                    <TouchableOpacity style={styles.button} onPress={handleStartChangePassword}>
-                        <Text style={styles.buttonText}>Change Password</Text>
-                    </TouchableOpacity>
-                </View>
+                {user.provider === 'LOCAL' && (
+                    <View style={styles.section}>
+                        <TouchableOpacity style={styles.button} onPress={handleStartChangePassword}>
+                            <Text style={styles.buttonText}>Change Password</Text>
+                        </TouchableOpacity>
+                    </View>
+                )}
 
                 {/* Change Password Modal */}
                 <Modal

@@ -9,7 +9,7 @@ import {
     View
 } from 'react-native';
 import { Colors } from '../../../constants/theme';
-import { useThemeStore } from '../../stores/themeStore';
+import { useThemeStore } from '@/stores/themeStore';
 
 export interface MultiSelectOption {
     id: string | number;

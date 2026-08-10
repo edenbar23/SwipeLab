@@ -1,10 +1,10 @@
 import React, { useMemo } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View, ScrollView, Platform, ActivityIndicator } from 'react-native';
 import { Colors } from '../../../../constants/theme';
-import { useThemeStore } from '../../../stores/themeStore';
-import { SpeciesRefImage, StepSpeciesProps } from './addTaskTypes';
-import MultiSelect from '../../../components/ui/MultiSelect';
-import SpeciesImagePicker from './SpeciesImagePicker';
+import { useThemeStore } from '@/stores/themeStore';
+import { SpeciesRefImage, StepSpeciesProps } from '@/components/researcher/addTask/addTaskTypes';
+import MultiSelect from '@/components/ui/MultiSelect';
+import SpeciesImagePicker from '@/components/researcher/addTask/SpeciesImagePicker';
 
 export default function StepSpecies({
   formData,

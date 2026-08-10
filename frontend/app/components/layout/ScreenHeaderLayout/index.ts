@@ -1,3 +1,3 @@
-export { default } from "./ScreenHeaderLayout";
-export * from "./ScreenHeaderLayout.types";
+export { default } from "@/components/layout/ScreenHeaderLayout/ScreenHeaderLayout";
+export * from "@/components/layout/ScreenHeaderLayout/ScreenHeaderLayout.types";
 

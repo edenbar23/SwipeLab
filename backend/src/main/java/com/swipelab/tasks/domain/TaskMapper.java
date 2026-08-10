@@ -90,6 +90,10 @@ public class TaskMapper {
         if (request.getSharedWithResearchers() != null) {
             task.setSharedWithResearchers(request.getSharedWithResearchers());
         }
+
+        if (request.getConsensusThreshold() != null) {
+            task.setConsensusThreshold(request.getConsensusThreshold());
+        }
         // targetSpecies handled in service
     }
 

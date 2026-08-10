@@ -1,10 +1,10 @@
 import React from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { CollectionItem, SwipeDirection } from '../../types';
-import { useThemeStore } from '../../stores/themeStore';
+import { CollectionItem, SwipeDirection } from '@/types';
+import { useThemeStore } from '@/stores/themeStore';
 import { Colors } from '../../../constants/theme';
-import { parseImageUrl } from '../../utils/imageUtils';
+import { parseImageUrl } from '@/utils/imageUtils';
 
 interface CollectionCardProps {
     item: CollectionItem;

@@ -19,6 +19,7 @@ public class UserProfileResponse {
     private String displayName;
     private String profileImageUrl;
     private UserRole role;
+    private String provider;
 
     // Gamification data
     private Long score;

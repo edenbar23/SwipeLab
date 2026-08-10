@@ -1,9 +1,9 @@
 import React from "react";
-import { useAuthStore } from "../../stores/authStore";
-import { useModeStore } from "../../stores/modeStore";
+import { useAuthStore } from "@/stores/authStore";
+import { useModeStore } from "@/stores/modeStore";
 
-import ResearcherTopBar from "../../components/researcher/ResearcherTopBar";
-import UserTopBar from "../../components/user/UserTopBar";
+import ResearcherTopBar from "@/components/researcher/ResearcherTopBar";
+import UserTopBar from "@/components/user/UserTopBar";
 
 export default function TopBar() {
   const { mode } = useModeStore();

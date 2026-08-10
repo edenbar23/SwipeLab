@@ -15,11 +15,11 @@ import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useQueryClient } from '@tanstack/react-query';
 import { Colors } from '../../../../constants/theme';
-import { useThemeStore } from '../../../stores/themeStore';
-import { API_ENDPOINTS } from '../../../api/apiEndpoints';
-import { apiFetch } from '../../../api/apiFetch';
-import { SpeciesRefImage } from './addTaskTypes';
-import AuthenticatedImage from '../../ui/AuthenticatedImage';
+import { useThemeStore } from '@/stores/themeStore';
+import { API_ENDPOINTS } from '@/api/apiEndpoints';
+import { apiFetch } from '@/api/apiFetch';
+import { SpeciesRefImage } from '@/components/researcher/addTask/addTaskTypes';
+import AuthenticatedImage from '@/components/ui/AuthenticatedImage';
 
 const MAX_IMAGES = 3;
 const MIN_IMAGES = 1;

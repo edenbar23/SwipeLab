@@ -1,11 +1,11 @@
 import React from 'react';
 import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
-import ScreenHeaderLayout from '../../components/layout/ScreenHeaderLayout/ScreenHeaderLayout';
-import { CollectionItem, SwipeDirection } from '../../types';
-import { useThemeStore } from '../../stores/themeStore';
+import ScreenHeaderLayout from '@/components/layout/ScreenHeaderLayout/ScreenHeaderLayout';
+import { CollectionItem, SwipeDirection } from '@/types';
+import { useThemeStore } from '@/stores/themeStore';
 import { Colors } from '../../../constants/theme';
-import { parseImageUrl } from '../../utils/imageUtils';
+import { parseImageUrl } from '@/utils/imageUtils';
 
 export default function CollectionDetailsScreen() {
     const route = useRoute<any>();

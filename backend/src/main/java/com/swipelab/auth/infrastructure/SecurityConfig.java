@@ -77,6 +77,7 @@ public class SecurityConfig {
                                                                 "/favicon.ico",
                                                                 // Auth endpoints (strictly matched)
                                                                 "/api/v1/auth/login",
+                                                                "/api/v1/auth/logout",
                                                                 "/api/v1/auth/register",
                                                                 "/api/v1/auth/refresh",
                                                                 "/api/v1/auth/password/forgot",
@@ -135,9 +136,9 @@ public class SecurityConfig {
                 } else {
                         configuration.setAllowedOrigins(List.of("*")); // Fallback
                 }
-                configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+                configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
                 configuration.setAllowedHeaders(List.of("*"));
-                configuration.setAllowCredentials(false);
+                configuration.setAllowCredentials(true);
                 configuration.setMaxAge(3600L);
 
                 UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

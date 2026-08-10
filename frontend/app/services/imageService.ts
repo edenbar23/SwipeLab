@@ -1,4 +1,4 @@
-import { Question, SwipeResult } from '../types';
+import { Question, SwipeResult } from '@/types';
 
 export class ImageService {
   // Mock service - replace with actual API calls
