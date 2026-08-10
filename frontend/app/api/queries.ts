@@ -311,6 +311,12 @@ export const useUpdateTaskStatus = () => {
     },
     onSuccess: (updatedTask, { taskId }) => {
       queryClient.setQueryData(QUERY_KEYS.taskDetails(taskId), updatedTask);
+      queryClient.setQueryData(QUERY_KEYS.dashboardTasks, (oldData: any) => {
+        if (!Array.isArray(oldData)) return oldData;
+        return oldData.map((task: any) =>
+          task.taskId === taskId ? updatedTask : task
+        );
+      });
     },
     onSettled: (data, error, { taskId }) => {
       // Broadly invalidate to ensure all lists and analytics screens reflect the new status
