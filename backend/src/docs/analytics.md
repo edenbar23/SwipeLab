@@ -28,3 +28,8 @@ A heavily cached, expensive query that provides a comprehensive platform snapsho
 - **Time Windows**: Shows activity (classifications, unique users, tasks) for "Today", "This Week", and "This Month".
 - **Confidence Trend**: Tracks average user credibility scores over a 30-day window.
 - **Label Distribution**: Shows the split of YES / NO / UNSURE labels over time.
+
+## 6. Data Export (CSV & JSON)
+Researchers and SuperAdmins can export classification datasets in CSV and JSON formats. These exports are highly optimized for both performance and readability:
+- **Traceability**: All exported rows include strict cross-system mapping identifiers (`swipelab_image_id`, `stardbi_experiment_id`, `stardbi_image_id`, and `stardbi_crop_id`).
+- **Optimization**: Raw Base64 image strings are completely omitted from the generated files, vastly reducing network latency and file sizes (e.g., bringing a row payload down from ~100+ KB to ~150 bytes).

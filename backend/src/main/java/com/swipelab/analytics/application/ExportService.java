@@ -43,10 +43,10 @@ public class ExportService {
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
     // Legacy header kept for backward-compatible single-task endpoints
-    private static final String LEGACY_CSV_HEADER = "parent_image_id,crop_id,image_data,username,user_response,classified_at,is_gold_standard";
+    private static final String LEGACY_CSV_HEADER = "swipelab_image_id,stardbi_experiment_id,stardbi_image_id,stardbi_crop_id,username,user_response,classified_at,is_gold_standard";
 
     private static final String MULTI_EXPORT_CSV_HEADER =
-            "classification_id,task_id,task_name,parent_image_id,crop_id,image_src_path,username,user_role,query_species,user_response,credibility_score,is_gold_standard,classified_at";
+            "classification_id,task_id,task_name,swipelab_image_id,stardbi_experiment_id,stardbi_image_id,stardbi_crop_id,username,user_role,query_species,user_response,credibility_score,is_gold_standard,classified_at";
 
     // ─── Multi-task export (Issue #257) ───────────────────────────────────────
 
@@ -101,13 +101,14 @@ public class ExportService {
                 Image image = c.getImage();
                 boolean isGold = goldImageRepository.existsByImageId(image.getId());
 
-                String row = String.format("%d,%d,\"%s\",%s,%s,\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",%s,%b,\"%s\"",
+                String row = String.format("%d,%d,\"%s\",%d,%s,%s,%s,\"%s\",\"%s\",\"%s\",\"%s\",%s,%b,\"%s\"",
                         c.getId(),
                         c.getTaskId(),
                         escapeCsv(taskNameMap.getOrDefault(c.getTaskId(), "")),
+                        image.getId(),
+                        image.getExperimentId() != null ? image.getExperimentId().toString() : "",
                         image.getParentImageId() != null ? image.getParentImageId().toString() : "",
                         image.getExternalBoxId() != null ? image.getExternalBoxId().toString() : "",
-                        escapeCsv(image.getImageData()),
                         escapeCsv(c.getUsername()),
                         escapeCsv(c.getUserRole() != null ? c.getUserRole() : ""),
                         escapeCsv(c.getQuerySpecies() != null ? c.getQuerySpecies() : ""),
@@ -188,7 +189,7 @@ public class ExportService {
         summary.put("taskId", taskId);
         summary.put("totalImages", totalImages);
         summary.put("totalClassifications", totalClassifications);
-        summary.put("estimatedCsvSizeKb", totalClassifications * 100 / 1024); // ~100 bytes per row
+        summary.put("estimatedCsvSizeKb", totalClassifications * 150 / 1024); // ~150 bytes per row
 
         return summary;
     }
@@ -197,10 +198,11 @@ public class ExportService {
 
     private String formatLegacyCsvRow(Classification classification, boolean isGoldStandard) {
         Image image = classification.getImage();
-        return String.format("%s,%s,\"%s\",\"%s\",\"%s\",\"%s\",%b",
+        return String.format("%d,%s,%s,%s,\"%s\",\"%s\",\"%s\",%b",
+                image.getId(),
+                image.getExperimentId() != null ? image.getExperimentId().toString() : "",
                 image.getParentImageId() != null ? image.getParentImageId().toString() : "",
                 image.getExternalBoxId() != null ? image.getExternalBoxId().toString() : "",
-                escapeCsv(image.getImageData()),
                 escapeCsv(classification.getUsername()),
                 escapeCsv(classification.getUserResponse().name()),
                 classification.getCreatedAt() != null ? classification.getCreatedAt().format(DATE_FORMATTER) : "",
@@ -210,9 +212,10 @@ public class ExportService {
     private Map<String, Object> formatJsonObject(Classification classification, boolean isGoldStandard) {
         Image image = classification.getImage();
         Map<String, Object> obj = new HashMap<>();
-        obj.put("imageId", image.getParentImageId());
-        obj.put("cropId", image.getExternalBoxId());
-        obj.put("imageData", image.getImageData());
+        obj.put("swipelabImageId", image.getId());
+        obj.put("stardbiExperimentId", image.getExperimentId());
+        obj.put("stardbiImageId", image.getParentImageId());
+        obj.put("stardbiCropId", image.getExternalBoxId());
         obj.put("username", classification.getUsername());
         obj.put("userResponse", classification.getUserResponse().name());
         obj.put("classifiedAt",

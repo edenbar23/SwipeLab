@@ -25,3 +25,12 @@ Base path: `/api/v1/admin/export`
 | `GET` | `/tasks/{taskId}/summary` | Export task summary |
 | `GET` | `/tasks/{taskId}/csv` | Export task data as CSV |
 | `GET` | `/tasks/{taskId}/json` | Export task data as JSON |
+
+### Export Data Schema
+
+The CSV and JSON exports are optimized for performance and file size by omitting raw Base64 image strings. They contain the following cross-system traceability identifiers to reliably map classifications back to their source:
+
+- `swipelab_image_id`: Internal primary key of the image in the SwipeLab database.
+- `stardbi_experiment_id`: External ID mapping to the StarDBi experiment.
+- `stardbi_image_id`: External ID mapping to the StarDBi parent image.
+- `stardbi_crop_id`: External ID mapping to the StarDBi bounding box/crop.
