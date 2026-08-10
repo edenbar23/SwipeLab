@@ -118,53 +118,57 @@ export default function TaskCard({ task, onPress, onEdit, onToggleStatus, onArch
         </View>
 
         {/* Divider */}
-        <View style={[styles.divider, { backgroundColor: isDark ? themeColors.border : '#DBEAFE' }]} />
+        {task.status !== 'ARCHIVED' && (
+          <>
+            <View style={[styles.divider, { backgroundColor: isDark ? themeColors.border : '#DBEAFE' }]} />
 
-        {/* Action row */}
-        <View style={styles.actions}>
-          {/* Toggle status */}
-          {isProcessing ? (
-            <View style={styles.actionChip}>
-              <Ionicons name="cloud-download-outline" size={14} color="#3B82F6" />
-              <Text style={[styles.actionChipText, { color: '#3B82F6' }]}>Importing…</Text>
+            {/* Action row */}
+            <View style={styles.actions}>
+              {/* Toggle status */}
+              {isProcessing ? (
+                <View style={styles.actionChip}>
+                  <Ionicons name="cloud-download-outline" size={14} color="#3B82F6" />
+                  <Text style={[styles.actionChipText, { color: '#3B82F6' }]}>Importing…</Text>
+                </View>
+              ) : (
+                <TouchableOpacity
+                  style={[
+                    styles.actionChip,
+                    { backgroundColor: isActive ? '#FEF3C7' : '#D1FAE5' },
+                  ]}
+                  onPress={(e) => { e.stopPropagation(); onToggleStatus(); }}
+                >
+                  <Ionicons
+                    name={isActive ? 'pause-circle-outline' : 'play-circle-outline'}
+                    size={15}
+                    color={isActive ? '#F59E0B' : '#10B981'}
+                  />
+                  <Text style={[styles.actionChipText, { color: isActive ? '#F59E0B' : '#10B981' }]}>
+                    {isActive ? 'Pause' : 'Resume'}
+                  </Text>
+                </TouchableOpacity>
+              )}
+
+              <View style={styles.iconActions}>
+                <TouchableOpacity
+                  disabled={isProcessing}
+                  style={styles.iconBtn}
+                  onPress={(e) => { e.stopPropagation(); onEdit(); }}
+                >
+                  <Ionicons name="create-outline" size={20} color="#3B82F6" />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  disabled={isProcessing}
+                  style={styles.iconBtn}
+                  onPress={(e) => { e.stopPropagation(); onArchive(); }}
+                >
+                  <Ionicons name="archive-outline" size={20} color={themeColors.textSecondary} />
+                </TouchableOpacity>
+              </View>
             </View>
-          ) : (
-            <TouchableOpacity
-              style={[
-                styles.actionChip,
-                { backgroundColor: isActive ? '#FEF3C7' : '#D1FAE5' },
-              ]}
-              onPress={(e) => { e.stopPropagation(); onToggleStatus(); }}
-            >
-              <Ionicons
-                name={isActive ? 'pause-circle-outline' : 'play-circle-outline'}
-                size={15}
-                color={isActive ? '#F59E0B' : '#10B981'}
-              />
-              <Text style={[styles.actionChipText, { color: isActive ? '#F59E0B' : '#10B981' }]}>
-                {isActive ? 'Pause' : 'Resume'}
-              </Text>
-            </TouchableOpacity>
-          )}
-
-          <View style={styles.iconActions}>
-            <TouchableOpacity
-              disabled={isProcessing}
-              style={styles.iconBtn}
-              onPress={(e) => { e.stopPropagation(); onEdit(); }}
-            >
-              <Ionicons name="create-outline" size={20} color="#3B82F6" />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              disabled={isProcessing}
-              style={styles.iconBtn}
-              onPress={(e) => { e.stopPropagation(); onArchive(); }}
-            >
-              <Ionicons name="archive-outline" size={20} color={themeColors.textSecondary} />
-            </TouchableOpacity>
-          </View>
-        </View>
+          </>
+        )}
       </View>
     </TouchableOpacity>
   );

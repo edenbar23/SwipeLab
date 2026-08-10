@@ -166,43 +166,45 @@ export default function TaskDetailsScreen({ route, navigation }: Props) {
           </View>
 
           {/* ── Action buttons ───────────────────────────────────────────────── */}
-          <View style={styles.actionsRow}>
-            <TouchableOpacity
-              style={[styles.actionBtn, { backgroundColor: isDark ? '#1e3a5f' : '#DBEAFE', borderColor: '#3B82F6' }]}
-              onPress={() => navigation.navigate('EditTask', { taskId })}
-            >
-              <Ionicons name="create-outline" size={16} color="#3B82F6" />
-              <Text style={[styles.actionBtnText, { color: '#3B82F6' }]}>Edit</Text>
-            </TouchableOpacity>
+          {task.status !== 'ARCHIVED' && (
+            <View style={styles.actionsRow}>
+              <TouchableOpacity
+                style={[styles.actionBtn, { backgroundColor: isDark ? '#1e3a5f' : '#DBEAFE', borderColor: '#3B82F6' }]}
+                onPress={() => navigation.navigate('EditTask', { taskId })}
+              >
+                <Ionicons name="create-outline" size={16} color="#3B82F6" />
+                <Text style={[styles.actionBtnText, { color: '#3B82F6' }]}>Edit</Text>
+              </TouchableOpacity>
 
-            <TouchableOpacity
-              style={[
-                styles.actionBtn,
-                {
-                  backgroundColor: isActive ? (isDark ? '#3d2e0a' : '#FEF3C7') : (isDark ? '#0d2e1c' : '#D1FAE5'),
-                  borderColor: isActive ? '#F59E0B' : '#10B981',
-                },
-              ]}
-              onPress={() => updateStatus({ taskId, action: isActive ? 'pause' : 'activate' })}
-            >
-              <Ionicons
-                name={isActive ? 'pause-circle-outline' : 'play-circle-outline'}
-                size={16}
-                color={isActive ? '#F59E0B' : '#10B981'}
-              />
-              <Text style={[styles.actionBtnText, { color: isActive ? '#F59E0B' : '#10B981' }]}>
-                {isActive ? 'Pause' : 'Resume'}
-              </Text>
-            </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.actionBtn,
+                  {
+                    backgroundColor: isActive ? (isDark ? '#3d2e0a' : '#FEF3C7') : (isDark ? '#0d2e1c' : '#D1FAE5'),
+                    borderColor: isActive ? '#F59E0B' : '#10B981',
+                  },
+                ]}
+                onPress={() => updateStatus({ taskId, action: isActive ? 'pause' : 'activate' })}
+              >
+                <Ionicons
+                  name={isActive ? 'pause-circle-outline' : 'play-circle-outline'}
+                  size={16}
+                  color={isActive ? '#F59E0B' : '#10B981'}
+                />
+                <Text style={[styles.actionBtnText, { color: isActive ? '#F59E0B' : '#10B981' }]}>
+                  {isActive ? 'Pause' : 'Resume'}
+                </Text>
+              </TouchableOpacity>
 
-            <TouchableOpacity
-              style={[styles.actionBtn, { backgroundColor: isDark ? '#2d1515' : '#FEE2E2', borderColor: '#EF4444' }]}
-              onPress={() => setShowArchiveModal(true)}
-            >
-              <Ionicons name="archive-outline" size={16} color="#EF4444" />
-              <Text style={[styles.actionBtnText, { color: '#EF4444' }]}>Archive</Text>
-            </TouchableOpacity>
-          </View>
+              <TouchableOpacity
+                style={[styles.actionBtn, { backgroundColor: isDark ? '#2d1515' : '#FEE2E2', borderColor: '#EF4444' }]}
+                onPress={() => setShowArchiveModal(true)}
+              >
+                <Ionicons name="archive-outline" size={16} color="#EF4444" />
+                <Text style={[styles.actionBtnText, { color: '#EF4444' }]}>Archive</Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
       </View>
 
