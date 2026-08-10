@@ -92,14 +92,33 @@ export async function apiFetch(
     console.log("[apiFetch] Full exact URL being fetch'ed:", fullUrl);
   }
 
-  const response = await fetch(fullUrl, {
-    ...init,
-    credentials: "include", // Required for HttpOnly cookies on web
-    headers: {
-      ...(init?.headers ?? {}),
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-  });
+  let response: Response;
+  try {
+    response = await fetch(fullUrl, {
+      ...init,
+      credentials: "include", // Required for HttpOnly cookies on web
+      headers: {
+        ...(init?.headers ?? {}),
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+    });
+  } catch (err) {
+    // Network error (e.g., ERR_CONNECTION_REFUSED, offline)
+    (async () => {
+      try {
+        const healthRes = await fetch(backendUrl + API_ENDPOINTS.SYSTEM.HEALTH, { method: 'GET' });
+        if (!healthRes.ok) {
+          const { useAppStateStore } = require('@/stores/appStateStore');
+          useAppStateStore.getState().setMaintenanceMode(true);
+        }
+      } catch (e) {
+        // Backend is completely unreachable
+        const { useAppStateStore } = require('@/stores/appStateStore');
+        useAppStateStore.getState().setMaintenanceMode(true);
+      }
+    })();
+    throw err;
+  }
 
   if (response.status === 401) {
     // Check for Stardbi session expiration before attempting refresh
@@ -195,8 +214,8 @@ export async function apiFetch(
     }
   }
 
-  // Handle generic errors (non-401, non-403) with a Toast
-  if (!response.ok && response.status !== 401 && response.status !== 403 && response.status !== 500) {
+  // Handle generic errors (non-401, non-403) with a Toast, excluding 5xx errors which are handled below
+  if (!response.ok && response.status !== 401 && response.status !== 403 && response.status < 500) {
     const urlString = input.toString();
     if (!urlString.includes('/login') && !urlString.includes('/refresh')) {
       Toast.show({
@@ -209,8 +228,26 @@ export async function apiFetch(
 
   // 500 Maintenance Mode handling
   if (response.status >= 500) {
-    const { useAppStateStore } = require('@/stores/appStateStore');
-    useAppStateStore.getState().setMaintenanceMode(true);
+    (async () => {
+      try {
+        const healthRes = await fetch(backendUrl + API_ENDPOINTS.SYSTEM.HEALTH, { method: 'GET' });
+        if (!healthRes.ok) {
+          const { useAppStateStore } = require('@/stores/appStateStore');
+          useAppStateStore.getState().setMaintenanceMode(true);
+        } else {
+          // The backend is alive, it was just an isolated 500 error.
+          Toast.show({
+            type: 'error',
+            text1: 'Server Error',
+            text2: 'An unexpected internal error occurred.',
+          });
+        }
+      } catch (e) {
+        // Fetch failed entirely
+        const { useAppStateStore } = require('@/stores/appStateStore');
+        useAppStateStore.getState().setMaintenanceMode(true);
+      }
+    })();
   }
   
   return response;
