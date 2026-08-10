@@ -313,8 +313,9 @@ export const useUpdateTaskStatus = () => {
       queryClient.setQueryData(QUERY_KEYS.taskDetails(taskId), updatedTask);
     },
     onSettled: (data, error, { taskId }) => {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.taskDetails(taskId) });
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.dashboardTasks });
+      // Broadly invalidate to ensure all lists and analytics screens reflect the new status
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['analytics'] });
     }
   });
 };

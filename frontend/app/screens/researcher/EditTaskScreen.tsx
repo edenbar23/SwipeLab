@@ -244,6 +244,7 @@ export default function EditTaskScreen({ route, navigation }: Props) {
       await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.taskDetails(taskId) });
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
       queryClient.invalidateQueries({ queryKey: ["species", "pool"] });
+      queryClient.invalidateQueries({ queryKey: ["analytics"] });
 
       Alert.alert("Success", "Task updated successfully");
       navigation.navigate("TasksManagement");
