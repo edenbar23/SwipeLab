@@ -311,6 +311,9 @@ export const useUpdateTaskStatus = () => {
     },
     onSuccess: (updatedTask, { taskId }) => {
       queryClient.setQueryData(QUERY_KEYS.taskDetails(taskId), updatedTask);
+    },
+    onSettled: (data, error, { taskId }) => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.taskDetails(taskId) });
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.dashboardTasks });
     }
   });
