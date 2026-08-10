@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import React from "react";
+import React, { useState } from "react";
 import {
   ActivityIndicator,
   Image,
@@ -16,6 +16,7 @@ import { researcherStackParamList } from "@/navigation/researcherStack.types";
 import { useThemeStore } from '@/stores/themeStore';
 import AuthenticatedImage from '@/components/ui/AuthenticatedImage';
 import { useTaskDetails, useExperiments, useUpdateTaskStatus } from "@/api/queries";
+import ConfirmationModal from '@/components/ui/ConfirmationModal';
 
 type Props = NativeStackScreenProps<researcherStackParamList, "TaskDetails">;
 
@@ -52,6 +53,7 @@ export default function TaskDetailsScreen({ route, navigation }: Props) {
   const { data: task, isLoading: loading, error } = useTaskDetails(taskId);
   const { data: experimentsList } = useExperiments();
   const { mutate: updateStatus } = useUpdateTaskStatus();
+  const [showArchiveModal, setShowArchiveModal] = useState(false);
 
   // ── Loading state ──────────────────────────────────────────────────────────
   if (loading) {
@@ -85,11 +87,12 @@ export default function TaskDetailsScreen({ route, navigation }: Props) {
   const borderCol = isDark ? themeColors.border : '#BFDBFE';
 
   return (
-    <ScrollView
-      style={{ backgroundColor: themeColors.background }}
-      contentContainerStyle={[styles.container, { backgroundColor: themeColors.background }]}
-      showsVerticalScrollIndicator={false}
-    >
+    <>
+      <ScrollView
+        style={{ backgroundColor: themeColors.background }}
+        contentContainerStyle={[styles.container, { backgroundColor: themeColors.background }]}
+        showsVerticalScrollIndicator={false}
+      >
       {/* ── Back button ─────────────────────────────────────────────────────── */}
       <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
         <Ionicons name="chevron-back" size={18} color="#3B82F6" />
@@ -194,7 +197,7 @@ export default function TaskDetailsScreen({ route, navigation }: Props) {
 
             <TouchableOpacity
               style={[styles.actionBtn, { backgroundColor: isDark ? '#2d1515' : '#FEE2E2', borderColor: '#EF4444' }]}
-              onPress={() => updateStatus({ taskId, action: 'archive' })}
+              onPress={() => setShowArchiveModal(true)}
             >
               <Ionicons name="archive-outline" size={16} color="#EF4444" />
               <Text style={[styles.actionBtnText, { color: '#EF4444' }]}>Archive</Text>
@@ -293,7 +296,20 @@ export default function TaskDetailsScreen({ route, navigation }: Props) {
           ))}
         </>
       )}
-    </ScrollView>
+      </ScrollView>
+
+      <ConfirmationModal
+        visible={showArchiveModal}
+        title="Archive Task"
+        message="Are you sure you want to archive this task? Once archived, it cannot be returned to an active state."
+        confirmText="Archive"
+        onConfirm={() => {
+          updateStatus({ taskId, action: 'archive' });
+          setShowArchiveModal(false);
+        }}
+        onCancel={() => setShowArchiveModal(false)}
+      />
+    </>
   );
 }
 
