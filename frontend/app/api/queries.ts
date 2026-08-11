@@ -7,7 +7,7 @@ export const QUERY_KEYS = {
   myTasks: ['tasks', 'my'],
   availableTasks: ['tasks', 'available'],
   dashboardTasks: ['tasks', 'dashboard'],
-  taskDetails: (id: string | number) => ['tasks', id],
+  taskDetails: (id: string | number) => ['tasks', Number(id)],
   experiments: ['tasks', 'experiments'],
   
   // User Profile
@@ -92,7 +92,7 @@ export const useAllStatistics = () => {
             fetchJson(API_ENDPOINTS.STATISTICS.VS_EXPERTS),
             fetchJson(API_ENDPOINTS.STATISTICS.VS_USERS),
             fetchJson(API_ENDPOINTS.STATISTICS.BREAKDOWN),
-            fetchJson(API_ENDPOINTS.GAMIFICATION.USER_INFO).catch(() => ({ score: 0, badge: null, currentStreak: 0 })),
+            fetchJson(API_ENDPOINTS.GAMIFICATION.USER_INFO).catch(() => ({ score: 0, badge: null, currentStreak: 0, longestStreak: 0 })),
         ]);
         return { summary, vsExperts, vsUsers, breakdown, userInfo };
     },
@@ -311,7 +311,17 @@ export const useUpdateTaskStatus = () => {
     },
     onSuccess: (updatedTask, { taskId }) => {
       queryClient.setQueryData(QUERY_KEYS.taskDetails(taskId), updatedTask);
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.dashboardTasks });
+      queryClient.setQueryData(QUERY_KEYS.dashboardTasks, (oldData: any) => {
+        if (!Array.isArray(oldData)) return oldData;
+        return oldData.map((task: any) =>
+          task.taskId === Number(taskId) ? updatedTask : task
+        );
+      });
+    },
+    onSettled: (data, error, { taskId }) => {
+      // Broadly invalidate to ensure all lists and analytics screens reflect the new status
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['analytics'] });
     }
   });
 };

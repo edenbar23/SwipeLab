@@ -5,6 +5,7 @@ import com.swipelab.analytics.dto.*;
 import com.swipelab.analytics.infrastructure.*;
 import com.swipelab.classification.domain.core.Classification.UserResponse;
 import com.swipelab.classification.infrastructure.ClassificationRepository;
+import com.swipelab.classification.infrastructure.ConsensusResultRepository;
 import com.swipelab.classification.infrastructure.ImageRepository;
 import com.swipelab.config.CacheConfig;
 import com.swipelab.analytics.dto.DashboardStatsResponse;
@@ -43,6 +44,7 @@ public class AnalyticsService {
     private final UserRepository userRepository;
     private final TaskRepository taskRepository;
     private final ImageRepository imageRepository;
+    private final ConsensusResultRepository consensusResultRepository;
 
     // ─── User-scoped endpoints ────────────────────────────────────────────────
 
@@ -62,7 +64,8 @@ public class AnalyticsService {
             }
         }
 
-        double accuracy = total > 0 ? (double) correct / total : 0.0;
+        Double calculatedAccuracy = classificationFactRepository.getUserAccuracy(userId);
+        double accuracy = calculatedAccuracy != null ? calculatedAccuracy : 0.0;
 
         return UserProgressResponse.builder()
                 .completed((int) total)
@@ -83,7 +86,9 @@ public class AnalyticsService {
                 correct = row[1] != null ? ((Number) row[1]).longValue() : 0;
             }
         }
-        double accuracy = total > 0 ? (double) correct / total : 0.0;
+        
+        Double calculatedAccuracy = classificationFactRepository.getUserAccuracy(userId);
+        double accuracy = calculatedAccuracy != null ? calculatedAccuracy : 0.0;
 
         UserRanking ranking = userRankingRepository.findByUserIdAndPeriod(userId, "ALL_TIME")
                 .orElse(UserRanking.builder().rank(0).percentile(0).build());
@@ -194,7 +199,8 @@ public class AnalyticsService {
 
     @Transactional(readOnly = true)
     public TaskAnalyticsResponse getTaskAnalytics(Long taskId) {
-        Long completedImages = classificationFactRepository.countCompletedImages(taskId);
+        Long imagesClassified = classificationFactRepository.countDistinctImagesByTaskId(taskId);
+        Long completedImages = consensusResultRepository.countCompletedImagesByTaskId(taskId);
         List<ClassificationFact> facts = classificationFactRepository.findByTaskId(taskId);
         int totalClassifications = facts.size();
 
@@ -204,7 +210,7 @@ public class AnalyticsService {
                 : 0.0;
 
         TaskAnalyticsResponse.Progress progress = TaskAnalyticsResponse.Progress.builder()
-                .imagesClassified(completedImages.intValue())
+                .imagesClassified(imagesClassified.intValue())
                 .totalImages(totalImages)
                 .completedImages(completedImages.intValue())
                 .percentComplete(percentComplete)
@@ -225,15 +231,88 @@ public class AnalyticsService {
                         .build())
                 .collect(Collectors.toList());
 
+        // ─── Participation ──────────────────
+        long activeUsers = facts.stream().map(ClassificationFact::getUserId).distinct().count();
+        int avgClassifications = activeUsers > 0 ? (int) (totalClassifications / activeUsers) : 0;
+        
+        List<Long> responseTimes = facts.stream()
+                .map(ClassificationFact::getResponseTimeMs)
+                .filter(java.util.Objects::nonNull)
+                .sorted()
+                .collect(Collectors.toList());
+        long medianResponseTime = 0L;
+        if (!responseTimes.isEmpty()) {
+            int mid = responseTimes.size() / 2;
+            medianResponseTime = responseTimes.size() % 2 == 1 
+                ? responseTimes.get(mid) 
+                : (responseTimes.get(mid - 1) + responseTimes.get(mid)) / 2;
+        }
+
+        TaskAnalyticsResponse.Participation participation = TaskAnalyticsResponse.Participation.builder()
+                .activeUsers((int) activeUsers)
+                .totalClassifications(totalClassifications)
+                .averageClassificationsPerUser(avgClassifications)
+                .medianResponseTimeMs(medianResponseTime)
+                .build();
+
+        // ─── Quality ────────────────────────
+        double sumCredibility = 0;
+        int credibilityCount = 0;
+        Map<String, List<Double>> userCredibility = new HashMap<>();
+        for (ClassificationFact f : facts) {
+            if (f.getCredibilityAtTime() != null) {
+                sumCredibility += f.getCredibilityAtTime();
+                credibilityCount++;
+                userCredibility.computeIfAbsent(f.getUserId(), k -> new ArrayList<>()).add(f.getCredibilityAtTime());
+            }
+        }
+        double avgCredibility = credibilityCount > 0 ? sumCredibility / credibilityCount : 0.0;
+        
+        int lowQualityCount = 0;
+        for (List<Double> creds : userCredibility.values()) {
+            double uAvg = creds.stream().mapToDouble(Double::doubleValue).average().orElse(100.0);
+            if (uAvg < 50.0) {
+                lowQualityCount++;
+            }
+        }
+
+        TaskAnalyticsResponse.Quality quality = TaskAnalyticsResponse.Quality.builder()
+                .averageCredibility(avgCredibility)
+                .lowQualityUsers(lowQualityCount)
+                .build();
+
+        // ─── Consensus ──────────────────────
+        Map<Long, Double> imageConsensus = new HashMap<>();
+        for (ClassificationFact f : facts) {
+            if (f.getConsensusScore() != null) {
+                imageConsensus.merge(f.getImageId(), f.getConsensusScore(), Math::max);
+            }
+        }
+        double sumConsensus = 0;
+        int lowConsensusImages = 0;
+        for (Double score : imageConsensus.values()) {
+            sumConsensus += score;
+            if (score < 0.8) {
+                lowConsensusImages++;
+            }
+        }
+        double avgConsensus = imageConsensus.isEmpty() ? 0.0 : (sumConsensus / imageConsensus.size()) * 100.0;
+
+        TaskAnalyticsResponse.Consensus consensus = TaskAnalyticsResponse.Consensus.builder()
+                .overallAverage(avgConsensus)
+                .lowConsensusImages(lowConsensusImages)
+                .threshold(0.8)
+                .build();
+
         return TaskAnalyticsResponse.builder()
                 .taskId(taskId)
                 .status("ACTIVE")
                 .progress(progress)
                 .speciesAnalytics(saList)
                 .generatedAt(java.time.LocalDateTime.now().toString())
-                .consensus(TaskAnalyticsResponse.Consensus.builder().build())
-                .participation(TaskAnalyticsResponse.Participation.builder().build())
-                .quality(TaskAnalyticsResponse.Quality.builder().build())
+                .consensus(consensus)
+                .participation(participation)
+                .quality(quality)
                 .timeSeries(List.of())
                 .build();
     }
@@ -355,14 +434,15 @@ public class AnalyticsService {
         String username = (String) row[0];
         int total = row[1] != null ? ((Number) row[1]).intValue() : 0;
         int correct = row[2] != null ? ((Number) row[2]).intValue() : 0;
-        double avgCredibility = row[3] != null ? ((Number) row[3]).doubleValue() : 0.0;
-        double accuracy = total > 0 ? (double) correct / total : 0.0;
+        int goldTotal = row[3] != null ? ((Number) row[3]).intValue() : 0;
+        double avgCredibility = row[4] != null ? ((Number) row[4]).doubleValue() : 0.0;
+        double accuracy = goldTotal > 0 ? (double) correct / goldTotal : 0.0;
 
         return UserPerformanceResponse.builder()
                 .username(username)
                 .displayName(username)
                 .totalClassifications(total)
-                .goldImageClassifications(0)
+                .goldImageClassifications(goldTotal)
                 .correctGoldClassifications(correct)
                 .goldAccuracy(accuracy)
                 .credibilityScore(avgCredibility)

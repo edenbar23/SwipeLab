@@ -108,6 +108,7 @@ public class UserService {
         try {
             com.swipelab.model.enums.UserRole role = com.swipelab.model.enums.UserRole.valueOf(roleName.toUpperCase());
             return userRepository.findByRole(role).stream()
+                    .filter(user -> !securityAuthorizationService.isSuperAdmin(user.getUsername()))
                     .map(authMapper::toUserProfileResponse)
                     .collect(Collectors.toList());
         } catch (IllegalArgumentException e) {

@@ -141,6 +141,30 @@ class UserServiceTest {
     }
 
     @Test
+    void getUsersByRole_ShouldReturnList_ExcludingSuperAdmin() {
+        User superAdmin = new User();
+        superAdmin.setUsername("superadmin");
+        
+        when(userRepository.findByRole(com.swipelab.model.enums.UserRole.RESEARCHER))
+                .thenReturn(List.of(user, superAdmin));
+        when(securityAuthorizationService.isSuperAdmin("testuser")).thenReturn(false);
+        when(securityAuthorizationService.isSuperAdmin("superadmin")).thenReturn(true);
+        when(authMapper.toUserProfileResponse(user)).thenReturn(profileResponse);
+
+        List<UserProfileResponse> responses = userService.getUsersByRole("RESEARCHER");
+
+        assertEquals(1, responses.size());
+        assertEquals("testuser", responses.get(0).getUsername());
+        verify(securityAuthorizationService, times(1)).isSuperAdmin("testuser");
+        verify(securityAuthorizationService, times(1)).isSuperAdmin("superadmin");
+    }
+
+    @Test
+    void getUsersByRole_ShouldThrowException_WhenRoleInvalid() {
+        assertThrows(ResourceNotFoundException.class, () -> userService.getUsersByRole("INVALID_ROLE"));
+    }
+
+    @Test
     void getAllUsers_ShouldReturnList() {
         when(userRepository.findAll()).thenReturn(Collections.singletonList(user));
         when(authMapper.toUserProfileResponse(user)).thenReturn(profileResponse);

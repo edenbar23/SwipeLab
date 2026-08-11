@@ -12,6 +12,7 @@ import {
     View,
     Alert,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import useResponsive from '@/hooks/useResponsive';
 import { Colors } from '../../../constants/theme';
 import { API_ENDPOINTS } from '@/api/apiEndpoints';
@@ -36,6 +37,7 @@ interface User {
     // credibilityScore: composite 0–100 score from backend UserProfileResponse
     credibilityScore: number;
     active: boolean;
+    role?: string;
 }
 
 const SORT_ICONS: Record<SortOrder, string> = {
@@ -54,6 +56,17 @@ const SORT_LABELS: Record<SortOrder, string> = {
     default: 'Default',
     asc: 'Credibility ↑',
     desc: 'Credibility ↓',
+};
+
+const getAvatarConfig = (role?: string) => {
+    switch (role) {
+        case 'SUPER_ADMIN':
+            return { bg: '#8B5CF6', iconName: 'shield-checkmark' as const, isIonicon: true };
+        case 'RESEARCHER':
+            return { bg: '#3B82F6', iconName: 'flask' as const, isIonicon: true };
+        default:
+            return { bg: '#D8BFD8', isIonicon: false };
+    }
 };
 
 
@@ -142,13 +155,16 @@ export default function UsersManagementScreen() {
                         Credibility {SORT_ICONS[sortOrder]}
                     </Text>
                 </TouchableOpacity>
+                <Text style={[webStyles.headerCell, webStyles.roleCol, { color: themeColors.textSecondary }]}>Role</Text>
                 <Text style={[webStyles.headerCell, webStyles.statusCol, { color: themeColors.textSecondary }]}>Status</Text>
-                <Text style={[webStyles.headerCell, webStyles.actionCol, { color: themeColors.textSecondary }]}>Actions</Text>
+                <Text style={[webStyles.headerCell, webStyles.actionCol, { color: themeColors.textSecondary, textAlign: 'center' }]}>Actions</Text>
             </View>
 
             {/* Table Body */}
             <ScrollView style={webStyles.tableBody}>
-                {displayedUsers.map((item: User, index: number) => (
+                {displayedUsers.map((item: User, index: number) => {
+                    const avatarConfig = getAvatarConfig(item.role);
+                    return (
                     <View
                         key={item.username}
                         style={[
@@ -158,15 +174,26 @@ export default function UsersManagementScreen() {
                         ]}
                     >
                         <View style={[webStyles.cell, webStyles.avatarCol]}>
-                            <View style={webStyles.avatarWrapper}>
-                                <Image source={profileImg} style={webStyles.avatar} />
+                            <View style={[webStyles.avatarWrapper, { backgroundColor: avatarConfig.bg }]}>
+                                {avatarConfig.isIonicon ? (
+                                    <Ionicons name={avatarConfig.iconName} size={18} color="white" />
+                                ) : (
+                                    <Image source={profileImg} style={webStyles.avatar} />
+                                )}
                             </View>
                         </View>
                         <View style={[webStyles.cell, webStyles.usernameCol]}>
                             <Text style={[webStyles.usernameText, { color: themeColors.text }]}>{item.username}</Text>
                         </View>
                         <View style={[webStyles.cell, webStyles.scoreCol]}>
-                            <Text style={[webStyles.scoreText, { color: themeColors.text }]}>{item.credibilityScore ?? '—'}</Text>
+                            <Text style={[webStyles.scoreText, { color: themeColors.text }]}>
+                                {item.credibilityScore != null ? Math.round(item.credibilityScore) : '—'}
+                            </Text>
+                        </View>
+                        <View style={[webStyles.cell, webStyles.roleCol]}>
+                            <Text style={[webStyles.roleText, { color: themeColors.textSecondary }]}>
+                                {item.role ?? 'USER'}
+                            </Text>
                         </View>
                         <View style={[webStyles.cell, webStyles.statusCol]}>
                             <View style={[webStyles.statusBadge, { backgroundColor: item.active ? '#e6f7ff' : '#fff1f0' }]}>
@@ -190,28 +217,42 @@ export default function UsersManagementScreen() {
                             )}
                         </View>
                     </View>
-                ))}
+                    );
+                })}
             </ScrollView>
         </View>
     );
 
     // ─── Mobile: card grid layout ─────────────────────────────────────────────
-    const renderMobileCard = ({ item }: { item: User }) => (
+    const renderMobileCard = ({ item }: { item: User }) => {
+        const avatarConfig = getAvatarConfig(item.role);
+        return (
         <View style={[mobileStyles.card, { backgroundColor: themeColors.card, borderColor: themeColors.border }]}>
             {/* Avatar */}
-            <View style={mobileStyles.avatarContainer}>
-                <Image source={profileImg} style={mobileStyles.avatar} />
+            <View style={[mobileStyles.avatarContainer, { backgroundColor: avatarConfig.bg }]}>
+                {avatarConfig.isIonicon ? (
+                    <Ionicons name={avatarConfig.iconName} size={24} color="white" />
+                ) : (
+                    <Image source={profileImg} style={mobileStyles.avatar} />
+                )}
             </View>
 
             {/* Username */}
             <Text style={[mobileStyles.username, { color: themeColors.text }]} numberOfLines={1}>
                 {item.username}
             </Text>
+            
+            {/* Role */}
+            <Text style={[mobileStyles.roleLabel, { color: themeColors.textSecondary }]}>
+                {item.role ?? 'USER'}
+            </Text>
 
             {/* Credibility row */}
             <View style={mobileStyles.scoreRow}>
                 <Text style={[mobileStyles.scoreLabel, { color: themeColors.textSecondary }]}>Credibility </Text>
-                <Text style={[mobileStyles.scoreValue, { color: themeColors.text }]}>{item.credibilityScore ?? '—'}</Text>
+                <Text style={[mobileStyles.scoreValue, { color: themeColors.text }]}>
+                    {item.credibilityScore != null ? Math.round(item.credibilityScore) : '—'}
+                </Text>
             </View>
 
             {/* Status badge */}
@@ -231,7 +272,8 @@ export default function UsersManagementScreen() {
                 </TouchableOpacity>
             )}
         </View>
-    );
+        );
+    };
 
     return (
         <ScreenHeaderLayout
@@ -367,10 +409,15 @@ const mobileStyles = StyleSheet.create({
     username: {
         fontSize: 13,
         fontWeight: '700',
-        marginBottom: 6,
+        marginBottom: 2,
         textAlign: 'center',
         // Prevent overflow
         maxWidth: '100%',
+    },
+    roleLabel: {
+        fontSize: 11,
+        marginBottom: 6,
+        textTransform: 'capitalize',
     },
     scoreRow: {
         flexDirection: 'row',
@@ -455,16 +502,18 @@ const webStyles = StyleSheet.create({
     avatarCol: { width: 60, alignItems: 'center' },
     usernameCol: { flex: 2, paddingLeft: 16 },
     scoreCol: { flex: 1 },
-    statusCol: { flex: 1 },
-    actionCol: { flex: 1.5, alignItems: 'flex-end' },
+    roleCol: { flex: 1 },
+    statusCol: { flex: 1, alignItems: 'flex-start' },
+    actionCol: { flex: 1.5, alignItems: 'center' },
 
     avatarWrapper: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#D8BFD8', justifyContent: 'center', alignItems: 'center' },
     avatar: { width: 20, height: 20, tintColor: 'white' },
 
     usernameText: { fontSize: 15, fontWeight: '600' },
     scoreText: { fontSize: 15 },
+    roleText: { fontSize: 14, textTransform: 'capitalize' },
 
-    statusBadge: { paddingHorizontal: 12, paddingVertical: 4, borderRadius: 12 },
+    statusBadge: { paddingHorizontal: 12, paddingVertical: 4, borderRadius: 12, alignSelf: 'flex-start' },
     statusText: { fontSize: 12, fontWeight: 'bold' },
 
     actionButton: { paddingVertical: 8, paddingHorizontal: 16, borderRadius: 6 },

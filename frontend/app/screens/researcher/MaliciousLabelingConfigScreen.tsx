@@ -102,6 +102,61 @@ const formToPayload = (form: ConfigForm) => ({
   warningCooldownMinutes:      parseInt(form.warningCooldownMinutes, 10),
 });
 
+// ── Sub-components (Extracted to prevent focus loss) ──────────────────────────
+
+const Field = ({
+  label, value, error, unit, keyboardType = 'numeric', colors, onChangeText,
+}: {
+  label: string; value: string; error?: string; unit?: string; keyboardType?: 'numeric' | 'decimal-pad'; colors: any; onChangeText: (val: string) => void;
+}) => (
+  <View style={s.fieldRow}>
+    <View style={s.fieldLabelWrap}>
+      <Text style={[s.fieldLabel, { color: colors.text }]}>{label}</Text>
+      {unit && <Text style={[s.fieldUnit, { color: colors.textSub }]}>{unit}</Text>}
+    </View>
+    <View style={[s.inputWrap, { backgroundColor: colors.inputBg, borderColor: error ? colors.error : colors.inputBorder }]}>
+      <TextInput
+        style={[s.input, { color: colors.text }]}
+        value={value}
+        onChangeText={(text) => {
+          const sanitized = keyboardType === 'decimal-pad' 
+            ? text.replace(/[^0-9.]/g, '') 
+            : text.replace(/[^0-9]/g, '');
+          onChangeText(sanitized);
+        }}
+        keyboardType={keyboardType}
+        placeholderTextColor={colors.textSub}
+      />
+    </View>
+    {error ? <Text style={[s.errorText, { color: colors.error }]}>{error}</Text> : null}
+  </View>
+);
+
+const SwitchField = ({ label, desc, value, colors, isDark, onValueChange }: { label: string; desc: string; value: boolean; colors: any; isDark: boolean; onValueChange: (val: boolean) => void }) => (
+  <View style={[s.switchRow, { backgroundColor: colors.card, borderColor: colors.cardBorder }]}>
+    <View style={s.switchTextWrap}>
+      <Text style={[s.switchLabel, { color: colors.text }]}>{label}</Text>
+      <Text style={[s.switchDesc, { color: colors.textSub }]}>{desc}</Text>
+    </View>
+    <Switch
+      value={value}
+      onValueChange={onValueChange}
+      trackColor={{ false: isDark ? '#374151' : '#d1d5db', true: colors.accent }}
+      thumbColor="#fff"
+    />
+  </View>
+);
+
+const Section = ({ title, icon, colors, children }: { title: string; icon: string; colors: any; children: React.ReactNode }) => (
+  <View style={[s.section, { backgroundColor: colors.card, borderColor: colors.cardBorder }]}>
+    <View style={s.sectionHeader}>
+      <Ionicons name={icon as any} size={18} color={colors.accent} style={{ marginRight: 8 }} />
+      <Text style={[s.sectionTitle, { color: colors.text }]}>{title}</Text>
+    </View>
+    {children}
+  </View>
+);
+
 // ── Main component ────────────────────────────────────────────────────────────
 
 export default function MaliciousLabelingConfigScreen() {
@@ -158,56 +213,6 @@ export default function MaliciousLabelingConfigScreen() {
     success:     '#22c55e',
   };
 
-  // ── Sub-components ─────────────────────────────────────────────────────────
-
-  const Field = ({
-    label, fieldKey, unit, keyboardType = 'numeric',
-  }: {
-    label: string; fieldKey: keyof ConfigForm; unit?: string; keyboardType?: 'numeric' | 'decimal-pad';
-  }) => (
-    <View style={s.fieldRow}>
-      <View style={s.fieldLabelWrap}>
-        <Text style={[s.fieldLabel, { color: c.text }]}>{label}</Text>
-        {unit && <Text style={[s.fieldUnit, { color: c.textSub }]}>{unit}</Text>}
-      </View>
-      <View style={[s.inputWrap, { backgroundColor: c.inputBg, borderColor: errors[fieldKey] ? c.error : c.inputBorder }]}>
-        <TextInput
-          style={[s.input, { color: c.text }]}
-          value={form ? String(form[fieldKey]) : ''}
-          onChangeText={v => { setForm(prev => prev ? { ...prev, [fieldKey]: v } : prev); setSaveError(''); }}
-          keyboardType={keyboardType}
-          placeholderTextColor={c.textSub}
-        />
-      </View>
-      {errors[fieldKey] ? <Text style={[s.errorText, { color: c.error }]}>{errors[fieldKey]}</Text> : null}
-    </View>
-  );
-
-  const SwitchField = ({ label, desc }: { label: string; desc: string }) => (
-    <View style={[s.switchRow, { backgroundColor: c.card, borderColor: c.cardBorder }]}>
-      <View style={s.switchTextWrap}>
-        <Text style={[s.switchLabel, { color: c.text }]}>{label}</Text>
-        <Text style={[s.switchDesc, { color: c.textSub }]}>{desc}</Text>
-      </View>
-      <Switch
-        value={form?.autoBanEnabled ?? true}
-        onValueChange={v => setForm(prev => prev ? { ...prev, autoBanEnabled: v } : prev)}
-        trackColor={{ false: isDark ? '#374151' : '#d1d5db', true: c.accent }}
-        thumbColor="#fff"
-      />
-    </View>
-  );
-
-  const Section = ({ title, icon, children }: { title: string; icon: string; children: React.ReactNode }) => (
-    <View style={[s.section, { backgroundColor: c.card, borderColor: c.cardBorder }]}>
-      <View style={s.sectionHeader}>
-        <Ionicons name={icon as any} size={18} color={c.accent} style={{ marginRight: 8 }} />
-        <Text style={[s.sectionTitle, { color: c.text }]}>{title}</Text>
-      </View>
-      {children}
-    </View>
-  );
-
   // ── Render ─────────────────────────────────────────────────────────────────
 
   if (isLoading || !form) {
@@ -258,9 +263,24 @@ export default function MaliciousLabelingConfigScreen() {
         )}
 
         {/* ── Credibility-based detection ─────────────────────── */}
-        <Section title="Credibility Detection" icon="shield-checkmark-outline">
-          <Field label="Malicious Threshold" fieldKey="maliciousThreshold" unit="score 0–100" keyboardType="decimal-pad" />
-          <Field label="Min Samples" fieldKey="maliciousMinSamples" unit="classifications" />
+        <Section title="Credibility Detection" icon="shield-checkmark-outline" colors={c}>
+          <Field 
+            label="Malicious Threshold" 
+            value={form.maliciousThreshold} 
+            error={errors.maliciousThreshold}
+            colors={c}
+            onChangeText={v => { setForm(prev => prev ? { ...prev, maliciousThreshold: v } : prev); setSaveError(''); }}
+            unit="score 0–100" 
+            keyboardType="decimal-pad" 
+          />
+          <Field 
+            label="Min Samples" 
+            value={form.maliciousMinSamples}
+            error={errors.maliciousMinSamples}
+            colors={c}
+            onChangeText={v => { setForm(prev => prev ? { ...prev, maliciousMinSamples: v } : prev); setSaveError(''); }}
+            unit="classifications" 
+          />
         </Section>
 
         {/* ── Auto-ban toggle ──────────────────────────────────── */}
@@ -271,22 +291,26 @@ export default function MaliciousLabelingConfigScreen() {
               ? 'Users are automatically banned when strikes reach the ban threshold.'
               : 'Auto-ban is OFF — strikes accumulate but no ban is issued.'
           }
+          value={form.autoBanEnabled}
+          colors={c}
+          isDark={isDark}
+          onValueChange={v => setForm(prev => prev ? { ...prev, autoBanEnabled: v } : prev)}
         />
 
         {/* ── Fraud detection (speed-based) ───────────────────── */}
-        <Section title="Fraud Detection — Speed Thresholds" icon="timer-outline">
-          <Field label="Min Response Time (Regular)" fieldKey="minResponseTimeMs" unit="ms" />
-          <Field label="Min Response Time (Researcher)" fieldKey="researcherMinResponseTimeMs" unit="ms" />
-          <Field label="Suspicious Count / Strike" fieldKey="suspiciousCountForStrike" unit="events" />
-          <Field label="Sliding Window" fieldKey="slidingWindowMinutes" unit="min" />
+        <Section title="Fraud Detection — Speed Thresholds" icon="timer-outline" colors={c}>
+          <Field label="Min Response Time (Regular)" value={form.minResponseTimeMs} error={errors.minResponseTimeMs} colors={c} onChangeText={v => { setForm(prev => prev ? { ...prev, minResponseTimeMs: v } : prev); setSaveError(''); }} unit="ms" />
+          <Field label="Min Response Time (Researcher)" value={form.researcherMinResponseTimeMs} error={errors.researcherMinResponseTimeMs} colors={c} onChangeText={v => { setForm(prev => prev ? { ...prev, researcherMinResponseTimeMs: v } : prev); setSaveError(''); }} unit="ms" />
+          <Field label="Suspicious Count / Strike" value={form.suspiciousCountForStrike} error={errors.suspiciousCountForStrike} colors={c} onChangeText={v => { setForm(prev => prev ? { ...prev, suspiciousCountForStrike: v } : prev); setSaveError(''); }} unit="events" />
+          <Field label="Sliding Window" value={form.slidingWindowMinutes} error={errors.slidingWindowMinutes} colors={c} onChangeText={v => { setForm(prev => prev ? { ...prev, slidingWindowMinutes: v } : prev); setSaveError(''); }} unit="min" />
         </Section>
 
         {/* ── Escalation ladder ────────────────────────────────── */}
-        <Section title="Escalation Ladder" icon="trending-up-outline">
-          <Field label="Strikes for Warning 1" fieldKey="strikesForWarning1" unit="strikes" />
-          <Field label="Strikes for Warning 2" fieldKey="strikesForWarning2" unit="strikes" />
-          <Field label="Strikes for Ban" fieldKey="strikesForBan" unit="strikes" />
-          <Field label="Warning Cooldown" fieldKey="warningCooldownMinutes" unit="min" />
+        <Section title="Escalation Ladder" icon="trending-up-outline" colors={c}>
+          <Field label="Strikes for Warning 1" value={form.strikesForWarning1} error={errors.strikesForWarning1} colors={c} onChangeText={v => { setForm(prev => prev ? { ...prev, strikesForWarning1: v } : prev); setSaveError(''); }} unit="strikes" />
+          <Field label="Strikes for Warning 2" value={form.strikesForWarning2} error={errors.strikesForWarning2} colors={c} onChangeText={v => { setForm(prev => prev ? { ...prev, strikesForWarning2: v } : prev); setSaveError(''); }} unit="strikes" />
+          <Field label="Strikes for Ban" value={form.strikesForBan} error={errors.strikesForBan} colors={c} onChangeText={v => { setForm(prev => prev ? { ...prev, strikesForBan: v } : prev); setSaveError(''); }} unit="strikes" />
+          <Field label="Warning Cooldown" value={form.warningCooldownMinutes} error={errors.warningCooldownMinutes} colors={c} onChangeText={v => { setForm(prev => prev ? { ...prev, warningCooldownMinutes: v } : prev); setSaveError(''); }} unit="min" />
         </Section>
 
         {/* ── Save button ──────────────────────────────────────── */}

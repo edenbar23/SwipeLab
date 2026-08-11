@@ -57,6 +57,7 @@ interface UserInfoData {
     score: number;
     badge: string | null;
     currentStreak: number;
+    longestStreak: number;
 }
 
 interface StatsData {
@@ -147,9 +148,9 @@ export default function StatsScreen() {
 
                 {/* User Profile Summary */}
                 <View style={styles.grid}>
-                    <SummaryCard title="Global Rank" value={`#${data.summary?.summary?.rank?.allTime ?? '-'}`} subtext="Top 1%" icon="🌍" />
+                    <SummaryCard title="Global Rank" value={`#${data.summary?.summary?.rank?.allTime ?? '-'}`} subtext={`Top ${Math.max(0, 100 - (data.vsUsers?.percentile ?? 0)).toFixed(0)}%`} icon="🌍" />
                     <SummaryCard title="Score" value={data.userInfo?.score?.toLocaleString() ?? '0'} icon="🌟" />
-                    <SummaryCard title="Tasks Done" value={data.summary?.summary?.totalClassifications ?? 0} icon="✅" />
+                    <SummaryCard title="Images Labeled" value={data.summary?.summary?.totalClassifications ?? 0} icon="✅" />
                     <SummaryCard title="Accuracy" value={`${((data.summary?.summary?.accuracy ?? 0) * 100).toFixed(1)}%`} subtext="Overall" icon="🎯" />
                 </View>
 
@@ -158,7 +159,7 @@ export default function StatsScreen() {
                     <Text style={[styles.sectionTitle, { color: themeColors.text }]}>🔥 Streak</Text>
                     <View style={[styles.streakContainer, { backgroundColor: themeColors.card }]}>
                         <Text style={[styles.streakText, { color: themeColors.text }]}>Current: <Text style={styles.streakBold}>{data.userInfo?.currentStreak ?? 0} days</Text></Text>
-                        <Text style={[styles.streakText, { color: themeColors.text }]}>Longest: <Text style={styles.streakBold}>{data.summary?.summary?.longestStreak ?? 0} days</Text></Text>
+                        <Text style={[styles.streakText, { color: themeColors.text }]}>Longest: <Text style={styles.streakBold}>{data.userInfo?.longestStreak ?? 0} days</Text></Text>
                     </View>
                 </View>
 

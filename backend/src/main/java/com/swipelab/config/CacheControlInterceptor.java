@@ -95,20 +95,17 @@ public class CacheControlInterceptor implements HandlerInterceptor {
             return true;
         }
 
-        // ── Task details (stable once created) ────────────────────────────────
-        if (path.matches(".*/tasks/my-tasks/[^/]+")
-                || path.matches(".*/tasks/dashboard/[^/]+")) {
-            response.setHeader(CACHE_CONTROL, PRIVATE_120S);
-            return true;
-        }
-
-        // ── Personalised task lists (change on every assignment) ──────────────
-        // These are per-user and mutate the moment the user self-assigns a task.
-        // Any HTTP cache here would race with the frontend refetch and serve
-        // stale data, so they must always go to the network.
+        // ── Task lists & details (always revalidate with backend) ────────────
+        // These are volatile and mutate the moment the user self-assigns a task
+        // or a researcher pauses/archives a task. We use NO_CACHE_PRIVATE so
+        // the client caches them but ALWAYS revalidates via ETags, preventing
+        // stale UI bugs while saving bandwidth when nothing has changed.
         if (path.equals("/api/v1/tasks/my-tasks")
-                || path.equals("/api/v1/tasks/available-tasks")) {
-            response.setHeader(CACHE_CONTROL, NO_STORE);
+                || path.equals("/api/v1/tasks/available-tasks")
+                || path.equals("/api/v1/tasks/dashboard")
+                || path.matches(".*/tasks/my-tasks/[^/]+")
+                || path.matches(".*/tasks/dashboard/[^/]+")) {
+            response.setHeader(CACHE_CONTROL, NO_CACHE_PRIVATE);
             return true;
         }
 

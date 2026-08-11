@@ -9,6 +9,7 @@ public class GamificationUserInfoResponse {
     private long score;
     private String badge;
     private int currentStreak;
+    private int longestStreak;
 }
 
 

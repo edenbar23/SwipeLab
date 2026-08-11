@@ -134,7 +134,7 @@ public class GlobalExceptionHandler {
         }
 
         @ExceptionHandler({ EmailVerificationException.class, PasswordResetException.class,
-                        IllegalArgumentException.class })
+                        IllegalArgumentException.class, IllegalStateException.class })
         public ResponseEntity<ErrorResponse> handleBadRequestExceptions(
                         RuntimeException ex, HttpServletRequest request) {
 

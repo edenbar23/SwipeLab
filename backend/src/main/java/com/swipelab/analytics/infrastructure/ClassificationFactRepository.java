@@ -14,20 +14,20 @@ public interface ClassificationFactRepository extends JpaRepository<Classificati
 
     // ─── Existing user-scoped queries ────────────────────────────────────────
 
-    @Query("SELECT AVG(CASE WHEN c.isCorrect = true THEN 1.0 ELSE 0.0 END) FROM ClassificationFact c WHERE c.userId = :userId")
+    @Query("SELECT AVG(CASE WHEN c.isCorrect = true THEN 1.0 ELSE 0.0 END) FROM ClassificationFact c WHERE c.userId = :userId AND c.isCorrect IS NOT NULL")
     Double getUserAccuracy(@Param("userId") String userId);
 
-    @Query("SELECT AVG(CASE WHEN c.isCorrect = true THEN 1.0 ELSE 0.0 END) FROM ClassificationFact c WHERE c.isExpert = true")
+    @Query("SELECT AVG(CASE WHEN c.isCorrect = true THEN 1.0 ELSE 0.0 END) FROM ClassificationFact c WHERE c.isExpert = true AND c.isCorrect IS NOT NULL")
     Double getGlobalExpertAccuracy();
 
-    @Query("SELECT AVG(CASE WHEN c.isCorrect = true THEN 1.0 ELSE 0.0 END) FROM ClassificationFact c")
+    @Query("SELECT AVG(CASE WHEN c.isCorrect = true THEN 1.0 ELSE 0.0 END) FROM ClassificationFact c WHERE c.isCorrect IS NOT NULL")
     Double getGlobalAverageAccuracy();
 
     @Query("SELECT COUNT(DISTINCT c.imageId) FROM ClassificationFact c WHERE c.taskId = :taskId")
-    Long countCompletedImages(@Param("taskId") Long taskId);
+    Long countDistinctImagesByTaskId(@Param("taskId") Long taskId);
 
     @Query("SELECT c.species, COUNT(c), AVG(CASE WHEN c.isCorrect = true THEN 1.0 ELSE 0.0 END) " +
-            "FROM ClassificationFact c WHERE c.userId = :userId GROUP BY c.species")
+            "FROM ClassificationFact c WHERE c.userId = :userId AND c.isCorrect IS NOT NULL GROUP BY c.species")
     List<Object[]> getSpeciesBreakdown(@Param("userId") String userId);
 
     List<ClassificationFact> findByTaskId(Long taskId);
@@ -76,6 +76,7 @@ public interface ClassificationFactRepository extends JpaRepository<Classificati
      */
     @Query("SELECT c.userId, COUNT(c), " +
             "SUM(CASE WHEN c.isCorrect = true THEN 1 ELSE 0 END), " +
+            "SUM(CASE WHEN c.isCorrect IS NOT NULL THEN 1 ELSE 0 END), " +
             "AVG(c.credibilityAtTime) " +
             "FROM ClassificationFact c " +
             "WHERE (:taskId IS NULL OR c.taskId = :taskId) " +
@@ -87,6 +88,7 @@ public interface ClassificationFactRepository extends JpaRepository<Classificati
      */
     @Query("SELECT c.userId, COUNT(c) as total, " +
             "SUM(CASE WHEN c.isCorrect = true THEN 1 ELSE 0 END), " +
+            "SUM(CASE WHEN c.isCorrect IS NOT NULL THEN 1 ELSE 0 END), " +
             "AVG(c.credibilityAtTime) " +
             "FROM ClassificationFact c " +
             "GROUP BY c.userId ORDER BY total DESC")

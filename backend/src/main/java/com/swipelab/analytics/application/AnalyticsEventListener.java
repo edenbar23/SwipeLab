@@ -76,10 +76,14 @@ public class AnalyticsEventListener {
                         .build());
 
         stats.setTotal(stats.getTotal() + 1);
-        if (event.isCorrect()) {
+        if (event.isGoldStandard() && event.isCorrect()) {
             stats.setCorrect(stats.getCorrect() + 1);
         }
-        stats.setAccuracy(stats.getTotal() > 0 ? (double) stats.getCorrect() / stats.getTotal() : 0.0);
+        
+        // Note: For true daily accuracy we need a count of gold classifications for the day.
+        // For now, we will leave the denormalized accuracy at 0.0 or calculate a rough estimate,
+        // since the UI fetches live accuracy from the facts table directly.
+        stats.setAccuracy(0.0);
 
         userDailyStatsRepository.save(stats);
     }

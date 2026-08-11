@@ -18,6 +18,8 @@ import { useThemeStore } from '@/stores/themeStore';
 import MultiSelect, { MultiSelectOption } from '@/components/ui/MultiSelect';
 import { useAdminTasks, useExportClassificationsCsv } from '@/api/queries';
 import { downloadCsvBlob } from '@/services/csvDownload';
+import { useDownloadStore } from '@/stores/downloadStore';
+import Toast from 'react-native-toast-message';
 
 interface ExportModalProps {
   visible: boolean;
@@ -60,22 +62,42 @@ export default function ExportModal({ visible, onClose }: ExportModalProps) {
     }
   };
 
+  const { addTasks, removeTasks } = useDownloadStore();
+
   const handleExport = async () => {
     if (selectedTaskIds.length === 0) return;
 
+    // Build the list of tasks to export based on selected IDs
+    const tasksToExport = selectedTaskIds.map((id) => {
+      const numericId = Number(id);
+      const taskOpt = taskOptions.find(t => t.id === numericId);
+      return { taskId: numericId, taskName: taskOpt?.label ?? `Task #${numericId}` };
+    });
+
+    const numericIds = tasksToExport.map(t => t.taskId);
+
+    // Register tasks in global background download store
+    addTasks(tasksToExport);
+
+    // Close the modal immediately to allow background operation
+    setSelectedTaskIds([]);
+    onClose();
+
     try {
-      const numericIds = selectedTaskIds.map((id) => Number(id));
       const blob = await exportMutation.mutateAsync(numericIds);
 
       const today = new Date().toISOString().slice(0, 10);
       const filename = `swipelab_classifications_export_${today}.csv`;
       await downloadCsvBlob(blob, filename);
-
-      Alert.alert('Success', `Exported ${selectedTaskIds.length} task(s) to CSV.`);
-      setSelectedTaskIds([]);
-      onClose();
     } catch (err: any) {
-      Alert.alert('Export Failed', err?.message ?? 'Something went wrong. Please try again.');
+      Toast.show({
+        type: 'error',
+        text1: 'Export Failed',
+        text2: err?.message ?? 'Something went wrong. Please try again.',
+      });
+    } finally {
+      // Remove tasks from active background list
+      removeTasks(numericIds);
     }
   };
 

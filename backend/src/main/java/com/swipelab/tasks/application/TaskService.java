@@ -25,6 +25,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.access.AccessDeniedException;
 import com.swipelab.auth.application.SecurityAuthorizationService;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
+import com.swipelab.config.CacheConfig;
 
 import java.util.Collections;
 import java.util.List;
@@ -72,7 +76,7 @@ public class TaskService {
                 pageable);
 
         List<TaskResponse> taskResponses = taskPage.getContent().stream()
-                .map(task -> taskMapper.toResponse(task, true)) // assignedToUser = true
+                .map(task -> taskMapper.toResponse(task, true, buildProgress(task.getId()))) // assignedToUser = true
                 .collect(Collectors.toList());
 
         return TaskPageResponse.builder()
@@ -84,6 +88,7 @@ public class TaskService {
                 .build();
     }
 
+    @Cacheable(value = CacheConfig.CACHE_TASK_DETAILS, key = "#taskId + '-' + #username")
     @Transactional(readOnly = true)
     public TaskResponse getTaskForUser(Long taskId, String username) {
         Task task = getTask(taskId);
@@ -119,7 +124,7 @@ public class TaskService {
             throw new ResourceNotFoundException("Task not found or access denied");
         }
 
-        return taskMapper.toResponse(task, true);
+        return taskMapper.toResponse(task, true, buildProgress(task.getId()));
     }
 
     @Transactional(readOnly = true)
@@ -140,7 +145,7 @@ public class TaskService {
                 pageable);
 
         List<TaskResponse> taskResponses = taskPage.getContent().stream()
-                .map(task -> taskMapper.toResponse(task, false))
+                .map(task -> taskMapper.toResponse(task, false, buildProgress(task.getId())))
                 .collect(Collectors.toList());
 
         return TaskPageResponse.builder()
@@ -152,6 +157,10 @@ public class TaskService {
                 .build();
     }
 
+    @Caching(evict = {
+        @CacheEvict(value = CacheConfig.CACHE_ACTIVE_TASKS, allEntries = true),
+        @CacheEvict(value = CacheConfig.CACHE_TASK_DETAILS, allEntries = true)
+    })
     @Transactional
     public TaskResponse assignTaskToUser(Long taskId, String username) {
         Task task = getTask(taskId);
@@ -170,7 +179,7 @@ public class TaskService {
         }
 
         task.getAssignedUsernames().add(username);
-        return taskMapper.toResponse(task, true);
+        return taskMapper.toResponse(task, true, buildProgress(task.getId()));
     }
 
     // =========================
@@ -188,6 +197,7 @@ public class TaskService {
         }
     }
 
+    @Cacheable(value = CacheConfig.CACHE_ACTIVE_TASKS, key = "#username")
     @Transactional(readOnly = true)
     public List<TaskResponse> getResearcherDashboard(String username) {
         List<Task> tasks;
@@ -204,6 +214,7 @@ public class TaskService {
                 .collect(Collectors.toList());
     }
 
+    @Cacheable(value = CacheConfig.CACHE_TASK_DETAILS, key = "#taskId + '-' + #username")
     @Transactional(readOnly = true)
     public TaskResponse getTaskDetailsResearcher(Long taskId, String username) {
         Task task = getTask(taskId);
@@ -211,6 +222,10 @@ public class TaskService {
         return taskMapper.toResponse(task, false, buildProgress(taskId));
     }
 
+    @Caching(evict = {
+        @CacheEvict(value = CacheConfig.CACHE_ACTIVE_TASKS, allEntries = true),
+        @CacheEvict(value = CacheConfig.CACHE_TASK_DETAILS, allEntries = true)
+    })
     @Transactional
     public TaskResponse createTask(CreateTaskRequest request, String username) {
         // Validate uniqueness
@@ -261,6 +276,10 @@ public class TaskService {
         return mapToResponse(task);
     }
 
+    @Caching(evict = {
+        @CacheEvict(value = CacheConfig.CACHE_ACTIVE_TASKS, allEntries = true),
+        @CacheEvict(value = CacheConfig.CACHE_TASK_DETAILS, allEntries = true)
+    })
     @Transactional
     public TaskResponse archiveTask(Long taskId, String username) {
         Task task = getTask(taskId);
@@ -269,6 +288,10 @@ public class TaskService {
         return mapToResponse(task);
     }
 
+    @Caching(evict = {
+        @CacheEvict(value = CacheConfig.CACHE_ACTIVE_TASKS, allEntries = true),
+        @CacheEvict(value = CacheConfig.CACHE_TASK_DETAILS, allEntries = true)
+    })
     @Transactional
     public TaskResponse activateTask(Long taskId, String username) {
         Task task = getTask(taskId);
@@ -277,6 +300,10 @@ public class TaskService {
         return mapToResponse(task);
     }
 
+    @Caching(evict = {
+        @CacheEvict(value = CacheConfig.CACHE_ACTIVE_TASKS, allEntries = true),
+        @CacheEvict(value = CacheConfig.CACHE_TASK_DETAILS, allEntries = true)
+    })
     @Transactional
     public TaskResponse pauseTask(Long taskId, String username) {
         Task task = getTask(taskId);
@@ -285,6 +312,10 @@ public class TaskService {
         return mapToResponse(task);
     }
 
+    @Caching(evict = {
+        @CacheEvict(value = CacheConfig.CACHE_ACTIVE_TASKS, allEntries = true),
+        @CacheEvict(value = CacheConfig.CACHE_TASK_DETAILS, allEntries = true)
+    })
     @Transactional
     public TaskResponse updateTask(Long taskId, UpdateTaskRequest request, String username) {
         Task task = getTask(taskId);

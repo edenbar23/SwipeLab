@@ -8,6 +8,7 @@ import { useAdminTasks, useUpdateTaskStatus } from '@/api/queries';
 import TaskCard from '@/components/researcher/TaskCard';
 import ScreenHeaderLayout from '@/components/layout/ScreenHeaderLayout';
 import { useThemeStore } from '@/stores/themeStore';
+import ConfirmationModal from '@/components/ui/ConfirmationModal';
 
 type StatusFilter = 'ALL' | 'ACTIVE' | 'PAUSED' | 'ARCHIVED' | 'PROCESSING';
 
@@ -35,6 +36,7 @@ export default function TasksManagementScreen({ navigation }: any) {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<StatusFilter>('ALL');
+  const [taskToArchive, setTaskToArchive] = useState<number | null>(null);
 
   const filtered = tasks.filter((t: any) => {
     const matchesSearch = t.name.toLowerCase().includes(searchQuery.toLowerCase());
@@ -120,13 +122,27 @@ export default function TasksManagementScreen({ navigation }: any) {
                   updateStatus({ taskId: item.taskId, action: item.status === 'ACTIVE' ? 'pause' : 'activate' });
                 }}
                 onArchive={() => {
-                  updateStatus({ taskId: item.taskId, action: 'archive' });
+                  setTaskToArchive(item.taskId);
                 }}
               />
             )}
           />
         )}
       </View>
+
+      <ConfirmationModal
+        visible={taskToArchive !== null}
+        title="Archive Task"
+        message="Are you sure you want to archive this task? Once archived, it cannot be returned to an active state."
+        confirmText="Archive"
+        onConfirm={() => {
+          if (taskToArchive !== null) {
+            updateStatus({ taskId: taskToArchive, action: 'archive' });
+          }
+          setTaskToArchive(null);
+        }}
+        onCancel={() => setTaskToArchive(null)}
+      />
     </ScreenHeaderLayout>
   );
 }

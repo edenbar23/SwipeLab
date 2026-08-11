@@ -7,6 +7,7 @@ import com.swipelab.analytics.dto.UserProgressResponse;
 import com.swipelab.analytics.infrastructure.*;
 import com.swipelab.classification.domain.core.Classification.UserResponse;
 import com.swipelab.classification.infrastructure.ClassificationRepository;
+import com.swipelab.classification.infrastructure.ConsensusResultRepository;
 import com.swipelab.classification.infrastructure.ImageRepository;
 import com.swipelab.analytics.dto.DashboardStatsResponse;
 import com.swipelab.analytics.dto.UserPerformanceResponse;
@@ -42,6 +43,7 @@ class AnalyticsServiceTest {
     @Mock private UserRepository userRepository;
     @Mock private TaskRepository taskRepository;
     @Mock private ImageRepository imageRepository;
+    @Mock private ConsensusResultRepository consensusResultRepository;
 
     @InjectMocks
     private AnalyticsService analyticsService;
@@ -54,6 +56,7 @@ class AnalyticsServiceTest {
         Object[] row = {10L, 8L};
         when(userDailyStatsRepository.getProgressSince(eq("alice"), any(LocalDate.class)))
                 .thenReturn(row);
+        when(classificationFactRepository.getUserAccuracy("alice")).thenReturn(0.8);
 
         UserProgressResponse result = analyticsService.getUserProgress("alice");
 
@@ -66,6 +69,7 @@ class AnalyticsServiceTest {
         // Repository returns null result when the user has no data
         when(userDailyStatsRepository.getProgressSince(eq("ghost"), any(LocalDate.class)))
                 .thenReturn(null);
+        when(classificationFactRepository.getUserAccuracy("ghost")).thenReturn(null);
 
         UserProgressResponse result = analyticsService.getUserProgress("ghost");
 
@@ -160,8 +164,8 @@ class AnalyticsServiceTest {
 
     @Test
     void getUserPerformanceMetrics_happyFlow_mapsAggregationCorrectly() {
-        // (userId, total, correct, avgCredibility)
-        Object[] row = {"alice", 50L, 40L, 0.85};
+        // (userId, total, correct, goldTotal, avgCredibility)
+        Object[] row = {"alice", 100L, 40L, 50L, 0.85};
         List<Object[]> perfRows = new java.util.ArrayList<>();
         perfRows.add(row);
         when(classificationFactRepository.getUserPerformanceAggregation(eq(1L)))
@@ -172,7 +176,8 @@ class AnalyticsServiceTest {
         assertEquals(1, result.size());
         UserPerformanceResponse resp = result.get(0);
         assertEquals("alice", resp.getUsername());
-        assertEquals(50, resp.getTotalClassifications());
+        assertEquals(100, resp.getTotalClassifications());
+        assertEquals(50, resp.getGoldImageClassifications());
         assertEquals(0.85, resp.getCredibilityScore(), 0.001);
         assertEquals(0.8, resp.getGoldAccuracy(), 0.001); // 40/50
     }
@@ -192,7 +197,7 @@ class AnalyticsServiceTest {
 
     @Test
     void getTopPerformers_happyFlow_returnsLimitedList() {
-        Object[] row = {"bob", 100L, 90L, 0.92};
+        Object[] row = {"bob", 200L, 90L, 100L, 0.92};
         List<Object[]> topRows = new java.util.ArrayList<>();
         topRows.add(row);
         when(classificationFactRepository.getTopPerformersAggregation(any(Pageable.class)))
@@ -233,8 +238,9 @@ class AnalyticsServiceTest {
 
     @Test
     void getTaskAnalytics_happyFlow_computesProgressFromImageCounts() {
-        // 200 total crops in the task, 50 of them classified → 25 % complete
-        when(classificationFactRepository.countCompletedImages(1L)).thenReturn(50L);
+        // 200 total crops in the task, 50 of them classified, 5 completed → 2.5 % complete
+        when(classificationFactRepository.countDistinctImagesByTaskId(1L)).thenReturn(50L);
+        when(consensusResultRepository.countCompletedImagesByTaskId(1L)).thenReturn(5L);
         when(classificationFactRepository.findByTaskId(1L)).thenReturn(Collections.emptyList());
         when(taskSpeciesStatsRepository.findByTaskId(1L)).thenReturn(Collections.emptyList());
         when(imageRepository.countByTaskId(1L)).thenReturn(200L);
@@ -244,14 +250,15 @@ class AnalyticsServiceTest {
         TaskAnalyticsResponse.Progress progress = response.getProgress();
         assertEquals(200, progress.getTotalImages());
         assertEquals(50, progress.getImagesClassified());
-        assertEquals(50, progress.getCompletedImages());
-        assertEquals(25.0, progress.getPercentComplete(), 0.001);
+        assertEquals(5, progress.getCompletedImages());
+        assertEquals(2.5, progress.getPercentComplete(), 0.001);
     }
 
     @Test
     void getTaskAnalytics_edgeCase_noImages_returnsZeroPercent() {
         // No crops imported yet → avoid division by zero, report 0 %
-        when(classificationFactRepository.countCompletedImages(2L)).thenReturn(0L);
+        when(classificationFactRepository.countDistinctImagesByTaskId(2L)).thenReturn(0L);
+        when(consensusResultRepository.countCompletedImagesByTaskId(2L)).thenReturn(0L);
         when(classificationFactRepository.findByTaskId(2L)).thenReturn(Collections.emptyList());
         when(taskSpeciesStatsRepository.findByTaskId(2L)).thenReturn(Collections.emptyList());
         when(imageRepository.countByTaskId(2L)).thenReturn(0L);

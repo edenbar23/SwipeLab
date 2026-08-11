@@ -34,6 +34,7 @@ Architecture: Modular Hexagonal/DDD.
 * Security: Remediated Medium severity security findings (secured Swagger UI in production, sanitized global exception handler, downgraded JWT logging, and unified login error messages).
 * System: Configured Docker containers (backend, frontend, db) to automatically restart after server reboot using 'restart: unless-stopped' policy in docker-compose.yml.
 * Backend: Implemented dynamic Image Consensus Threshold feature using an asynchronous `ThresholdEventListener` that intercepts `ClassificationSubmittedEvent`. It evaluates the weighted credibility of classifications and automatically excludes images from distribution (via `ConsensusResult` tracking) once the dynamic researcher-defined threshold is met.
+* Backend/Frontend: Optimized the CSV Export System (Issue #257). Implemented a non-blocking, background-execution export flow in the frontend using a global Zustand store and an animated `GlobalDownloadToast`. Cleaned up the backend CSV generation (`ExportService`) to significantly reduce file size and improve traceability by removing the raw base64 image strings and replacing them with explicit local and external IDs (`swipelab_image_id`, `stardbi_experiment_id`, `stardbi_image_id`, `stardbi_crop_id`).
 ## Current Focus (Active GitHub Issues)
 * Issue #201: Refactor Backend roles to include Researchers and Super Admin.
 * Issue #226: [Frontend] fix recipients list not deleting users.

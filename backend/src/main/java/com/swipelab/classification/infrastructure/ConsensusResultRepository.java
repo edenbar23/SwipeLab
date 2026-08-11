@@ -16,4 +16,7 @@ public interface ConsensusResultRepository extends JpaRepository<ConsensusResult
     List<String> findCompletedSpeciesByImageId(@Param("imageId") Long imageId);
 
     Optional<ConsensusResult> findByImageIdAndSpecies(Long imageId, String species);
+
+    @Query("SELECT COUNT(DISTINCT c.imageId) FROM ConsensusResult c WHERE c.taskId = :taskId")
+    Long countCompletedImagesByTaskId(@Param("taskId") Long taskId);
 }

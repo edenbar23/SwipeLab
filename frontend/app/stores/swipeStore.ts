@@ -7,6 +7,7 @@ interface SwipeStore {
   activeTaskId: string | number | null;
 
   setBatch: (items: any[]) => void;
+  appendBatch: (items: any[]) => void;
   nextCard: () => void;
   clearBatch: () => void;
   getCurrentImage: () => any | null;
@@ -20,6 +21,10 @@ export const useSwipeStore = create<SwipeStore>((set, get) => ({
 
   setBatch: (items: any[]) => {
     set({ dataBatch: items, currentIndex: 0 });
+  },
+
+  appendBatch: (items: any[]) => {
+    set((state) => ({ dataBatch: [...state.dataBatch, ...items] }));
   },
 
   nextCard: () => {

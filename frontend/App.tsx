@@ -10,6 +10,7 @@ import Toast from 'react-native-toast-message';
 import { useAppStateStore } from "@/stores/appStateStore";
 import { MaintenanceScreen } from "@/screens/shared/MaintenanceScreen";
 import { useHealthCheck } from "@/hooks/useHealthCheck";
+import GlobalDownloadToast from "@/components/ui/GlobalDownloadToast";
 
 export default function App() {
 
@@ -39,6 +40,7 @@ export default function App() {
           </GestureHandlerRootView>
         </View>
       </QueryClientProvider>
+      <GlobalDownloadToast />
       <Toast />
     </GlobalErrorBoundary>
   );

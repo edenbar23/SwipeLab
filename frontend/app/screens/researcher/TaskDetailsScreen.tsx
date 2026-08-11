@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import React from "react";
+import React, { useState } from "react";
 import {
   ActivityIndicator,
   Image,
@@ -16,6 +16,7 @@ import { researcherStackParamList } from "@/navigation/researcherStack.types";
 import { useThemeStore } from '@/stores/themeStore';
 import AuthenticatedImage from '@/components/ui/AuthenticatedImage';
 import { useTaskDetails, useExperiments, useUpdateTaskStatus } from "@/api/queries";
+import ConfirmationModal from '@/components/ui/ConfirmationModal';
 
 type Props = NativeStackScreenProps<researcherStackParamList, "TaskDetails">;
 
@@ -52,6 +53,7 @@ export default function TaskDetailsScreen({ route, navigation }: Props) {
   const { data: task, isLoading: loading, error } = useTaskDetails(taskId);
   const { data: experimentsList } = useExperiments();
   const { mutate: updateStatus } = useUpdateTaskStatus();
+  const [showArchiveModal, setShowArchiveModal] = useState(false);
 
   // ── Loading state ──────────────────────────────────────────────────────────
   if (loading) {
@@ -85,11 +87,12 @@ export default function TaskDetailsScreen({ route, navigation }: Props) {
   const borderCol = isDark ? themeColors.border : '#BFDBFE';
 
   return (
-    <ScrollView
-      style={{ backgroundColor: themeColors.background }}
-      contentContainerStyle={[styles.container, { backgroundColor: themeColors.background }]}
-      showsVerticalScrollIndicator={false}
-    >
+    <>
+      <ScrollView
+        style={{ backgroundColor: themeColors.background }}
+        contentContainerStyle={[styles.container, { backgroundColor: themeColors.background }]}
+        showsVerticalScrollIndicator={false}
+      >
       {/* ── Back button ─────────────────────────────────────────────────────── */}
       <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
         <Ionicons name="chevron-back" size={18} color="#3B82F6" />
@@ -163,43 +166,45 @@ export default function TaskDetailsScreen({ route, navigation }: Props) {
           </View>
 
           {/* ── Action buttons ───────────────────────────────────────────────── */}
-          <View style={styles.actionsRow}>
-            <TouchableOpacity
-              style={[styles.actionBtn, { backgroundColor: isDark ? '#1e3a5f' : '#DBEAFE', borderColor: '#3B82F6' }]}
-              onPress={() => navigation.navigate('EditTask', { taskId })}
-            >
-              <Ionicons name="create-outline" size={16} color="#3B82F6" />
-              <Text style={[styles.actionBtnText, { color: '#3B82F6' }]}>Edit</Text>
-            </TouchableOpacity>
+          {task.status !== 'ARCHIVED' && (
+            <View style={styles.actionsRow}>
+              <TouchableOpacity
+                style={[styles.actionBtn, { backgroundColor: isDark ? '#1e3a5f' : '#DBEAFE', borderColor: '#3B82F6' }]}
+                onPress={() => navigation.navigate('EditTask', { taskId })}
+              >
+                <Ionicons name="create-outline" size={16} color="#3B82F6" />
+                <Text style={[styles.actionBtnText, { color: '#3B82F6' }]}>Edit</Text>
+              </TouchableOpacity>
 
-            <TouchableOpacity
-              style={[
-                styles.actionBtn,
-                {
-                  backgroundColor: isActive ? (isDark ? '#3d2e0a' : '#FEF3C7') : (isDark ? '#0d2e1c' : '#D1FAE5'),
-                  borderColor: isActive ? '#F59E0B' : '#10B981',
-                },
-              ]}
-              onPress={() => updateStatus({ taskId, action: isActive ? 'pause' : 'activate' })}
-            >
-              <Ionicons
-                name={isActive ? 'pause-circle-outline' : 'play-circle-outline'}
-                size={16}
-                color={isActive ? '#F59E0B' : '#10B981'}
-              />
-              <Text style={[styles.actionBtnText, { color: isActive ? '#F59E0B' : '#10B981' }]}>
-                {isActive ? 'Pause' : 'Resume'}
-              </Text>
-            </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.actionBtn,
+                  {
+                    backgroundColor: isActive ? (isDark ? '#3d2e0a' : '#FEF3C7') : (isDark ? '#0d2e1c' : '#D1FAE5'),
+                    borderColor: isActive ? '#F59E0B' : '#10B981',
+                  },
+                ]}
+                onPress={() => updateStatus({ taskId, action: isActive ? 'pause' : 'activate' })}
+              >
+                <Ionicons
+                  name={isActive ? 'pause-circle-outline' : 'play-circle-outline'}
+                  size={16}
+                  color={isActive ? '#F59E0B' : '#10B981'}
+                />
+                <Text style={[styles.actionBtnText, { color: isActive ? '#F59E0B' : '#10B981' }]}>
+                  {isActive ? 'Pause' : 'Resume'}
+                </Text>
+              </TouchableOpacity>
 
-            <TouchableOpacity
-              style={[styles.actionBtn, { backgroundColor: isDark ? '#2d1515' : '#FEE2E2', borderColor: '#EF4444' }]}
-              onPress={() => updateStatus({ taskId, action: 'archive' })}
-            >
-              <Ionicons name="archive-outline" size={16} color="#EF4444" />
-              <Text style={[styles.actionBtnText, { color: '#EF4444' }]}>Archive</Text>
-            </TouchableOpacity>
-          </View>
+              <TouchableOpacity
+                style={[styles.actionBtn, { backgroundColor: isDark ? '#2d1515' : '#FEE2E2', borderColor: '#EF4444' }]}
+                onPress={() => setShowArchiveModal(true)}
+              >
+                <Ionicons name="archive-outline" size={16} color="#EF4444" />
+                <Text style={[styles.actionBtnText, { color: '#EF4444' }]}>Archive</Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
       </View>
 
@@ -293,7 +298,20 @@ export default function TaskDetailsScreen({ route, navigation }: Props) {
           ))}
         </>
       )}
-    </ScrollView>
+      </ScrollView>
+
+      <ConfirmationModal
+        visible={showArchiveModal}
+        title="Archive Task"
+        message="Are you sure you want to archive this task? Once archived, it cannot be returned to an active state."
+        confirmText="Archive"
+        onConfirm={() => {
+          updateStatus({ taskId, action: 'archive' });
+          setShowArchiveModal(false);
+        }}
+        onCancel={() => setShowArchiveModal(false)}
+      />
+    </>
   );
 }
 

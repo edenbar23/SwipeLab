@@ -35,7 +35,7 @@ export async function gotoLogin(page: Page): Promise<void> {
     try { window.localStorage.clear(); } catch {}
   });
   await page.reload();
-  await page.waitForLoadState('networkidle');
+  await page.waitForLoadState('domcontentloaded');
   await expect(page.locator('text=Welcome to SwipeLab')).toBeVisible({ timeout: 20000 });
 }
 
